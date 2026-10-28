@@ -14,6 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500..800&family=Inter:opsz,wght@14..32,400..650&display=swap" />
+    <script>try{var t=localStorage.getItem('finanzas.site-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
     <style>
       :root {
         --brand: #032a67; --navy: #04132e; --blue: #3d7bff; --glow: #5b9bff;
@@ -22,6 +23,7 @@
         --good: #12a150; --warn: #d98a00; --bad: #d93025;
         --btn: #04132e; --btn-ink: #fff;
         --display: 'Inter Tight', 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+        --mono: ui-monospace, 'SF Mono', SFMono-Regular, 'JetBrains Mono', Menlo, Consolas, monospace;
         --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
         --card-shadow: 0 1px 2px rgb(10 25 60 / 0.04), 0 20px 50px -24px rgb(10 25 60 / 0.22);
         color-scheme: light;
@@ -35,6 +37,13 @@
           color-scheme: dark;
         }
       }
+      :root[data-theme='dark'] {
+          --bg: #050913; --surface: #0c1322; --ink: #eef2fa; --ink-2: rgb(238 242 250 / 0.7); --muted: rgb(238 242 250 / 0.46);
+          --line: rgb(255 255 255 / 0.09); --soft: rgb(91 155 255 / 0.12); --brand-ink: #9cc0ff;
+          --good: #3ddc84; --warn: #f5b942; --bad: #ff7b73; --btn: #fff; --btn-ink: #04132e;
+          --card-shadow: 0 1px 2px rgb(0 0 0 / 0.5), 0 20px 50px -24px rgb(0 0 0 / 0.8);
+          color-scheme: dark;
+      }
       * { box-sizing: border-box; }
       html { scroll-behavior: smooth; }
       body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.6 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
@@ -44,9 +53,15 @@
       h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
 
       /* Cabecera sobre el hero oscuro */
-      header { position: fixed; inset: 0 0 auto; z-index: 30; transition: background 0.25s, border-color 0.25s; border-bottom: 1px solid transparent; }
-      header.solid { background: rgb(4 19 46 / 0.78); -webkit-backdrop-filter: blur(16px) saturate(1.5); backdrop-filter: blur(16px) saturate(1.5); border-color: rgb(255 255 255 / 0.08); }
-      .bar { display: flex; align-items: center; justify-content: space-between; height: 68px; gap: 20px; color: #fff; }
+      header { position: fixed; inset: 0 0 auto; z-index: 30; padding: 14px 0 0; pointer-events: none; }
+      .bar { pointer-events: auto; display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 16px; color: #fff; padding: 0 8px 0 18px; border-radius: 999px; background: rgb(255 255 255 / 0.06); border: 1px solid rgb(255 255 255 / 0.14); -webkit-backdrop-filter: blur(16px) saturate(1.5); backdrop-filter: blur(16px) saturate(1.5); transition: background 0.25s, box-shadow 0.25s; }
+      header.solid .bar { background: rgb(4 19 46 / 0.84); box-shadow: 0 18px 40px -18px rgb(4 19 46 / 0.7); }
+      .bar .end { display: flex; align-items: center; gap: 8px; }
+      @media (max-width: 600px) { .hide-s { display: none; } }
+      .tgl { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; border: 0; cursor: pointer; background: rgb(255 255 255 / 0.1); color: #fff; transition: background 0.2s, transform 0.2s; }
+      .tgl:hover { background: rgb(255 255 255 / 0.18); } .tgl:active { transform: scale(0.92); } .tgl .moon { display: none; }
+      :root[data-theme='dark'] .tgl .sun { display: none; } :root[data-theme='dark'] .tgl .moon { display: block; }
+      @media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .tgl .sun { display: none; } :root:not([data-theme='light']) .tgl .moon { display: block; } }
       .brand { display: flex; align-items: center; gap: 10px; font: 700 19px var(--display); text-decoration: none; letter-spacing: -0.02em; }
       .brand img { width: 30px; height: 30px; border-radius: 8px; }
       nav { display: flex; gap: 6px; font-size: 14.5px; }
@@ -104,7 +119,7 @@
 
       /* Secciones */
       section { padding: 112px 0 0; }
-      .kicker { display: inline-block; font: 600 13px var(--sans); color: var(--brand-ink); background: var(--soft); padding: 6px 12px; border-radius: 999px; }
+      .kicker { display: inline-block; font: 500 12px/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--brand-ink); background: var(--surface); border: 1px solid var(--line); padding: 9px 14px; border-radius: 10px; }
       h2 { font-size: clamp(34px, 5vw, 58px); line-height: 1.02; letter-spacing: -0.035em; word-spacing: 0.05em; font-weight: 700; margin: 18px 0 16px; }
       .head { max-width: 720px; margin-bottom: 52px; }
       .head.center { margin-left: auto; margin-right: auto; text-align: center; }
@@ -112,12 +127,13 @@
 
       /* Bento */
       .bento { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
-      .card { grid-column: span 2; background: var(--surface); border: 1px solid var(--line); border-radius: 28px; padding: 28px; box-shadow: var(--card-shadow); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 10px; min-height: 280px; }
+      .card { grid-column: span 2; background: radial-gradient(70% 60% at 100% 100%, rgb(61 123 255 / 0.07), transparent 70%), var(--surface); border: 1px solid var(--line); border-radius: 28px; padding: 28px; box-shadow: var(--card-shadow); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 10px; min-height: 280px; }
       .card.w3 { grid-column: span 3; } .card.w4 { grid-column: span 4; } .card.w6 { grid-column: span 6; }
       .card h3 { font-size: 24px; letter-spacing: -0.035em; font-weight: 650; margin-top: 4px; }
       .card p { margin: 0; color: var(--ink-2); font-size: 15.5px; max-width: 46ch; }
       .card .ic { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: var(--soft); color: var(--brand-ink); }
       .card .viz { margin-top: auto; padding-top: 14px; }
+      .more-link { display: inline-block; margin-top: 4px; color: var(--ink); font: 600 14.5px var(--sans); text-decoration: none; border-bottom: 1.5px solid currentColor; padding-bottom: 1px; width: fit-content; transition: color 0.2s, gap 0.2s; } .more-link:hover { color: var(--blue); }
 
       .eq { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font: 650 30px/1 var(--display); letter-spacing: -0.04em; }
       .eq small { font: 500 14px var(--sans); color: var(--muted); letter-spacing: 0; display: block; margin-top: 6px; }
@@ -172,7 +188,7 @@
       /* Seguridad */
       .secure { margin-top: 112px; background: var(--navy); color: #fff; padding: 104px 0; position: relative; overflow: hidden; isolation: isolate; }
       .secure::before { content: ''; position: absolute; inset: auto -10% -40% auto; width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(closest-side, rgb(61 123 255 / 0.35), transparent); z-index: -1; }
-      .secure .kicker { background: rgb(255 255 255 / 0.1); color: #cfe0ff; }
+      .secure .kicker, .sc-stage .kicker { background: rgb(255 255 255 / 0.08); border-color: rgb(255 255 255 / 0.16); color: #cfe0ff; }
       .secure h2 { color: #fff; } .secure .head p { color: rgb(255 255 255 / 0.7); }
       .cols3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
       .col { padding: 28px; border-radius: 24px; background: rgb(255 255 255 / 0.05); border: 1px solid rgb(255 255 255 / 0.1); }
@@ -200,7 +216,10 @@
       .foot h4 { margin: 0 0 14px; font: 650 13px var(--sans); color: var(--ink); letter-spacing: 0.02em; }
       .foot a { display: block; text-decoration: none; color: var(--ink-2); padding: 4px 0; transition: color 0.2s; } .foot a:hover { color: var(--blue); }
       .foot .fb a.brand { display: flex; padding: 0; } .foot .fb p { margin: 14px 0 0; max-width: 36ch; line-height: 1.55; }
-      .fine { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 13px; }
+      .talk { margin-top: 44px; padding-top: 28px; border-top: 1px dashed var(--line); display: grid; gap: 6px; }
+      .talk span { font-size: 13px; } .talk a { display: inline-flex; align-items: center; gap: 12px; width: fit-content; text-decoration: none; color: var(--ink); font: 600 clamp(24px, 4vw, 44px) var(--display); letter-spacing: -0.03em; word-break: break-all; transition: color 0.2s; }
+      .talk a:hover { color: var(--blue); } .talk a i { display: grid; place-items: center; transition: transform 0.3s; } .talk a:hover i { transform: translate(3px, -3px); }
+      .fine { margin-top: 36px; padding-top: 22px; border-top: 1px dashed var(--line); font-size: 13px; display: flex; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; } .fine .trust { color: var(--ink-2); }
 
       /* Detalles: foco de luz que sigue al cursor en las tarjetas y brillo en el botón principal */
       .card::after, .step::after, .col::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity 0.3s; background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 50%), rgb(61 123 255 / 0.13), transparent 60%); }
@@ -222,7 +241,45 @@
       .store.glass { background: rgb(255 255 255 / 0.08); color: #fff; border-color: rgb(255 255 255 / 0.2); } .store.glass:hover { background: rgb(255 255 255 / 0.14); transform: translateY(-1px); }
       .alt { margin: 16px 0 0; font-size: 14px; } .alt a { color: rgb(255 255 255 / 0.65); text-decoration: none; border-bottom: 1px solid rgb(255 255 255 / 0.25); } .alt a:hover { color: #fff; }
 
-      /* Galería */
+
+
+      /* Guías verticales discontinuas de fondo (detalle editorial) */
+      .guides { position: fixed; inset: 0; z-index: 0; pointer-events: none; display: flex; justify-content: center; }
+      .guides div { width: min(1120px, calc(100% - 40px)); display: grid; grid-template-columns: repeat(4, 1fr); border-left: 1px dashed var(--line); border-right: 1px dashed var(--line); }
+      .guides i { border-right: 1px dashed var(--line); } .guides i:last-child { border-right: 0; }
+      main { position: relative; z-index: 1; }
+
+      /* Escaparate de funciones: móvil central, palabra gigante de fondo y tarjetas alrededor */
+      .showcase { padding-top: 0; } .showcase .sc-stage { border-top: 1px solid rgb(255 255 255 / 0.08); }
+      .sc-stage { position: relative; margin-top: 0; background: var(--navy); overflow: hidden; isolation: isolate; padding: 96px 0 0; }
+      .sc-stage::before { content: ''; position: absolute; inset: 0; z-index: -1; background: radial-gradient(50% 60% at 50% 30%, rgb(61 123 255 / 0.32), transparent 70%); }
+      .sc-word { position: absolute; left: 0; right: 0; top: 250px; text-align: center; z-index: -1; font: 800 clamp(96px, 17vw, 250px)/1 var(--display); letter-spacing: -0.05em; color: rgb(255 255 255 / 0.055); user-select: none; white-space: nowrap; }
+      .sc-cols { display: grid; grid-template-columns: 1fr 330px 1fr; gap: 28px; align-items: start; height: 620px; overflow: hidden; }
+      .sc-side { display: grid; gap: 16px; padding-top: 24px; align-content: start; }
+      .sc-card { display: flex; gap: 16px; align-items: flex-start; padding: 22px; border-radius: 28px; background: rgb(255 255 255 / 0.05); border: 1px solid rgb(255 255 255 / 0.1); color: #fff; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); transition: background 0.3s, transform 0.3s; }
+      .sc-card:hover { background: rgb(255 255 255 / 0.09); transform: translateY(-3px); }
+      .sc-ic { flex: none; width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; background: rgb(91 155 255 / 0.18); color: #a9c9ff; }
+      .sc-card b { display: block; font: 650 18px var(--display); letter-spacing: -0.02em; margin-bottom: 4px; } .sc-card p { margin: 0; color: rgb(255 255 255 / 0.66); font-size: 14.5px; line-height: 1.45; }
+      .sc-phone { align-self: end; padding-top: 24px; }
+      .sc-phone .mock { padding: 9px; border-radius: 46px 46px 0 0; box-shadow: 0 -30px 100px -20px rgb(61 123 255 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.12) inset; }
+      .sc-phone .mock img { border-radius: 38px 38px 0 0; aspect-ratio: 390 / 760; }
+      .sc-stage::after { content: ''; position: absolute; inset: auto 0 0; height: 90px; z-index: 2; background: linear-gradient(transparent, var(--bg)); pointer-events: none; }
+
+      /* Crucetas y píldoras decorativas */
+      .cross { position: absolute; width: 54px; height: 54px; color: rgb(156 192 255 / 0.55); z-index: 0; } .cross::before, .cross::after { content: ''; position: absolute; background: currentColor; } .cross::before { left: 50%; top: 0; bottom: 0; width: 1px; } .cross::after { top: 50%; left: 0; right: 0; height: 1px; }
+      .pills i { position: absolute; display: grid; place-items: center; width: 78px; height: 56px; border-radius: 99px; background: rgb(255 255 255 / 0.1); border: 1px solid rgb(255 255 255 / 0.2); color: #cfe0ff; font-style: normal; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); animation: float 7s ease-in-out infinite; }
+      .pills i:nth-child(1) { left: 6%; top: 18%; transform: rotate(-8deg); } .pills i:nth-child(2) { right: 8%; top: 14%; transform: rotate(7deg); animation-delay: -2s; } .pills i:nth-child(3) { left: 12%; bottom: 14%; transform: rotate(6deg); animation-delay: -4s; } .pills i:nth-child(4) { right: 12%; bottom: 18%; transform: rotate(-6deg); animation-delay: -1s; }
+      .btn.arrow { padding: 8px 8px 8px 26px; gap: 14px; } .btn.arrow .circ { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--blue); color: #fff; transition: transform 0.3s; } .btn.arrow:hover .circ { transform: rotate(45deg); }
+
+      /* QR flotante */
+      .qr-float { position: fixed; right: 20px; bottom: 20px; z-index: 35; width: 176px; padding: 12px 12px 14px; border-radius: 24px; text-align: center; background: color-mix(in srgb, var(--navy) 90%, transparent); color: #fff; border: 1px solid rgb(255 255 255 / 0.14); box-shadow: 0 24px 60px -16px rgb(4 19 46 / 0.7); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); transition: opacity 0.35s, transform 0.35s; }
+      .qr-float.hide { opacity: 0; transform: translateY(20px); pointer-events: none; }
+      .qr-float img { display: block; width: 100%; border-radius: 14px; background: #fff; padding: 4px; }
+      .qr-float p { margin: 10px 0 4px; font-size: 12.5px; font-weight: 600; } .qr-float .stores { display: flex; gap: 12px; justify-content: center; color: rgb(255 255 255 / 0.7); }
+      .qr-float button { position: absolute; top: -10px; right: -10px; width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgb(255 255 255 / 0.2); background: var(--navy); color: #fff; cursor: pointer; display: grid; place-items: center; padding: 0; }
+      @media (max-width: 1100px) { .qr-float { display: none; } }
+
+      /* Galería (sin uso) */
       .gallery { display: flex; gap: 28px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 12px max(20px, calc((100vw - 1160px) / 2 + 20px)) 36px; scrollbar-width: none; }
       .gallery::-webkit-scrollbar { display: none; }
       .gallery figure { flex: 0 0 auto; margin: 0; width: 260px; scroll-snap-align: center; }
@@ -271,15 +328,17 @@
       @media (max-width: 1240px) { .badge.a { left: -2%; } .badge.b { right: -2%; } .phone-back { transform: translate(120px, 46px) rotate(8deg); } }
       @media (max-width: 860px) {
         nav { display: none; }
-        .hero { padding: 104px 0 40px; } .hero-grid { grid-template-columns: 1fr; min-height: 0; gap: 8px; } .hero-copy { text-align: center; } .hero h1 { margin-left: auto; margin-right: auto; } .hero .lead { margin-left: auto; margin-right: auto; } .ctas, .assure { justify-content: center; }
+        .hero { padding: 112px 0 40px; } .hero-grid { grid-template-columns: 1fr; min-height: 0; gap: 8px; } .hero-copy { text-align: center; } .hero h1 { margin-left: auto; margin-right: auto; } .hero .lead { margin-left: auto; margin-right: auto; } .ctas, .assure { justify-content: center; }
         .hero-visual { min-height: 520px; } .phone { width: 250px; } .phone-back { width: 212px; transform: translate(118px, 40px) rotate(8deg); } .badge.a { left: 0; top: 8%; } .badge.b { right: 0; bottom: 12%; } .badge.c { display: none; }
         .strip .wrap { grid-template-columns: 1fr 1fr; } .stat:nth-child(3) { border-left: 0; padding-left: 0; }
         .bento { grid-template-columns: 1fr 1fr; } .card, .card.w3, .card.w4 { grid-column: span 2; } .card.w6 { grid-column: span 2; }
+        .sc-cols { grid-template-columns: 1fr 1fr; height: auto; overflow: visible; } .sc-phone { grid-column: 1 / -1; order: -1; max-width: 300px; margin: 0 auto; } .sc-side { padding-top: 0; } .sc-stage { padding-bottom: 40px; } .sc-stage::after { display: none; } .sc-word { top: 10px; }
         .ig-steps { grid-template-columns: 1fr; } .ios-guide { padding: 32px 20px; }
         .how, .cols3 { grid-template-columns: 1fr; } .dl { grid-template-columns: 1fr 1fr; } .sticky-dl { display: flex; } .foot { grid-template-columns: 1fr 1fr; } .foot .fb { grid-column: 1 / -1; }
         .coachc { flex-direction: column; align-items: flex-start; }
       }
       @media (max-width: 560px) {
+        .sc-cols { grid-template-columns: 1fr; } .pills i { display: none; }
         section { padding-top: 76px; } .secure { margin-top: 76px; padding: 76px 0; } .final { margin-top: 76px; }
         .bento { grid-template-columns: 1fr; } .card, .card.w3, .card.w4, .card.w6 { grid-column: auto; }
         .dl { grid-template-columns: 1fr; } .foot { grid-template-columns: 1fr 1fr; } .gallery figure { width: 230px; } footer { padding-bottom: 110px; }
@@ -291,12 +350,18 @@
   </head>
   <body>
     <header>
-      <div class="wrap bar">
+      <div class="wrap"><div class="bar">
         <a class="brand" href="./"><img src="./app/icons/icon-192.png" alt="" />Finanzas</a>
         <nav aria-label="Secciones"><a href="#funciones">Funciones</a><a href="#divisas">Divisas</a><a href="#como">Cómo funciona</a><a href="#seguridad">Seguridad</a><a href="#faq">Preguntas</a></nav>
-        <a class="btn white sm" href="#descargar">Descargar</a>
-      </div>
+        <div class="end">
+          <button class="tgl" id="theme" type="button" aria-label="Cambiar entre tema claro y oscuro"><span class="sun"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4V2M12 22v-2M4.9 4.9 3.5 3.5M20.5 20.5l-1.4-1.4M4 12H2M22 12h-2M4.9 19.1l-1.4 1.4M20.5 3.5l-1.4 1.4M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z" /></svg></span><span class="moon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" /></svg></span></button>
+          <a class="btn glass sm hide-s" href="./app/">Abrir la app</a>
+          <a class="btn white sm" href="#descargar">Descargar</a>
+        </div>
+      </div></div>
     </header>
+
+    <div class="guides" aria-hidden="true"><div><i></i><i></i><i></i><i></i></div></div>
 
     <main>
       <div class="hero">
@@ -317,6 +382,7 @@
             </ul>
           </div>
           <div class="hero-visual" id="hv" aria-hidden="true">
+            <span class="cross" style="right: 2%; top: 4%"></span><span class="cross" style="left: 8%; bottom: 2%; opacity: .6"></span>
             <div class="phone-back"><img src="./site/shot-plan.jpg" alt="" loading="lazy" /></div>
             <div class="phone"><picture><source srcset="./site/shot-home-dark.jpg" media="(prefers-color-scheme: dark)" /><img src="./site/shot-home.jpg" alt="" /></picture></div>
             <div class="badge a"><span>Cobro registrado</span><b>56.500 Bs ≈ 1.250 $</b><span class="ok">Tasa acordada · 45,20</span></div>
@@ -335,28 +401,31 @@
         </div>
       </div>
 
-      <section id="galeria">
-        <div class="wrap">
-          <div class="head center rv">
-            <span class="kicker">Míralo por dentro</span>
-            <h2>Clara, rápida y bonita.</h2>
-            <p>Cada pantalla pensada para entender tu dinero de un vistazo.</p>
+      <section id="funciones" class="showcase">
+        <div class="sc-stage">
+          <div class="wrap"><div class="head center rv" style="margin-bottom: 36px"><span class="kicker">Funciones</span><h2 style="color:#fff">Todo lo que necesitas para llevar tu dinero más lejos.</h2></div></div>
+          <div class="sc-word" aria-hidden="true">FUNCIONES</div>
+          <div class="wrap sc-cols">
+            <div class="sc-side">
+              <div class="sc-card rv"><span class="sc-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></svg></span><div><b>Presupuestos</b><p>Define límites por categoría y recibe alertas a tiempo.</p></div></div>
+              <div class="sc-card rv"><span class="sc-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7" /></svg></span><div><b>Multimoneda</b><p>Bolívares, dólares, euros y USDT en un solo balance.</p></div></div>
+              <div class="sc-card rv"><span class="sc-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-4a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0-4a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" /></svg></span><div><b>Metas de ahorro</b><p>Cifra, fecha y aporte mensual; sigue tu progreso.</p></div></div>
+            </div>
+            <div class="sc-phone rv"><div class="mock"><img src="./site/shot-plan.jpg" alt="Presupuestos con barras de progreso por categoría" loading="lazy" /></div></div>
+            <div class="sc-side">
+              <div class="sc-card rv"><span class="sc-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3ZM5 11a7 7 0 0 0 14 0M12 18v3" /></svg></span><div><b>Registro por voz</b><p>Anota un gasto hablando, sin escribir.</p></div></div>
+              <div class="sc-card rv"><span class="sc-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18H6zM9 7h6M9 11h.01M12 11h.01M15 11h.01M9 15h.01M12 15h.01M15 15h.01" /></svg></span><div><b>Calculadora de tasas</b><p>Convierte entre monedas con la tasa que tú elijas.</p></div></div>
+              <div class="sc-card rv"><span class="sc-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8zM19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z" /></svg></span><div><b>Asesor con IA</b><p>Analiza tus números y te propone qué hacer.</p></div></div>
+            </div>
           </div>
-        </div>
-        <div class="gallery rv" role="list">
-          <figure role="listitem"><div class="mock"><picture><source srcset="./site/shot-home-dark.jpg" media="(prefers-color-scheme: dark)" /><img src="./site/shot-home.jpg" alt="Inicio: patrimonio neto, accesos rápidos y resumen del mes" loading="lazy" /></picture></div><figcaption><b>Inicio</b>Tu patrimonio y el mes de un vistazo</figcaption></figure>
-          <figure role="listitem"><div class="mock"><img src="./site/shot-tx.jpg" alt="Movimientos del mes con ingresos y gastos" loading="lazy" /></div><figcaption><b>Movimientos</b>Todo lo que entra y sale, por categorías</figcaption></figure>
-          <figure role="listitem"><div class="mock"><img src="./site/shot-plan.jpg" alt="Presupuestos con barras de progreso" loading="lazy" /></div><figcaption><b>Presupuestos</b>Topes que avisan antes de pasarte</figcaption></figure>
-          <figure role="listitem"><div class="mock"><img src="./site/shot-fx.jpg" alt="Calculadora de divisas con tasas BCV y paralelo" loading="lazy" /></div><figcaption><b>Divisas</b>Cada cambio y cada tasa, con su pérdida o ganancia</figcaption></figure>
-          <figure role="listitem"><div class="mock"><img src="./site/shot-health.jpg" alt="Salud financiera con puntuación y próximos pasos" loading="lazy" /></div><figcaption><b>Salud financiera</b>Una nota y los pasos para mejorarla</figcaption></figure>
         </div>
       </section>
 
-      <section id="funciones">
+      <section id="detalles">
         <div class="wrap">
           <div class="head center rv">
-            <span class="kicker">Todo en una app</span>
-            <h2>Tus finanzas, sin complicarte.</h2>
+            <span class="kicker">En detalle</span>
+            <h2>Pensada para tu día a día.</h2>
             <p>Registra en segundos y entiende tus números de un vistazo.</p>
           </div>
           <div class="bento">
@@ -364,6 +433,7 @@
               <span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7" /></svg></span>
               <h3>Cada pago, con su equivalente</h3>
               <p>Si te pagan en bolívares a una tasa pactada, tu ingreso es lo que acordaste, no lo que marque la tasa del día. Finanzas lo cuenta así en tu moneda principal.</p>
+              <a class="more-link" href="#como">Ver cómo funciona →</a>
               <div class="viz">
                 <div class="eq"><div>56.500 Bs<small>Pago recibido</small></div><span class="arrow">→</span><div>1.250 $<small>Equivalente acordado</small></div></div>
                 <div class="chips"><span class="chip">BCV</span><span class="chip">Paralelo</span><span class="chip">Euro</span><span class="chip on">Acordada</span></div>
@@ -391,15 +461,7 @@
               <p>Cifra, fecha y aporte mensual.</p>
               <div class="viz goal"><div class="ring" style="--p:62"><b>62%</b></div><div><small>Viaje a Lisboa</small><strong>1.860 / 3.000 €</strong><small>En camino · 6 meses</small></div></div>
             </div>
-            <div class="card w3 coachc rv" id="asistente" style="grid-column: span 4;">
-              <img src="./site/coach-avatar.webp" alt="El asistente de Finanzas: un joven con gafas y americana azul marino" loading="lazy" />
-              <div>
-                <h3>Un asistente que conoce tus números</h3>
-                <p>Cercano, claro y sin jerga. Analiza tus gastos y te propone qué hacer.</p>
-                <div class="chat" aria-hidden="true"><div class="u">¿En qué se me va el dinero?</div><div class="b">Llevas un 20 % más en comida. ¿Te propongo un tope de 320 €?</div></div>
-              </div>
-            </div>
-            <div class="card calc rv" style="grid-column: span 2;">
+            <div class="card calc rv">
               <h3>¿Cuánto pierdes a tasa BCV?</h3>
               <form class="in" id="calc" autocomplete="off">
                 <label for="amt">Te deben (USD)<input id="amt" inputmode="decimal" value="800" /></label>
@@ -408,12 +470,21 @@
               </form>
               <div class="out" aria-live="polite"><span class="k">Pierdes</span><span class="v" id="loss">—</span><span class="s" id="detail"></span></div>
             </div>
-            <div class="card w3 rv">
+            <div class="card w3 coachc rv" id="asistente" style="grid-column: span 4;">
+              <img src="./site/coach-avatar.webp" alt="El asistente de Finanzas: un joven con gafas y americana azul marino" loading="lazy" />
+              <div>
+                <h3>Un asistente que conoce tus números</h3>
+                <p>Cercano, claro y sin jerga. Analiza tus gastos y te propone qué hacer.</p>
+                <a class="more-link" href="#seguridad">Cómo cuidamos tus datos →</a>
+                <div class="chat" aria-hidden="true"><div class="u">¿En qué se me va el dinero?</div><div class="b">Llevas un 20 % más en comida. ¿Te propongo un tope de 320 €?</div></div>
+              </div>
+            </div>
+            <div class="card rv">
               <span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h10l4 4v14H5zM14 3v5h5M8 13h8M8 17h8" /></svg></span>
               <h3>Excel y copias automáticas</h3>
               <p>Importa y exporta en Excel o CSV. Copias cifradas locales para que nada se pierda.</p>
             </div>
-            <div class="card w3 rv">
+            <div class="card w6 rv">
               <span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a5 5 0 1 1 .9-9.9A6 6 0 0 1 19 10a4 4 0 0 1-1 8z" /></svg></span>
               <h3>En todos tus dispositivos</h3>
               <p>Entra con Google o correo y tus datos te siguen, cifrados de extremo a extremo.</p>
@@ -515,11 +586,19 @@
 
       <div class="wrap final">
         <div class="cta rv">
+          <div class="pills" aria-hidden="true"><i><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></svg></i><i><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 7v5l3 2" /></svg></i><i><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-4a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0-4a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" /></svg></i><i><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3ZM5 11a7 7 0 0 0 14 0M12 18v3" /></svg></i></div>
           <h2>Empieza hoy, con tus propios números.</h2>
-          <a class="btn white" href="#descargar">Descargar Finanzas</a>
+          <a class="btn white arrow" href="#descargar">Descargar Finanzas <span class="circ"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9" /></svg></span></a>
         </div>
       </div>
     </main>
+
+    <aside class="qr-float" id="qrf" aria-label="Código QR para descargar">
+      <button type="button" id="qrx" aria-label="Cerrar"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+      <img src="./site/qr.svg" alt="Código QR de Finanzas" width="152" height="152" />
+      <p>Escanea para descargar</p>
+      <div class="stores"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.7c0-2.4 2-3.5 2-3.6a4.3 4.3 0 0 0-3.4-1.8c-1.4-.2-2.8.8-3.5.8s-1.8-.8-3-.8a4.4 4.4 0 0 0-3.700 2.300c-1.600 2.800-.4 6.900 1.100 9.100.8 1.100 1.700 2.300 2.900 2.300 1.100 0 1.600-.7 3-.7s1.800.7 3 .7 2-1.100 2.800-2.200a9.800 9.800 0 0 0 1.200-2.600 3.900 3.900 0 0 1-2.400-3.500zM14.200 6a3.900 3.900 0 0 0 .9-2.800 3.900 3.900 0 0 0-2.600 1.300A3.700 3.700 0 0 0 11.600 6a3.200 3.200 0 0 0 2.600 0z"/></svg><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 8.6l1.4-2.4a.3.3 0 0 0-.5-.3l-1.4 2.5a8.2 8.2 0 0 0-6.6 0L8.9 5.9a.3.3 0 0 0-.5.3l1.4 2.4A7 7 0 0 0 5 14.5h14a7 7 0 0 0-4.8-5.9zM5 15.6V19a1 1 0 0 0 1 1h1v2.2a1.1 1.1 0 0 0 2.2 0V20h5.6v2.2a1.1 1.1 0 0 0 2.2 0V20h1a1 1 0 0 0 1-1v-3.4z"/></svg></div>
+    </aside>
 
     <div class="sticky-dl" id="sticky" aria-hidden="true">
       <img src="./app/icons/icon-192.png" alt="" /><span><b>Finanzas</b><small>Gratis · privada · sin conexión</small></span>
@@ -536,7 +615,11 @@
         <div><h4>Descargar</h4><a href="#descargar">Android</a><a href="#iphone">iPhone y iPad</a><a href="./app/">En el navegador</a></div>
         <div><h4>Legal</h4><a href="./privacidad.html">Privacidad</a><a href="./condiciones.html">Condiciones</a></div>
       </div>
-      <div class="wrap fine">Orientación general, no asesoramiento financiero regulado. Las tasas de cambio las introduces tú.</div>
+      <div class="wrap talk">
+        <span>Hablemos</span>
+        <a href="mailto:creative.lestudio@gmail.com">creative.lestudio@gmail.com <i><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9" /></svg></i></a>
+      </div>
+      <div class="wrap fine"><span>Orientación general, no asesoramiento financiero regulado. Las tasas de cambio las introduces tú.</span><span class="trust">AES-256 · Sin anuncios · Sin venta de datos</span></div>
     </footer>
 
     <script>
@@ -635,6 +718,28 @@
             el.style.setProperty('--my', e.clientY - r.top + 'px');
           });
         });
+      })();
+
+      // Tema manual, QR flotante (se oculta al llegar a la descarga) y cabecera.
+      (function () {
+        var root = document.documentElement, btn = document.getElementById('theme');
+        if (btn) btn.addEventListener('click', function () {
+          var cur = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          var next = cur === 'dark' ? 'light' : 'dark';
+          root.setAttribute('data-theme', next);
+          try { localStorage.setItem('finanzas.site-theme', next); } catch (e) {}
+        });
+        var qr = document.getElementById('qrf'), x = document.getElementById('qrx');
+        if (!qr) return;
+        try { if (localStorage.getItem('finanzas.qr-closed') === '1') qr.remove(); } catch (e) {}
+        if (x) x.addEventListener('click', function () { qr.remove(); try { localStorage.setItem('finanzas.qr-closed', '1'); } catch (e) {} });
+        if (!('IntersectionObserver' in window)) return;
+        var hide = { d: false, f: false, h: true };
+        var upd = function () { qr.classList.toggle('hide', hide.d || hide.f || hide.h); };
+        var d = document.getElementById('descargar'), f = document.querySelector('footer'), h = document.querySelector('.hero');
+        new IntersectionObserver(function (e) { hide.d = e[0].isIntersecting; upd(); }, { threshold: 0.15 }).observe(d);
+        new IntersectionObserver(function (e) { hide.f = e[0].isIntersecting; upd(); }).observe(f);
+        new IntersectionObserver(function (e) { hide.h = e[0].intersectionRatio > 0.35; upd(); }, { threshold: [0, 0.35, 0.6, 1] }).observe(h);
       })();
     </script>
   </body>
