@@ -1,63 +1,64 @@
 # Finanzas
 
-App de finanzas personales (PWA instalable en el móvil), **local-first y cifrada**. Funciona 100 % sin conexión y sin vincular el banco; la conexión bancaria por Open Banking y la IA son opcionales.
+App de finanzas personales **local-first y cifrada**, instalable en Android, iPhone, iPad, Windows, Mac y Linux desde el navegador (PWA). Funciona 100 % sin conexión y sin vincular el banco. La sincronización entre dispositivos, el banco (Open Banking) y la IA son opcionales.
+
+- **Web pública:** `index.html` (página de descarga e instrucciones de instalación)
+- **App:** `app/` (se instala como app nativa: pantalla completa, icono, sin conexión, atajos)
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
-npm test         # tests de la lógica
-npm run build    # build de producción en dist/
+npm run dev            # http://localhost:5173 (web) y /app/ (la app)
+npm test               # tests de la lógica (vitest)
+npm run build          # build de producción en dist/
+npm run build:preview  # un único HTML autocontenido (vista previa)
 ```
 
-Al abrirla por primera vez puedes **empezar con datos de ejemplo** (4 meses de movimientos) para probarlo todo.
+Al abrir la app por primera vez puedes **probar con datos de ejemplo** (4 meses de movimientos, cuentas en EUR, USD y VES, cambios por Binance P2P y Wise).
 
-## Qué hace
+## Funciones
 
-| Área | Funcionalidad | Dónde |
+| Área | Qué hace | Código |
 |---|---|---|
-| **Sincronización** | Open Banking (PSD2) vía Enable Banking, con un puente serverless propio | `src/lib/banking.ts`, `supabase/functions/bank-proxy` |
-| | Importación de extractos CSV de bancos españoles (detecta separador, cabecera, `1.234,56`, cargo/abono, Windows-1252) sin duplicados | `src/lib/importer.ts` |
-| | Bizum: se detecta en los movimientos de la cuenta (enviado/recibido) | `src/lib/categorize.ts` |
-| | Entrada manual rápida (botón **+**): importe, categoría con un toque, listo | `src/components/QuickAdd.tsx` |
-| **Categorización** | Reglas integradas (Mercadona, Repsol, Netflix…), reglas propias y **aprendizaje** de tus correcciones; IA (Claude) opcional para lo que no reconozca | `src/lib/categorize.ts` |
-| | Gastos hormiga: compras pequeñas repetidas y su proyección anual | `src/lib/insights.ts` |
-| | Suscripciones y recibos fijos: detección de cobros periódicos, próximos cargos y subidas de precio | `src/lib/insights.ts` |
-| | Comisiones bancarias ocultas, con consejo para evitar cada tipo | `src/lib/insights.ts` |
-| **Presupuesto** | Topes por categoría con aviso al instante al registrar un gasto, proyección a fin de mes, €/día disponible, arrastre al mes siguiente y sugerencias según tu gasto medio | `src/lib/budgets.ts` |
-| | Huchas / sobres digitales con objetivo, fecha límite y prioridad | `src/lib/savings.ts` |
-| | Gastos compartidos estilo Splitwise: partes iguales o por pesos, saldos y mínimo de pagos para quedar en paz | `src/lib/shared.ts` |
-| **Salud e inversión** | Puntuación 0-100 (ahorro, colchón, deuda, presupuestos, suscripciones, fugas) con consejos priorizados | `src/lib/health.ts` |
-| | Patrimonio neto: cuentas, ahorro, efectivo, inversiones, cripto, tarjetas y préstamos | `src/pages/Wealth.tsx` |
-| | Ahorro automático estilo Plum: redondeo, % de ingresos y "ahorro inteligente" según tus hábitos, repartido por prioridad entre huchas | `src/lib/savings.ts` |
-| **Seguridad** | Datos cifrados con AES-256-GCM, clave derivada de tu contraseña (PBKDF2-SHA256, 600.000 iteraciones). La clave solo está en memoria; bloqueo automático por inactividad | `src/lib/crypto.ts`, `src/store.tsx` |
-| | **Modo sin terceros** (activado por defecto): nada sale del dispositivo; desactiva banco e IA | Ajustes |
-| | Copia de seguridad exportable, también cifrada | Ajustes |
+| Registro | Entrada manual rápida, **dictado por voz** ("gasté 50 euros en Mercadona") con botones para completar lo que falte, importación de **Excel/CSV** del banco y Open Banking | `components/QuickAdd.tsx`, `components/Voice.tsx`, `lib/voice.ts`, `lib/excel.ts`, `lib/importer.ts`, `lib/banking.ts` |
+| Categorización | Reglas, aprendizaje de tus correcciones e IA opcional; Bizum, suscripciones, comisiones y gastos hormiga | `lib/categorize.ts`, `lib/insights.ts` |
+| **Multimoneda** | Cuentas en cualquier moneda (VES, USD, EUR, USDT…), tasas por fuente (BCV, paralelo, Wise, Binance P2P…), conversión a tu moneda principal | `lib/fx.ts`, `pages/Currency.tsx` |
+| **Pérdida cambiaria** | Cobros a tasa oficial frente a tasa de mercado (800 $ a BCV → cuánto valen de verdad), cambios registrados frente a una tasa de referencia, ranking de plataformas y **calculadora de la ruta del dinero** (Bs → $ paralelo → € Wise) | `lib/fx.ts` |
+| Presupuestos | Topes con avisos, €/día disponible, proyección, sugerencias | `lib/budgets.ts`, `pages/Plan.tsx` |
+| **Metas medibles** | Ahorro, inversión (interés compuesto), compra o deuda; aporte necesario al mes, media real, fecha estimada, estado (en camino / retrasada) y medición por saldo de cuentas | `lib/goals.ts` |
+| **Asesor con IA** | Analiza tus datos, propone presupuestos y metas que aplicas con un toque, y te ayuda a decidir | `lib/ai.ts`, `pages/Assistant.tsx` |
+| Ahorro automático, compartidos, salud, patrimonio | Como en la versión anterior, ahora en moneda principal | `lib/savings.ts`, `lib/shared.ts`, `lib/health.ts` |
+| **Sincronización** | Entre dispositivos con Supabase, **cifrada de extremo a extremo**, con fusión de cambios a tres bandas | `lib/sync.ts`, `lib/merge.ts`, `store.tsx` |
+| Diseño | Estilo Apple con efecto Liquid Glass, color principal elegible, tema claro/oscuro/automático | `styles.css`, `lib/theme.ts` |
 
-## Conectar el banco (opcional)
+## Puesta en marcha del servidor (Supabase)
 
-Las claves de un proveedor de Open Banking no pueden vivir en el navegador, así que la app habla con una pequeña función serverless (`supabase/functions/bank-proxy`). La app **nunca ve tus credenciales**: te identificas en la web de tu banco y el proveedor (entidad regulada AISP) concede un permiso de **solo lectura** de hasta 180 días.
-
-1. Crea una aplicación en [Enable Banking](https://enablebanking.com) (cubre BBVA, Santander, CaixaBank, Sabadell, ING, Openbank, etc.) y descarga su clave privada.
-2. Despliega la función en tu proyecto de Supabase:
+1. Crea un proyecto en [supabase.com](https://supabase.com) (por ejemplo "finanzas").
+2. Aplica la migración `supabase/migrations/20261028000000_finanzas.sql` (SQL Editor → pegar → Run, o `supabase db push`).
+3. Despliega las funciones y sus secretos:
    ```bash
-   supabase secrets set ENABLEBANKING_APP_ID=... ENABLEBANKING_PRIVATE_KEY="$(cat private.pem)" ALLOWED_ORIGIN=https://tu-dominio
-   supabase functions deploy bank-proxy --no-verify-jwt
+   supabase link --project-ref <ref>
+   supabase secrets set ANTHROPIC_API_KEY=sk-ant-... AI_DAILY_LIMIT=60
+   supabase functions deploy ai
    ```
-3. En la app: **Ajustes → desactiva "Modo sin terceros" → pega la URL de la función → busca tu banco → Conectar**.
+   La clave de Anthropic se crea en [console.anthropic.com](https://console.anthropic.com) (API de pago por uso; es independiente de una suscripción Claude Pro).
+4. En GitHub → **Settings → Secrets and variables → Actions → Variables**, añade `SUPABASE_URL` y `SUPABASE_ANON_KEY` (la clave pública *anon*). El siguiente despliegue activa la sincronización y la IA para todo el mundo.
 
-La función está pensada para uso personal (un único usuario): restringe el acceso por `ALLOWED_ORIGIN`. Si la abres a más usuarios, añade autenticación (Supabase Auth) y asocia cada sesión bancaria a su usuario.
+Sin estos pasos la app funciona igual en modo local; los usuarios pueden poner su propia clave de IA en Ajustes.
 
-## Arquitectura
+## Publicación (GitHub Pages)
 
-- React 19 + TypeScript + Vite, sin backend obligatorio. Toda la lógica está en `src/lib/` como funciones puras con tests (`src/lib/lib.test.ts`).
-- Importes en céntimos (enteros); gastos negativos, ingresos positivos.
-- Persistencia: un único blob cifrado en IndexedDB (`src/lib/storage.ts`).
-- PWA: `public/manifest.webmanifest` + `public/sw.js` (funciona sin conexión).
+El workflow `.github/workflows/deploy.yml` compila, pasa los tests y publica `dist/` en cada push. Actívalo una vez en **Settings → Pages → Source: GitHub Actions**. La web queda en `https://<usuario>.github.io/finanzas/` y la app en `/finanzas/app/`.
 
-## Límites actuales
+## Seguridad y privacidad
 
-- Bizum no tiene API pública: sus movimientos se obtienen de la cuenta bancaria a la que está asociado.
-- El ahorro automático **propone** los traspasos a las huchas y tú los confirmas; mover dinero real entre cuentas requeriría un servicio de iniciación de pagos (PISP).
-- Las inversiones y cripto se actualizan a mano (no hay cotización automática todavía).
-- Los datos viven en un solo dispositivo; para usarlos en otro, exporta e importa la copia cifrada.
-- La puntuación de salud es orientativa y no constituye asesoramiento financiero.
+- Datos cifrados en el dispositivo con AES-256-GCM; clave derivada de tu contraseña con PBKDF2-SHA256 (600.000 iteraciones). Bloqueo por inactividad.
+- La nube solo recibe el blob cifrado (todos tus dispositivos comparten la sal, así una contraseña abre tus datos en todos). Ni Supabase ni el administrador pueden leerlo.
+- La IA recibe un resumen de tus finanzas (nunca contraseñas ni IBAN). Con el **modo sin terceros** activado, nada sale del dispositivo salvo la sincronización cifrada que tú actives.
+- Conexión bancaria por Open Banking (PSD2) mediante `supabase/functions/bank-proxy` (Enable Banking): solo lectura, nunca vemos tus credenciales.
+
+## Límites conocidos
+
+- Bizum no tiene API pública: sus movimientos llegan por la cuenta bancaria.
+- El ahorro automático propone traspasos a huchas; mover dinero real requeriría un servicio de iniciación de pagos (PISP).
+- Las tasas se pueden descargar (dolarapi para BCV/paralelo, er-api para el resto) o introducir a mano; si un servicio público cambia, se introducen a mano.
+- El dictado usa el reconocimiento de voz del navegador: funciona en Chrome (Android, escritorio) y Safari (iPhone, Mac); en Firefox se escribe la frase.

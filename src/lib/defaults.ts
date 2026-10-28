@@ -26,6 +26,9 @@ export const DEFAULT_CATEGORIES: Category[] = [
   { id: 'bizum_in', name: 'Bizum recibido', icon: '📲', kind: 'income' },
   { id: 'other_income', name: 'Otros ingresos', icon: '💰', kind: 'income' },
   { id: 'transfer', name: 'Traspaso entre cuentas', icon: '🔄', kind: 'transfer' },
+  { id: 'exchange', name: 'Cambio de divisa', icon: '💱', kind: 'transfer' },
+  { id: 'freelance', name: 'Trabajo freelance', icon: '🧑‍💻', kind: 'income' },
+  { id: 'remittance', name: 'Remesas', icon: '📨', kind: 'income' },
 ];
 
 /** Palabras clave → categoría. Se comparan sobre el texto normalizado. */
@@ -35,7 +38,7 @@ export const KEYWORD_RULES: [string, string][] = [
   ['dia ', 'groceries'], ['eroski', 'groceries'], ['alcampo', 'groceries'], ['consum', 'groceries'],
   ['hipercor', 'groceries'], ['supermercado', 'groceries'], ['ahorramas', 'groceries'], ['bonpreu', 'groceries'],
   // Restauración
-  ['restaurante', 'restaurants'], ['glovo', 'restaurants'], ['just eat', 'restaurants'], ['uber eats', 'restaurants'],
+  ['restaurante', 'restaurants'], ['bar', 'restaurants'], ['cerveceria', 'restaurants'], ['taberna', 'restaurants'], ['pizzeria', 'restaurants'], ['sushi', 'restaurants'], ['kebab', 'restaurants'], ['glovo', 'restaurants'], ['just eat', 'restaurants'], ['uber eats', 'restaurants'],
   ['telepizza', 'restaurants'], ['burger king', 'restaurants'], ['mcdonald', 'restaurants'], ['100 montaditos', 'restaurants'],
   ['starbucks', 'coffee'], ['cafeteria', 'coffee'], ['cafe ', 'coffee'], ['panaderia', 'coffee'], ['vending', 'coffee'],
   ['tabacos', 'coffee'], ['estanco', 'coffee'],
@@ -78,7 +81,7 @@ export const KEYWORD_RULES: [string, string][] = [
 
 export function emptyData(): AppData {
   return {
-    version: 1,
+    version: 2,
     accounts: [
       { id: 'cash', name: 'Efectivo', kind: 'cash', balance: 0, currency: 'EUR', source: 'manual' },
     ],
@@ -93,6 +96,28 @@ export function emptyData(): AppData {
     rules: [],
     learned: {},
     dismissedAlerts: [],
-    settings: { offlineOnly: true, aiCategorization: false, currency: 'EUR', bank: { provider: 'none' } },
+    rates: [],
+    exchanges: [],
+    settings: {
+      offlineOnly: true,
+      aiCategorization: false,
+      currency: 'EUR',
+      bank: { provider: 'none' },
+      theme: { accent: '#0a84ff', mode: 'auto' },
+    },
+  };
+}
+
+/** Actualiza datos guardados con versiones anteriores. */
+export function migrate(data: AppData | (Omit<AppData, 'version'> & { version: number })): AppData {
+  const d = data as AppData;
+  return {
+    ...emptyData(),
+    ...d,
+    version: 2,
+    categories: [...d.categories, ...DEFAULT_CATEGORIES.filter((c) => !d.categories.some((x) => x.id === c.id))],
+    rates: d.rates ?? [],
+    exchanges: d.exchanges ?? [],
+    settings: { ...emptyData().settings, ...d.settings, theme: d.settings?.theme ?? emptyData().settings.theme },
   };
 }

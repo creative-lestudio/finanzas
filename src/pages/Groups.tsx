@@ -62,7 +62,7 @@ function GroupView({ group, onAdd }: { group: Group; onAdd: () => void }) {
 
   return (
     <>
-      <div className="card">
+      <div className="card glass">
         <h2>Saldos · gasto total {formatMoney(total)}</h2>
         <ul className="list">
           {group.members.map((m) => (
@@ -76,7 +76,7 @@ function GroupView({ group, onAdd }: { group: Group; onAdd: () => void }) {
         </ul>
       </div>
       {transfers.length > 0 && (
-        <div className="card">
+        <div className="card glass">
           <h2>Para quedar en paz</h2>
           <ul className="list">
             {transfers.map((t) => (
@@ -90,8 +90,8 @@ function GroupView({ group, onAdd }: { group: Group; onAdd: () => void }) {
           <p className="small muted" style={{ marginBottom: 0 }}>Consejo: puedes pagar por Bizum y marcarlo como saldado.</p>
         </div>
       )}
-      <button className="btn primary block" onClick={onAdd} style={{ marginBottom: 12 }}>+ Añadir gasto</button>
-      <div className="card" style={{ padding: '4px 16px' }}>
+      <button className="btn primary block mb" onClick={onAdd}>+ Añadir gasto</button>
+      <div className="card glass flush">
         {expenses.length === 0 && <Empty>Sin gastos en este grupo.</Empty>}
         <ul className="list">
           {expenses.map((e) => (

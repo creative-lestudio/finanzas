@@ -81,40 +81,45 @@ export function learnFromCorrection(data: AppData, tx: Transaction, categoryId: 
 }
 
 /**
- * Clasificación con IA (opcional). Solo se usa si el usuario lo activa, pone su
- * propia clave y NO está en modo sin terceros. Se envía únicamente la descripción
- * y el signo del importe, nunca IBAN ni saldos.
+ * Clasificación con IA (opcional). Solo se usa si el usuario lo activa y NO
+ * está en modo sin terceros. Se envía únicamente la descripción y el signo
+ * del importe, nunca IBAN ni saldos.
  */
 export async function categorizeWithAI(
   items: { id: string; description: string; amount: number }[],
   categories: Category[],
-  apiKey: string,
-  fetchImpl: typeof fetch = fetch,
+  data: AppData,
 ): Promise<Record<string, string>> {
   if (!items.length) return {};
-  const catList = categories.map((c) => `${c.id}: ${c.name} (${c.kind})`).join('\n');
-  const lines = items.map((i) => `${i.id}\t${i.amount < 0 ? 'gasto' : 'ingreso'}\t${i.description}`).join('\n');
-  const res = await fetchImpl('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
+  const { callClaude, textOf } = await import('./ai');
+  const ids = categories.map((c) => c.id);
+  const res = await callClaude(data, {
+    system: 'Clasificas movimientos bancarios de España y Latinoamérica en categorías. Usa exclusivamente los ids de categoría dados.',
+    messages: [
+      {
+        role: 'user',
+        content: `Categorías:\n${categories.map((c) => `${c.id}: ${c.name} (${c.kind})`).join('\n')}\n\nMovimientos (id, tipo, descripción):\n${items.map((i) => `${i.id}\t${i.amount < 0 ? 'gasto' : 'ingreso'}\t${i.description}`).join('\n')}`,
+      },
+    ],
+    schema: {
+      type: 'object',
+      properties: {
+        items: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: { id: { type: 'string' }, categoryId: { type: 'string', enum: ids } },
+            required: ['id', 'categoryId'],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ['items'],
+      additionalProperties: false,
     },
-    body: JSON.stringify({
-      model: 'claude-haiku-5-5',
-      max_tokens: 2000,
-      system:
-        'Clasificas movimientos bancarios españoles. Responde SOLO con un objeto JSON {"<id>":"<categoryId>"} usando exclusivamente los ids de categoría dados.',
-      messages: [{ role: 'user', content: `Categorías:\n${catList}\n\nMovimientos (id, tipo, descripción):\n${lines}` }],
-    }),
+    effort: 'low',
   });
-  if (!res.ok) throw new Error(`IA: error ${res.status}`);
-  const body = (await res.json()) as { content: { type: string; text?: string }[] };
-  const text = body.content.find((c) => c.type === 'text')?.text ?? '{}';
-  const json = text.slice(text.indexOf('{'), text.lastIndexOf('}') + 1);
-  const parsed = JSON.parse(json || '{}') as Record<string, string>;
-  const valid = new Set(categories.map((c) => c.id));
-  return Object.fromEntries(Object.entries(parsed).filter(([, v]) => valid.has(v)));
+  const parsed = JSON.parse(textOf(res)) as { items: { id: string; categoryId: string }[] };
+  const valid = new Set(ids);
+  return Object.fromEntries(parsed.items.filter((i) => valid.has(i.categoryId)).map((i) => [i.id, i.categoryId]));
 }

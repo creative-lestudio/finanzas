@@ -1,4 +1,5 @@
-import { addMonths } from './money';
+import { toBase } from './fx';
+import { addMonths, today } from './money';
 import { budgetStatus } from './budgets';
 import { detectAntExpenses, detectFees, detectSubscriptions, isActive, monthSummary } from './insights';
 import type { Account, AppData } from './types';
@@ -17,13 +18,15 @@ export function netWorth(data: AppData): NetWorth {
   const byKind = { checking: 0, savings: 0, card: 0, cash: 0, investment: 0, crypto: 0, loan: 0 } as NetWorth['byKind'];
   let assets = 0;
   let liabilities = 0;
+  const date = today();
   for (const a of data.accounts) {
-    byKind[a.kind] += a.balance;
-    if (a.balance >= 0) assets += a.balance;
-    else liabilities -= a.balance;
+    const v = toBase(data, a.balance, a.currency, date);
+    byKind[a.kind] += v;
+    if (v >= 0) assets += v;
+    else liabilities -= v;
   }
   const liquid = byKind.checking + byKind.savings + byKind.cash;
-  const goals = data.goals.reduce((s, g) => s + g.saved, 0);
+  const goals = data.goals.filter((g) => !g.accountIds?.length).reduce((s, g) => s + toBase(data, g.saved, g.currency ?? data.settings.currency, date), 0);
   return { assets, liabilities, net: assets - liabilities, byKind, liquid, goals };
 }
 
@@ -79,8 +82,8 @@ export function healthReport(data: AppData, month: string, day: number): HealthR
   });
 
   // 2. Fondo de emergencia (objetivo 6 meses de gastos, mínimo 3).
-  const emergencyGoal = data.goals.find((g) => /emergencia|colchon|imprevistos/i.test(g.name.normalize('NFD').replace(/[̀-ͯ]/g, '')));
-  const cushion = nw.liquid + (emergencyGoal?.saved ?? 0);
+  // Las huchas son dinero dentro de tus cuentas: el colchón es la liquidez total.
+  const cushion = nw.liquid;
   const months = expenses > 0 ? cushion / expenses : cushion > 0 ? 6 : 0;
   factors.push({
     id: 'emergency',
@@ -117,8 +120,8 @@ export function healthReport(data: AppData, month: string, day: number): HealthR
 
   // 5. Suscripciones (ideal < 5 % de ingresos).
   const asOf = `${month}-${String(day).padStart(2, '0')}`;
-  const subs = detectSubscriptions(data.transactions).filter((s) => s.kind === 'subscription' && isActive(s, asOf));
-  const subsMonthly = subs.reduce((s, x) => s + x.yearly, 0) / 12;
+  const subs = detectSubscriptions(data).filter((s) => s.kind === 'subscription' && isActive(s, asOf));
+  const subsMonthly = subs.reduce((s, x) => s + x.yearlyBase, 0) / 12;
   const subsRatio = income > 0 ? subsMonthly / income : 0;
   factors.push({
     id: 'subscriptions',
@@ -130,9 +133,9 @@ export function healthReport(data: AppData, month: string, day: number): HealthR
   });
 
   // 6. Fugas: gastos hormiga y comisiones.
-  const ants = detectAntExpenses(data.transactions, asOf);
-  const fees = detectFees(data.transactions).filter((f) => f.date >= addMonths(month, -3));
-  const leakRatio = income > 0 ? (ants.total + fees.reduce((s, f) => s + f.amount, 0) / 3) / income : 0;
+  const ants = detectAntExpenses(data, asOf);
+  const fees = detectFees(data).filter((f) => f.date >= addMonths(month, -3));
+  const leakRatio = income > 0 ? (ants.total + fees.reduce((s, f) => s + f.amountBase, 0) / 3) / income : 0;
   factors.push({
     id: 'leaks',
     label: 'Fugas de dinero',

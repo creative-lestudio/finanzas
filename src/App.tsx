@@ -1,9 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
+import { Icon } from './components/icons';
+import { InstallBanner } from './components/Install';
 import { QuickAdd } from './components/QuickAdd';
 import { Toaster } from './components/ui';
+import { VoiceSheet } from './components/Voice';
 import { demoData } from './lib/demo';
 import { emptyData } from './lib/defaults';
 import { today } from './lib/money';
+import { supabase } from './lib/sync';
+import { applySavedTheme } from './lib/theme';
+import { IS_PREVIEW } from './lib/preview';
+import { Assistant } from './pages/Assistant';
+import { Currency } from './pages/Currency';
 import { Groups } from './pages/Groups';
 import { Health } from './pages/Health';
 import { Home } from './pages/Home';
@@ -12,48 +20,58 @@ import { handleBankCallback, Settings } from './pages/Settings';
 import { Subscriptions } from './pages/Subscriptions';
 import { Transactions } from './pages/Transactions';
 import { Wealth } from './pages/Wealth';
+import { AuthForm } from './components/AuthForm';
 import { useStore } from './store';
 
-export type Page = 'home' | 'transactions' | 'plan' | 'groups' | 'more' | 'wealth' | 'health' | 'subs' | 'settings';
+export type Page = 'home' | 'transactions' | 'plan' | 'assistant' | 'more' | 'fx' | 'groups' | 'wealth' | 'health' | 'subs' | 'settings';
 
 const TITLES: Record<Page, string> = {
   home: 'Inicio',
   transactions: 'Movimientos',
   plan: 'Plan',
-  groups: 'Gastos compartidos',
+  assistant: 'Asesor',
   more: 'Más',
+  fx: 'Divisas',
+  groups: 'Compartir',
   wealth: 'Patrimonio',
   health: 'Salud financiera',
-  subs: 'Suscripciones y comisiones',
+  subs: 'Suscripciones',
   settings: 'Ajustes',
 };
 
 const TABS: [Page, string, string][] = [
-  ['home', '🏠', 'Inicio'],
-  ['transactions', '📋', 'Movimientos'],
-  ['plan', '🎯', 'Plan'],
-  ['groups', '👥', 'Compartir'],
-  ['more', '☰', 'Más'],
+  ['home', 'home', 'Inicio'],
+  ['transactions', 'list', 'Movimientos'],
+  ['plan', 'target', 'Plan'],
+  ['assistant', 'sparkles', 'Asesor'],
+  ['more', 'grid', 'Más'],
 ];
 
-const MORE: [Page, string, string][] = [
-  ['wealth', '📊', 'Patrimonio: cuentas, inversiones, cripto y deudas'],
-  ['health', '❤️', 'Salud financiera y consejos'],
-  ['subs', '🔁', 'Suscripciones y comisiones'],
-  ['settings', '⚙️', 'Ajustes, seguridad, banco e importación'],
+const MORE: [Page, string, string, string][] = [
+  ['fx', 'swap', 'Divisas y cambios', 'Tasas BCV/paralelo, Wise, pérdidas por cambio'],
+  ['groups', 'users', 'Gastos compartidos', 'Divide cuentas con amigos y familia'],
+  ['wealth', 'chart', 'Patrimonio', 'Cuentas, inversiones, cripto y deudas'],
+  ['health', 'heart', 'Salud financiera', 'Tu puntuación y consejos'],
+  ['subs', 'repeat', 'Suscripciones y comisiones', 'Cobros recurrentes y fugas'],
+  ['settings', 'gear', 'Ajustes', 'Apariencia, cuenta, datos y seguridad'],
 ];
 
-const PARENT: Partial<Record<Page, Page>> = { wealth: 'more', health: 'more', subs: 'more', settings: 'more' };
+const PARENT: Partial<Record<Page, Page>> = { fx: 'more', groups: 'more', wealth: 'more', health: 'more', subs: 'more', settings: 'more' };
+
+applySavedTheme();
 
 export function App() {
   const store = useStore();
-  const [page, setPage] = useState<Page>(() => (location.hash.slice(1) as Page) in TITLES ? (location.hash.slice(1) as Page) : 'home');
-  const [adding, setAdding] = useState(false);
+  const [page, setPage] = useState<Page>(() => {
+    const h = location.hash.slice(1) as Page;
+    return h in TITLES ? h : 'home';
+  });
+  const [sheet, setSheet] = useState<'add' | 'voice' | null>(null);
   const callbackDone = useRef(false);
 
   useEffect(() => {
     history.replaceState(null, '', `${location.pathname}${location.search}#${page}`);
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0 });
   }, [page]);
 
   useEffect(() => {
@@ -63,73 +81,126 @@ export function App() {
     }
   }, [store.status, store]);
 
-  if (store.status === 'loading') return null;
-  if (store.status !== 'ready') return <Lock />;
+  // Atajos del icono de la app (manifest shortcuts): ?accion=voz / ?accion=nuevo
+  useEffect(() => {
+    if (store.status !== 'ready') return;
+    const a = new URLSearchParams(location.search).get('accion');
+    if (a === 'voz') setSheet('voice');
+    if (a === 'nuevo') setSheet('add');
+  }, [store.status]);
 
-  const tab = PARENT[page] ?? page;
-  return (
-    <div className="app">
-      <header className="topbar">
-        {PARENT[page] ? (
-          <button className="btn ghost" onClick={() => setPage(PARENT[page]!)} aria-label="Volver">‹ {TITLES[PARENT[page]!]}</button>
-        ) : (
-          <h1>{TITLES[page]}</h1>
-        )}
-        <button className="btn ghost" onClick={store.lock} aria-label="Bloquear">🔒</button>
-      </header>
-      {PARENT[page] && <h1 style={{ fontSize: 22, margin: '0 0 12px' }}>{TITLES[page]}</h1>}
-
-      <main>
-        {page === 'home' && <Home go={setPage} />}
-        {page === 'transactions' && <Transactions />}
-        {page === 'plan' && <Plan />}
-        {page === 'groups' && <Groups />}
-        {page === 'wealth' && <Wealth />}
-        {page === 'health' && <Health />}
-        {page === 'subs' && <Subscriptions />}
-        {page === 'settings' && <Settings />}
-        {page === 'more' && (
-          <div className="card" style={{ padding: '4px 16px' }}>
-            <ul className="list">
-              {MORE.map(([p, icon, label]) => (
-                <li key={p} onClick={() => setPage(p)} style={{ cursor: 'pointer' }}>
-                  <span className="icon">{icon}</span>
-                  <span className="grow">{label}</span>
-                  <span className="muted">›</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </main>
-
-      {(page === 'home' || page === 'transactions') && (
-        <button className="fab" onClick={() => setAdding(true)} aria-label="Añadir movimiento">+</button>
-      )}
-      {adding && <QuickAdd onClose={() => setAdding(false)} />}
-
-      <div className="tabbar">
-        <nav>
-          {TABS.map(([p, icon, label]) => (
-            <button key={p} className={tab === p ? 'on' : ''} onClick={() => setPage(p)} aria-current={tab === p ? 'page' : undefined}>
-              <span>{icon}</span>
-              <span>{label}</span>
-            </button>
-          ))}
-        </nav>
-      </div>
-      <Toaster />
+  const ambient = (
+    <div className="ambient" aria-hidden>
+      <i />
+      <i />
+      <i />
     </div>
+  );
+
+  if (store.status === 'loading') return ambient;
+  if (store.status !== 'ready') return (
+    <>
+      {ambient}
+      <Lock />
+      <Toaster />
+    </>
+  );
+
+  const parent = PARENT[page];
+  const tab = parent ?? page;
+  return (
+    <>
+      {ambient}
+      <div className="app">
+        <header className="nav">
+          {parent ? (
+            <button className="back" onClick={() => setPage(parent)}>
+              <Icon name="back" size={22} stroke={2.4} /> {TITLES[parent]}
+            </button>
+          ) : (
+            <span />
+          )}
+          <div className="nav-actions">
+            {store.sync.status !== 'off' && (
+              <button className="icon-btn glass" onClick={() => void store.syncNow()} aria-label="Sincronizar" title={store.sync.error ?? (store.sync.lastSync ? `Sincronizado ${new Date(store.sync.lastSync).toLocaleTimeString('es-ES')}` : 'Sincronizar')}>
+                <Icon name="cloud" size={19} className={store.sync.status === 'syncing' ? 'spin' : ''} />
+                {store.sync.status === 'error' && <span style={{ position: 'absolute', top: 6, right: 6, width: 8, height: 8, borderRadius: 4, background: 'var(--bad)' }} />}
+              </button>
+            )}
+            <button className="icon-btn glass" onClick={store.lock} aria-label="Bloquear">
+              <Icon name="lock" size={19} />
+            </button>
+          </div>
+        </header>
+        <h1 className="large-title">{TITLES[page]}</h1>
+        {page === 'home' && <InstallBanner />}
+
+        <main>
+          {page === 'home' && <Home go={setPage} openVoice={() => setSheet('voice')} openAdd={() => setSheet('add')} />}
+          {page === 'transactions' && <Transactions />}
+          {page === 'plan' && <Plan />}
+          {page === 'assistant' && <Assistant />}
+          {page === 'fx' && <Currency />}
+          {page === 'groups' && <Groups />}
+          {page === 'wealth' && <Wealth />}
+          {page === 'health' && <Health />}
+          {page === 'subs' && <Subscriptions />}
+          {page === 'settings' && <Settings />}
+          {page === 'more' && (
+            <div className="card glass flush">
+              <ul className="list">
+                {MORE.map(([p, icon, label, hint]) => (
+                  <li key={p} className="tap" onClick={() => setPage(p)}>
+                    <span className="icon accent"><Icon name={icon} size={20} /></span>
+                    <div className="grow">
+                      <div>{label}</div>
+                      <div className="small muted ellipsis">{hint}</div>
+                    </div>
+                    <Icon name="chevron" size={18} className="chev" />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </main>
+      </div>
+
+      <div className="dock">
+        <div className="dock-inner">
+          <nav className="tabbar glass" aria-label="Secciones">
+            {TABS.map(([p, icon, label]) => (
+              <button key={p} className={tab === p ? 'on' : ''} onClick={() => setPage(p)} aria-current={tab === p ? 'page' : undefined}>
+                <Icon name={icon} size={23} stroke={tab === p ? 2.2 : 1.8} />
+                <span>{label}</span>
+              </button>
+            ))}
+          </nav>
+          <button className="fab" onClick={() => setSheet('add')} aria-label="Añadir movimiento" onContextMenu={(e) => { e.preventDefault(); setSheet('voice'); }}>
+            <Icon name="plus" size={28} stroke={2.4} />
+          </button>
+        </div>
+      </div>
+
+      {sheet === 'add' && <QuickAdd onClose={() => setSheet(null)} onVoice={() => setSheet('voice')} />}
+      {sheet === 'voice' && <VoiceSheet onClose={() => setSheet(null)} />}
+      <Toaster />
+    </>
   );
 }
 
 function Lock() {
   const store = useStore();
   const isNew = store.status === 'new';
+  const [mode, setMode] = useState<'pass' | 'restore'>('pass');
   const [pass, setPass] = useState('');
   const [pass2, setPass2] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(store.sync.error ?? '');
   const [busy, setBusy] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
+
+  useEffect(() => {
+    void supabase()?.auth.getSession().then(({ data }) => setSignedIn(Boolean(data.session)));
+  }, [mode]);
 
   const submit = async (demo = false) => {
     setError('');
@@ -137,7 +208,10 @@ function Lock() {
       if (pass.length < 6) return setError('Usa al menos 6 caracteres.');
       if (pass !== pass2) return setError('Las contraseñas no coinciden.');
       setBusy(true);
-      await store.create(pass, demo ? demoData(today()) : emptyData());
+      const initial = demo ? demoData(today()) : emptyData();
+      // En la vista previa de claude.ai la IA funciona con tu cuenta de Claude.
+      if (IS_PREVIEW) initial.settings = { ...initial.settings, offlineOnly: false };
+      await store.create(pass, initial);
     } else {
       setBusy(true);
       if (!(await store.open(pass))) {
@@ -147,12 +221,46 @@ function Lock() {
     }
   };
 
+  const restore = async () => {
+    setBusy(true);
+    setError('');
+    const r = await store.restoreFromCloud(pass).catch((e: Error) => e.message);
+    if (r === 'empty') setError('No hay datos en la nube para esta cuenta todavía.');
+    else if (r === 'wrong-passphrase') setError('Esa no es la contraseña con la que cifraste tus datos.');
+    else if (r !== 'ok') setError(String(r));
+    setBusy(false);
+  };
+
+  if (mode === 'restore') {
+    return (
+      <div className="lock">
+        <div className="card glass">
+          <div className="app-icon"><Icon name="cloud" size={36} /></div>
+          <h1 className="center" style={{ margin: '4px 0 6px', fontSize: 26, letterSpacing: '-0.03em' }}>Recuperar mis datos</h1>
+          <p className="small muted center" style={{ marginTop: 0 }}>Inicia sesión y escribe la contraseña de cifrado que usas en tu otro dispositivo.</p>
+          {!signedIn ? (
+            <AuthForm onDone={() => setSignedIn(true)} />
+          ) : (
+            <form onSubmit={(e) => { e.preventDefault(); void restore(); }}>
+              <div className="field">
+                <input type="password" autoFocus placeholder="Contraseña de cifrado" value={pass} onChange={(e) => setPass(e.target.value)} aria-label="Contraseña de cifrado" />
+              </div>
+              {error && <p className="small" style={{ color: 'var(--bad)' }}>{error}</p>}
+              <button className="btn primary block" disabled={busy || !pass}>{busy ? 'Descifrando…' : 'Recuperar'}</button>
+            </form>
+          )}
+          <button className="btn ghost block mt small" onClick={() => setMode('pass')}>Volver</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="lock">
-      <form className="card" onSubmit={(e) => { e.preventDefault(); void submit(); }}>
-        <div style={{ textAlign: 'center', fontSize: 44 }}>💶</div>
-        <h1 style={{ textAlign: 'center', margin: '4px 0 6px', fontSize: 22 }}>Finanzas</h1>
-        <p className="small muted" style={{ textAlign: 'center', marginTop: 0 }}>
+      <form className="card glass" onSubmit={(e) => { e.preventDefault(); void submit(); }}>
+        <div className="app-icon"><Icon name="wallet" size={38} /></div>
+        <h1 className="center" style={{ margin: '4px 0 6px', fontSize: 28, letterSpacing: '-0.03em' }}>Finanzas</h1>
+        <p className="small muted center" style={{ marginTop: 0 }}>
           {isNew
             ? 'Crea una contraseña. Cifra tus datos en este dispositivo y no se puede recuperar: guárdala bien.'
             : 'Introduce tu contraseña para descifrar tus datos.'}
@@ -168,12 +276,19 @@ function Lock() {
         {error && <p className="small" style={{ color: 'var(--bad)' }}>{error}</p>}
         <button className="btn primary block" disabled={busy || !pass}>{busy ? 'Un momento…' : isNew ? 'Empezar' : 'Desbloquear'}</button>
         {isNew && (
-          <button type="button" className="btn block" style={{ marginTop: 8 }} disabled={busy || !pass} onClick={() => void submit(true)}>
-            Empezar con datos de ejemplo
-          </button>
+          <>
+            <button type="button" className="btn tinted block mt" disabled={busy || !pass} onClick={() => void submit(true)}>
+              Probar con datos de ejemplo
+            </button>
+            {supabase() && (
+              <button type="button" className="btn ghost block mt small" onClick={() => setMode('restore')}>
+                Ya uso Finanzas en otro dispositivo
+              </button>
+            )}
+          </>
         )}
         {!isNew && (
-          <button type="button" className="btn ghost block small muted" style={{ marginTop: 8 }} onClick={() => confirm('Se borrarán los datos cifrados de este dispositivo. ¿Continuar?') && store.wipe()}>
+          <button type="button" className="btn ghost block mt small muted" onClick={() => confirm('Se borrarán los datos cifrados de este dispositivo. ¿Continuar?') && void store.wipe()}>
             He olvidado la contraseña
           </button>
         )}

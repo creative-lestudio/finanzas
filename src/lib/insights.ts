@@ -1,3 +1,4 @@
+import { toBase, txCurrency } from './fx';
 import { daysBetween, merchantKey, monthKey, normalize } from './money';
 import type { AppData, Transaction } from './types';
 
@@ -12,8 +13,11 @@ export interface Subscription {
   kind: 'subscription' | 'bill';
   /** Importe medio por cobro (céntimos, positivo). */
   amount: number;
-  /** Coste anualizado (céntimos). */
+  /** Coste anualizado (céntimos de `currency`). */
   yearly: number;
+  currency: string;
+  /** Coste anualizado en la moneda principal. */
+  yearlyBase: number;
   lastDate: string;
   nextDate: string;
   count: number;
@@ -45,12 +49,13 @@ function median(xs: number[]): number {
  * Detecta cobros recurrentes: mismo comercio, importe parecido (±15 %) e
  * intervalos regulares entre cargos.
  */
-export function detectSubscriptions(transactions: Transaction[]): Subscription[] {
+export function detectSubscriptions(data: AppData): Subscription[] {
   const groups = new Map<string, Transaction[]>();
-  for (const t of transactions) {
-    if (t.amount >= 0 || t.channel === 'bizum' || t.channel === 'atm' || t.categoryId === 'transfer') continue;
-    const key = merchantKey(t.description);
-    if (!key) continue;
+  for (const t of data.transactions) {
+    if (t.amount >= 0 || t.channel === 'bizum' || t.channel === 'atm' || t.categoryId === 'transfer' || t.exchangeId) continue;
+    const merchant = merchantKey(t.description);
+    if (!merchant) continue;
+    const key = `${merchant}|${txCurrency(data, t)}`;
     (groups.get(key) ?? groups.set(key, []).get(key)!).push(t);
   }
 
@@ -80,14 +85,17 @@ export function detectSubscriptions(transactions: Transaction[]): Subscription[]
     const lastAmount = -last.amount;
     const next = new Date(Date.parse(last.date) + Math.round(days) * 86_400_000).toISOString().slice(0, 10);
 
+    const currency = txCurrency(data, last);
     result.push({
-      key,
+      key: key.split('|')[0],
       name: prettyName(last.description),
       categoryId: last.categoryId,
       frequency,
       kind: FIXED_BILLS.has(last.categoryId) ? 'bill' : 'subscription',
       amount: avg,
       yearly: avg * PER_YEAR[frequency],
+      currency,
+      yearlyBase: toBase(data, avg * PER_YEAR[frequency], currency, last.date),
       lastDate: last.date,
       nextDate: next,
       count: similar.length,
@@ -112,6 +120,8 @@ export interface FeeAlert {
   transactionId: string;
   date: string;
   amount: number;
+  currency: string;
+  amountBase: number;
   description: string;
   kind: 'maintenance' | 'card' | 'overdraft' | 'atm' | 'transfer' | 'fx' | 'other';
 }
@@ -126,14 +136,15 @@ const FEE_PATTERNS: [RegExp, FeeAlert['kind']][] = [
   [/\bcomision|\bcomisiones|\bfee\b/, 'other'],
 ];
 
-export function detectFees(transactions: Transaction[]): FeeAlert[] {
+export function detectFees(data: AppData): FeeAlert[] {
   const out: FeeAlert[] = [];
-  for (const t of transactions) {
-    if (t.amount >= 0) continue;
+  for (const t of data.transactions) {
+    if (t.amount >= 0 || t.exchangeId) continue;
     const text = normalize(t.description);
     const hit = FEE_PATTERNS.find(([re]) => re.test(text));
     if (hit || t.categoryId === 'fees') {
-      out.push({ transactionId: t.id, date: t.date, amount: -t.amount, description: t.description, kind: hit?.[1] ?? 'other' });
+      const currency = txCurrency(data, t);
+      out.push({ transactionId: t.id, date: t.date, amount: -t.amount, currency, amountBase: toBase(data, -t.amount, currency, t.date), description: t.description, kind: hit?.[1] ?? 'other' });
     }
   }
   return out.sort((a, b) => b.date.localeCompare(a.date));
@@ -163,14 +174,17 @@ export interface AntExpenses {
  * pesan mucho. Se analizan los últimos `days` días.
  */
 export function detectAntExpenses(
-  transactions: Transaction[],
+  data: AppData,
   asOf: string,
   { threshold = 1000, days = 30 } = {},
 ): AntExpenses {
-  const small = transactions.filter(
+  // Importes en moneda principal: 10 € y 10 Bs no son lo mismo.
+  const base = (t: Transaction) => -toBase(data, t.amount, txCurrency(data, t), t.date);
+  const small = data.transactions.filter(
     (t) =>
       t.amount < 0 &&
-      -t.amount <= threshold &&
+      !t.exchangeId &&
+      base(t) <= threshold &&
       t.channel !== 'bizum' &&
       !['transfer', 'fees', 'subscriptions'].includes(t.categoryId) &&
       daysBetween(t.date, asOf) >= 0 &&
@@ -180,7 +194,7 @@ export function detectAntExpenses(
   for (const t of small) {
     const key = merchantKey(t.description) || t.categoryId;
     const e = by.get(key) ?? { key, name: prettyName(t.description), total: 0, count: 0 };
-    e.total -= t.amount;
+    e.total += base(t);
     e.count++;
     by.set(key, e);
   }
@@ -196,20 +210,24 @@ export interface MonthSummary {
   income: number;
   expenses: number;
   byCategory: Record<string, number>;
+  /** Monedas sin tasa de cambio conocida (no se han podido sumar). */
+  missingRates: Set<string>;
 }
 
-export function monthSummary(data: Pick<AppData, 'transactions' | 'categories'>, month: string): MonthSummary {
+/** Ingresos y gastos del mes, convertidos a la moneda principal. */
+export function monthSummary(data: Pick<AppData, 'transactions' | 'categories' | 'accounts' | 'rates' | 'settings'>, month: string): MonthSummary {
   const kinds = new Map(data.categories.map((c) => [c.id, c.kind]));
-  const s: MonthSummary = { month, income: 0, expenses: 0, byCategory: {} };
+  const s: MonthSummary = { month, income: 0, expenses: 0, byCategory: {}, missingRates: new Set() };
   for (const t of data.transactions) {
     if (monthKey(t.date) !== month) continue;
     const kind = kinds.get(t.categoryId);
     if (kind === 'transfer') continue;
-    if (t.amount >= 0 && kind !== 'expense') s.income += t.amount;
+    const amount = toBase(data, t.amount, txCurrency(data, t), t.date, s.missingRates);
+    if (t.amount >= 0 && kind !== 'expense') s.income += amount;
     else {
       // Un ingreso en una categoría de gasto (p. ej. devolución) resta del gasto.
-      s.expenses -= t.amount;
-      s.byCategory[t.categoryId] = (s.byCategory[t.categoryId] ?? 0) - t.amount;
+      s.expenses -= amount;
+      s.byCategory[t.categoryId] = (s.byCategory[t.categoryId] ?? 0) - amount;
     }
   }
   return s;

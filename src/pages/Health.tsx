@@ -13,9 +13,9 @@ export function Health() {
 
   return (
     <>
-      <div className="card" style={{ textAlign: 'center' }}>
-        <div className="score" style={{ background: `conic-gradient(var(--accent) ${r.score * 3.6}deg, var(--surface-2) 0)` }}>
-          <div className="score" style={{ width: 96, height: 96, margin: 0, background: 'var(--surface)' }}>
+      <div className="card glass" style={{ textAlign: 'center' }}>
+        <div className="ring" style={{ background: `conic-gradient(var(--accent) ${r.score * 3.6}deg, var(--fill) 0)` }}>
+          <div>
             <b>{r.score}</b>
           </div>
         </div>
@@ -24,7 +24,7 @@ export function Health() {
       </div>
 
       {r.tips.length > 0 && (
-        <div className="card">
+        <div className="card glass">
           <h2>Tus próximos pasos</h2>
           {r.tips.map((t, i) => (
             <div className="alert" key={i}>
@@ -35,7 +35,7 @@ export function Health() {
         </div>
       )}
 
-      <div className="card">
+      <div className="card glass">
         <h2>Desglose</h2>
         {r.factors.map((f) => (
           <div key={f.id} style={{ marginBottom: 14 }}>

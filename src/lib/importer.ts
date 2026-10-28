@@ -64,31 +64,44 @@ function findCol(header: string[], names: string[]): number {
  * detecta separador, columnas y formato numérico.
  */
 export function parseBankCSV(text: string): { movements: RawMovement[]; errors: number } {
-  const lines = text.replace(/^﻿/, '').split(/\r?\n/).filter((l) => l.trim());
-  const sep = [';', '\t', ','].map((s) => [s, (lines.slice(0, 20).join('\n').match(new RegExp(s === '\t' ? '\t' : s, 'g')) ?? []).length] as const).sort((a, b) => b[1] - a[1])[0][0];
+  const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/).filter((l) => l.trim());
+  const sample = lines.slice(0, 20).join('\n');
+  const sep = [';', '\t', ','].map((s) => [s, sample.split(s).length - 1] as const).sort((a, b) => b[1] - a[1])[0][0];
+  const { movements, errors } = parseRows(lines.map((l) => splitLine(l, sep)));
+  return { movements, errors };
+}
 
+/**
+ * Interpreta una tabla (filas de celdas de texto) venga de CSV o de Excel.
+ * `extraCols` devuelve además esas columnas opcionales por fila (cuenta, moneda...).
+ */
+export function parseRows(
+  rows: string[][],
+  extraCols: string[] = [],
+): { movements: RawMovement[]; errors: number; extra: Record<string, string>[] } {
   let headerIdx = -1;
   let header: string[] = [];
-  for (let i = 0; i < Math.min(lines.length, 30); i++) {
-    const h = splitLine(lines[i], sep).map((c) => normalize(c.replace(/"/g, '')));
+  for (let i = 0; i < Math.min(rows.length, 30); i++) {
+    const h = rows[i].map((c) => normalize(c.replace(/"/g, '')));
     if (findCol(h, COLS.date) >= 0 && (findCol(h, COLS.amount) >= 0 || findCol(h, COLS.debit) >= 0)) {
       headerIdx = i;
       header = h;
       break;
     }
   }
-  if (headerIdx < 0) return { movements: [], errors: lines.length };
+  if (headerIdx < 0) return { movements: [], errors: rows.length, extra: [] };
 
   const iDate = findCol(header, COLS.date);
   const iDesc = findCol(header, COLS.desc);
   const iAmount = findCol(header, COLS.amount);
   const iDebit = findCol(header, COLS.debit);
   const iCredit = findCol(header, COLS.credit);
+  const iExtra = extraCols.map((c) => [c, header.findIndex((h) => h === c)] as const);
 
   const movements: RawMovement[] = [];
+  const extra: Record<string, string>[] = [];
   let errors = 0;
-  for (const line of lines.slice(headerIdx + 1)) {
-    const cells = splitLine(line, sep);
+  for (const cells of rows.slice(headerIdx + 1)) {
     const date = parseDate(cells[iDate] ?? '');
     let amount: number | null = null;
     if (iAmount >= 0) amount = parseAmount(cells[iAmount] ?? '');
@@ -103,8 +116,9 @@ export function parseBankCSV(text: string): { movements: RawMovement[]; errors: 
     }
     const description = (iDesc >= 0 ? cells[iDesc] : cells.filter((_, i) => i !== iDate && i !== iAmount).join(' ')) || 'Movimiento';
     movements.push({ date, amount, description });
+    extra.push(Object.fromEntries(iExtra.filter(([, i]) => i >= 0 && cells[i]).map(([c, i]) => [c, cells[i]])));
   }
-  return { movements, errors };
+  return { movements, errors, extra };
 }
 
 function fingerprintOf(m: RawMovement, n: number): string {

@@ -10,6 +10,13 @@ import { detectAntExpenses, detectFees, detectSubscriptions } from './insights';
 import { merchantKey, parseAmount } from './money';
 import { distribute, roundUpAmount, savingProposals } from './savings';
 import { balances, settleUp, splitByWeights, splitEqual } from './shared';
+import { addRate, analyzeExchange, analyzeIncomeFx, deleteExchange, fxSummary, rateFor, recordExchange, simulateChain } from './fx';
+import { futureValue, goalProgress } from './goals';
+import { merge3 } from './merge';
+import { parseVoiceLocal } from './voice';
+import { applyExcelImport, exportWorkbook, readWorkbook } from './excel';
+import { monthSummary } from './insights';
+import type { AppData, Goal, Transaction } from './types';
 
 describe('importes', () => {
   it('entiende formatos españoles e ingleses', () => {
@@ -80,7 +87,7 @@ basura`;
 describe('detecciones', () => {
   const data = demoData('2026-10-20');
   it('encuentra suscripciones mensuales', () => {
-    const subs = detectSubscriptions(data.transactions);
+    const subs = detectSubscriptions(data);
     const names = subs.map((s) => s.key);
     expect(names).toContain('netflix com');
     expect(names.some((n) => n.startsWith('spotify'))).toBe(true);
@@ -88,10 +95,10 @@ describe('detecciones', () => {
     expect(names.some((n) => n.includes('mercadona'))).toBe(false);
   });
   it('encuentra comisiones', () => {
-    expect(detectFees(data.transactions).length).toBeGreaterThanOrEqual(3);
+    expect(detectFees(data).length).toBeGreaterThanOrEqual(3);
   });
   it('encuentra gastos hormiga', () => {
-    const ants = detectAntExpenses(data.transactions, '2026-10-20');
+    const ants = detectAntExpenses(data, '2026-10-20');
     expect(ants.byMerchant[0].key).toBe('cafeteria el rincon');
     expect(ants.yearly).toBeGreaterThan(ants.total);
   });
@@ -167,5 +174,150 @@ describe('cifrado', () => {
     expect(await decryptJSON(s, blob)).toEqual({ hola: 'mundo' });
     expect((await unlock('1234', blob)).value).toEqual({ hola: 'mundo' });
     await expect(unlock('0000', blob)).rejects.toThrow();
+  });
+});
+
+describe('divisas', () => {
+  const base = (): AppData => {
+    let d = emptyData();
+    d.settings = { ...d.settings, currency: 'USD', rateSource: { VES: 'Paralelo' } };
+    d.accounts = [
+      { id: 'ves', name: 'Banesco', kind: 'checking', balance: 0, currency: 'VES', source: 'manual' },
+      { id: 'usd', name: 'Wise USD', kind: 'checking', balance: 0, currency: 'USD', source: 'manual' },
+      { id: 'eur', name: 'Wise EUR', kind: 'checking', balance: 0, currency: 'EUR', source: 'manual' },
+    ];
+    d = addRate(d, { date: '2026-10-01', base: 'USD', quote: 'VES', rate: 40, source: 'BCV' });
+    d = addRate(d, { date: '2026-10-01', base: 'USD', quote: 'VES', rate: 50, source: 'Paralelo' });
+    d = addRate(d, { date: '2026-10-01', base: 'EUR', quote: 'USD', rate: 1.1, source: 'Mercado medio' });
+    return d;
+  };
+
+  it('usa la fuente preferida, invierte pares y cruza vía USD', () => {
+    const d = base();
+    expect(rateFor(d, 'USD', 'VES', '2026-10-05')).toBe(50);
+    expect(rateFor(d, 'USD', 'VES', '2026-10-05', 'BCV')).toBe(40);
+    expect(rateFor(d, 'VES', 'USD', '2026-10-05')).toBeCloseTo(0.02);
+    expect(rateFor(d, 'EUR', 'VES', '2026-10-05')).toBeCloseTo(55);
+    expect(rateFor(d, 'USDT', 'USD', '2026-10-05')).toBe(1);
+  });
+
+  it('calcula lo que se pierde al cobrar 800 $ a tasa BCV', () => {
+    const d = base();
+    const t: Transaction = { id: 't', accountId: 'ves', date: '2026-10-05', amount: 3200000, description: 'Cobro', categoryId: 'salary', categorySource: 'user', fx: { amount: 80000, currency: 'USD', rate: 40, source: 'BCV' } };
+    const a = analyzeIncomeFx({ ...d, transactions: [t] }, t)!;
+    expect(a.realValue).toBe(64000); // 32.000 Bs / 50 = 640 $
+    expect(a.diff).toBe(-16000); // pierdes 160 $
+    expect(a.diffPct).toBeCloseTo(-0.2);
+  });
+
+  it('mide la pérdida de un cambio frente a la tasa de referencia', () => {
+    const d = base();
+    const next = recordExchange(d, { date: '2026-10-06', fromAccountId: 'usd', fromAmount: 64000, toAccountId: 'eur', toAmount: 57500, fee: 400, platform: 'Wise' });
+    expect(next.accounts.find((a) => a.id === 'usd')!.balance).toBe(-64000);
+    expect(next.accounts.find((a) => a.id === 'eur')!.balance).toBe(57500);
+    const a = analyzeExchange(next, next.exchanges[0]);
+    expect(a.expected).toBe(Math.round(64000 / 1.1)); // 581,82 €
+    expect(a.diff).toBe(57500 - Math.round(64000 / 1.1));
+    expect(a.diffBase).toBeLessThan(0);
+    const back = deleteExchange(next, next.exchanges[0].id);
+    expect(back.transactions).toHaveLength(0);
+    expect(back.accounts.find((x) => x.id === 'eur')!.balance).toBe(0);
+  });
+
+  it('simula la ruta del dinero paso a paso', () => {
+    const r = simulateChain(
+      { amount: 80000, currency: 'USD' },
+      [
+        { label: 'Cobro a tasa BCV', to: 'VES', rate: 40 },
+        { label: 'Compra de $ en paralelo', to: 'USD', rate: 1 / 50 },
+        { label: 'Wise a euros', to: 'EUR', rate: 1 / 1.12, feeFixed: 450 },
+      ],
+      { VES: 50, EUR: 1 / 1.1 },
+    );
+    expect(r[1].amount).toBe(3200000);
+    expect(r[1].stepDiff).toBe(-16000);
+    expect(r[2].amount).toBe(64000);
+    expect(r[2].stepDiff).toBe(0);
+    expect(r[3].totalDiff).toBeLessThan(-16000);
+  });
+
+  it('suma informes en la moneda principal', () => {
+    const d = demoData('2026-10-20');
+    const s = monthSummary(d, '2026-09');
+    expect(s.missingRates.size).toBe(0);
+    expect(fxSummary(d).total).toBeLessThan(0);
+  });
+});
+
+describe('metas medibles', () => {
+  it('calcula aportación necesaria, proyección y estado', () => {
+    const d = emptyData();
+    const g: Goal = { id: 'g', name: 'Colchón', icon: '', target: 600000, saved: 100000, priority: 1, deadline: '2027-09-15', monthlyPlan: 50000 };
+    d.goals = [g];
+    const p = goalProgress(d, g, '2026-10-20');
+    expect(p.monthsLeft).toBe(12);
+    expect(p.requiredMonthly).toBe(Math.ceil(500000 / 12));
+    expect(p.status).toBe('ahead');
+  });
+  it('proyecta inversión con interés compuesto y mide por saldo de cuentas', () => {
+    expect(futureValue(100000, 0, 12, 12)).toBe(Math.round(100000 * 1.01 ** 12));
+    const d = demoData('2026-10-20');
+    const g = d.goals.find((x) => x.id === 'g4')!;
+    const p = goalProgress(d, g, '2026-10-20');
+    expect(p.current).toBe(830000);
+    expect(p.requiredMonthly).toBeGreaterThan(0);
+  });
+});
+
+describe('sincronización: fusión a tres bandas', () => {
+  it('une movimientos nuevos de ambos lados, respeta borrados y suma saldos', () => {
+    const b = demoData('2026-10-20');
+    const local = mergeMovements(b, 'cash', [{ date: '2026-10-20', amount: -500, description: 'Café móvil' }]).data;
+    let remote = mergeMovements(b, 'cash', [{ date: '2026-10-20', amount: -1200, description: 'Taxi portátil' }]).data;
+    const removed = b.transactions[0];
+    remote = { ...remote, transactions: remote.transactions.filter((t) => t.id !== removed.id) };
+    const m = merge3(b, local, remote);
+    expect(m.transactions.some((t) => t.description === 'Café móvil')).toBe(true);
+    expect(m.transactions.some((t) => t.description === 'Taxi portátil')).toBe(true);
+    expect(m.transactions.some((t) => t.id === removed.id)).toBe(false);
+    const cashBase = b.accounts.find((a) => a.id === 'cash')!.balance;
+    expect(m.accounts.find((a) => a.id === 'cash')!.balance).toBe(cashBase - 1700);
+  });
+});
+
+describe('voz', () => {
+  const d = demoData('2026-10-20');
+  it('entiende "gasté 50 euros en mercadona"', () => {
+    const v = parseVoiceLocal('Gasté 50 euros en Mercadona', d);
+    expect(v).toMatchObject({ kind: 'expense', amount: 5000, currency: 'EUR', categoryId: 'groceries', description: 'Mercadona' });
+    expect(v.accountId).toBe('main');
+  });
+  it('entiende números en palabras, efectivo y ayer', () => {
+    const v = parseVoiceLocal('ayer pagué cincuenta y cinco euros en efectivo en la farmacia', d);
+    expect(v.amount).toBe(5500);
+    expect(v.accountId).toBe('cash');
+    expect(v.categoryId).toBe('health');
+    expect(v.date).not.toBe(new Date().toISOString().slice(0, 10));
+  });
+  it('detecta ingresos y pide lo que falta', () => {
+    const v = parseVoiceLocal('me pagaron 1.500 dólares', d);
+    expect(v.kind).toBe('income');
+    expect(v.amount).toBe(150000);
+    expect(v.currency).toBe('USD');
+    expect(v.missing).toContain('category');
+  });
+});
+
+describe('excel', () => {
+  it('exporta y vuelve a importar los movimientos', async () => {
+    const d = demoData('2026-10-20');
+    const blob = await exportWorkbook(d);
+    const imp = await readWorkbook(await blob.arrayBuffer());
+    expect(imp.movements.length).toBe(d.transactions.length);
+    const again = applyExcelImport(d, imp, 'main');
+    expect(again.added).toBe(0);
+    const fresh = applyExcelImport(emptyData(), imp, 'cash');
+    expect(fresh.added).toBe(d.transactions.length);
+    expect(fresh.data.accounts.some((a) => a.name === 'Banesco (Bs)' && a.currency === 'VES')).toBe(true);
   });
 });

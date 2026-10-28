@@ -3,13 +3,32 @@ export const uid = (): string =>
 
 const fmtCache = new Map<string, Intl.NumberFormat>();
 
-export function formatMoney(cents: number, currency = 'EUR'): string {
+let defaultCurrency = 'EUR';
+
+/** Moneda que usa formatMoney cuando no se indica otra (la principal del usuario). */
+export function setDefaultCurrency(code: string) {
+  defaultCurrency = code;
+}
+
+export function formatMoney(cents: number, currency = defaultCurrency): string {
   let f = fmtCache.get(currency);
   if (!f) {
-    f = new Intl.NumberFormat('es-ES', { style: 'currency', currency });
+    try {
+      f = new Intl.NumberFormat('es-ES', { style: 'currency', currency });
+    } catch {
+      // Monedas no ISO (USDT, USDC...): número + código.
+      const n = new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      f = { format: (v: number) => `${n.format(v)} ${currency}` } as Intl.NumberFormat;
+    }
     fmtCache.set(currency, f);
   }
   return f.format(cents / 100);
+}
+
+/** Formatea una tasa con decimales razonables (40,5 / 0,9213). */
+export function formatRate(rate: number): string {
+  const digits = rate >= 100 ? 2 : rate >= 1 ? 4 : 6;
+  return new Intl.NumberFormat('es-ES', { maximumFractionDigits: digits }).format(rate);
 }
 
 /** Convierte "12,50", "-1.234,56", "12.5" o "1,234.56" a céntimos. */

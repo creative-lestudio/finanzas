@@ -8,11 +8,11 @@ const FREQ: Record<string, string> = { weekly: 'semanal', monthly: 'mensual', qu
 export function Subscriptions() {
   const { data } = useStore();
   const now = today();
-  const all = detectSubscriptions(data.transactions);
+  const all = detectSubscriptions(data);
   const active = all.filter((s) => isActive(s, now));
   const inactive = all.filter((s) => !isActive(s, now));
-  const fees = detectFees(data.transactions);
-  const yearlyFees = fees.filter((f) => f.date >= new Date(Date.now() - 365 * 86_400_000).toISOString().slice(0, 10)).reduce((s, f) => s + f.amount, 0);
+  const fees = detectFees(data);
+  const yearlyFees = fees.filter((f) => f.date >= new Date(Date.now() - 365 * 86_400_000).toISOString().slice(0, 10)).reduce((s, f) => s + f.amountBase, 0);
   const kinds = [...new Set(fees.map((f) => f.kind))];
 
   return (
@@ -21,7 +21,7 @@ export function Subscriptions() {
       <RecurringCard title="Recibos fijos" items={active.filter((x) => x.kind === 'bill')} />
 
       {inactive.length > 0 && (
-        <div className="card">
+        <div className="card glass">
           <h2>Posiblemente canceladas</h2>
           <ul className="list small">
             {inactive.map((s) => (
@@ -31,7 +31,7 @@ export function Subscriptions() {
         </div>
       )}
 
-      <div className="card">
+      <div className="card glass">
         <h2>Comisiones bancarias</h2>
         {fees.length === 0 ? (
           <Empty>✓ No se han detectado comisiones. ¡Bien!</Empty>
@@ -43,7 +43,7 @@ export function Subscriptions() {
             ))}
             <ul className="list small">
               {fees.slice(0, 12).map((f) => (
-                <li key={f.transactionId}><span className="grow ellipsis">{f.description}</span><span className="muted">{f.date}</span><Money cents={f.amount} /></li>
+                <li key={f.transactionId}><span className="grow ellipsis">{f.description}</span><span className="muted">{f.date}</span><Money cents={f.amount} currency={f.currency} /></li>
               ))}
             </ul>
           </>
@@ -55,11 +55,11 @@ export function Subscriptions() {
 
 function RecurringCard({ title, items, hint }: { title: string; items: Subscription[]; hint?: boolean }) {
   const { data } = useStore();
-  const cheapest = [...items].sort((a, b) => a.yearly - b.yearly)[0];
+  const cheapest = [...items].sort((a, b) => a.yearlyBase - b.yearlyBase)[0];
   return (
-    <div className="card">
+    <div className="card glass">
       <h2>{title}</h2>
-      <div className="big">{formatMoney(items.reduce((s, x) => s + x.yearly, 0))}<span className="small muted"> /año</span></div>
+      <div className="big">{formatMoney(items.reduce((s, x) => s + x.yearlyBase, 0))}<span className="small muted"> /año</span></div>
       {items.length === 0 && <Empty>No se han detectado cobros de este tipo (hacen falta al menos 2 cargos).</Empty>}
       <ul className="list">
         {items.map((s) => (
@@ -69,19 +69,19 @@ function RecurringCard({ title, items, hint }: { title: string; items: Subscript
               <div className="ellipsis">{s.name}</div>
               <div className="small muted">
                 {FREQ[s.frequency]} · próximo ~{s.nextDate}
-                {s.priceIncrease ? <span style={{ color: 'var(--warn)' }}> · ↑ subió {formatMoney(s.priceIncrease)}</span> : null}
+                {s.priceIncrease ? <span style={{ color: 'var(--warn)' }}> · ↑ subió {formatMoney(s.priceIncrease, s.currency)}</span> : null}
               </div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <Money cents={s.amount} />
-              <div className="small muted">{formatMoney(s.yearly)}/año</div>
+              <Money cents={s.amount} currency={s.currency} />
+              <div className="small muted">{formatMoney(s.yearly, s.currency)}/año</div>
             </div>
           </li>
         ))}
       </ul>
       {hint && cheapest && (
         <p className="small muted" style={{ marginBottom: 0 }}>
-          ¿Usas todas? Cancelar {cheapest.name} ({formatMoney(cheapest.amount)}) te ahorra {formatMoney(cheapest.yearly)} al año.
+          ¿Usas todas? Cancelar {cheapest.name} ({formatMoney(cheapest.amount, cheapest.currency)}) te ahorra {formatMoney(cheapest.yearly, cheapest.currency)} al año.
         </p>
       )}
     </div>

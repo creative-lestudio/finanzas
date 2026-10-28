@@ -3,13 +3,160 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#0f766e" />
-    <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-    <title>Finanzas</title>
+    <title>Finanzas — tu dinero, claro</title>
+    <meta name="description" content="App de finanzas personales gratuita y privada: gastos, presupuestos, metas medibles, multimoneda (bolívar, dólar, euro), registro por voz y asesor con IA. Instálala en Android, iPhone o tu ordenador." />
+    <meta name="theme-color" content="#000000" />
+    <meta property="og:title" content="Finanzas — tu dinero, claro" />
+    <meta property="og:description" content="Gastos, presupuestos, metas, divisas y asesor con IA. Privada y cifrada. Instálala desde el navegador." />
+    <meta property="og:image" content="./app/icons/icon-512.png" />
+    <link rel="icon" href="./app/icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./app/icons/apple-touch-icon.png" />
+    <style>
+      :root {
+        --accent: #0a84ff;
+        --bg: #f5f5f7;
+        --text: #1d1d1f;
+        --text-2: #6e6e73;
+        --card: rgb(255 255 255 / 0.66);
+        --border: rgb(255 255 255 / 0.8);
+        --shadow: 0 20px 60px rgb(0 0 0 / 0.08);
+        --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+        color-scheme: light;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) {
+          --bg: #000;
+          --text: #f5f5f7;
+          --text-2: #a1a1a6;
+          --card: rgb(40 40 44 / 0.55);
+          --border: rgb(255 255 255 / 0.1);
+          --shadow: 0 20px 60px rgb(0 0 0 / 0.5);
+          color-scheme: dark;
+        }
+      }
+      :root[data-theme='dark'] { --bg: #000; --text: #f5f5f7; --text-2: #a1a1a6; --card: rgb(40 40 44 / 0.55); --border: rgb(255 255 255 / 0.1); --shadow: 0 20px 60px rgb(0 0 0 / 0.5); color-scheme: dark; }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; }
+      body { background: var(--bg); color: var(--text); font: 17px/1.5 var(--font); -webkit-font-smoothing: antialiased; letter-spacing: -0.01em; overflow-x: hidden; }
+      a { color: inherit; }
+      .ambient { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+      .ambient i { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.55; }
+      .ambient i:nth-child(1) { width: 70vmax; height: 70vmax; left: -25vmax; top: -40vmax; background: #3aa0ff; }
+      .ambient i:nth-child(2) { width: 50vmax; height: 50vmax; right: -20vmax; top: 20vh; background: #7a5cff; opacity: 0.35; }
+      .glass { background: var(--card); -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%); border: 0.5px solid var(--border); box-shadow: var(--shadow), inset 0 1px 0 rgb(255 255 255 / 0.3); }
+      header { position: sticky; top: 0; z-index: 10; padding: 10px 16px; }
+      header .bar { max-width: 1040px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; border-radius: 999px; padding: 8px 8px 8px 16px; }
+      .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; text-decoration: none; }
+      .brand img { width: 30px; height: 30px; border-radius: 8px; }
+      .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 22px; border-radius: 999px; font-weight: 600; text-decoration: none; border: none; cursor: pointer; font-size: 16px; transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1); }
+      .btn:active { transform: scale(0.96); }
+      .btn.primary { background: var(--accent); color: #fff; box-shadow: 0 10px 28px rgb(10 132 255 / 0.35); }
+      .btn.ghost { background: rgb(120 120 128 / 0.16); color: var(--text); }
+      .btn.sm { padding: 8px 16px; font-size: 15px; }
+      main { max-width: 1040px; margin: 0 auto; padding: 0 16px 60px; }
+      .hero { text-align: center; padding: 56px 0 28px; }
+      .hero img.icon { width: 104px; height: 104px; border-radius: 24px; box-shadow: 0 20px 50px rgb(10 132 255 / 0.35); }
+      h1 { font-size: clamp(40px, 8vw, 72px); line-height: 1.03; letter-spacing: -0.045em; margin: 20px 0 14px; }
+      h1 span { background: linear-gradient(90deg, #0a84ff, #7a5cff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .lead { font-size: clamp(18px, 2.6vw, 22px); color: var(--text-2); max-width: 680px; margin: 0 auto 26px; }
+      .ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+      .note { color: var(--text-2); font-size: 14px; margin-top: 14px; }
+      .shots { display: flex; gap: 18px; justify-content: center; margin: 46px 0 20px; flex-wrap: wrap; }
+      .phone { width: 260px; aspect-ratio: 390 / 844; border-radius: 44px; padding: 10px; }
+      .phone img { width: 100%; height: 100%; object-fit: cover; object-position: top; border-radius: 34px; display: block; }
+      .phone:nth-child(2) { transform: translateY(-24px); }
+      h2 { font-size: clamp(30px, 5vw, 46px); letter-spacing: -0.035em; line-height: 1.08; text-align: center; margin: 70px 0 12px; }
+      .sub { text-align: center; color: var(--text-2); max-width: 640px; margin: 0 auto 30px; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+      .feature { border-radius: 26px; padding: 22px; }
+      .feature .e { font-size: 30px; }
+      .feature h3 { margin: 10px 0 6px; font-size: 19px; letter-spacing: -0.02em; }
+      .feature p { margin: 0; color: var(--text-2); font-size: 15px; }
+      .install { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+      .os { border-radius: 26px; padding: 22px; position: relative; }
+      .os.me { outline: 2px solid var(--accent); }
+      .os .tag { font-size: 12px; font-weight: 700; color: #fff; background: var(--accent); padding: 3px 10px; border-radius: 999px; display: none; margin-bottom: 10px; }
+      .os.me .tag { display: inline-block; }
+      .os h3 { margin: 0 0 10px; font-size: 19px; }
+      .os ol { margin: 0; padding-left: 20px; color: var(--text-2); font-size: 15px; }
+      .os li { margin-bottom: 6px; }
+      .os b { color: var(--text); }
+      .privacy { border-radius: 30px; padding: 30px; text-align: center; margin-top: 70px; }
+      .privacy p { color: var(--text-2); max-width: 640px; margin: 8px auto 0; }
+      footer { text-align: center; color: var(--text-2); font-size: 13px; padding: 30px 16px 50px; }
+      @media (max-width: 640px) {
+        .phone { width: 46%; max-width: 220px; border-radius: 30px; padding: 6px; }
+        .phone img { border-radius: 24px; }
+        .phone:nth-child(3) { display: none; }
+        .phone:nth-child(2) { transform: none; }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div class="ambient" aria-hidden="true"><i></i><i></i></div>
+    <header>
+      <div class="bar glass">
+        <a class="brand" href="./"><img src="./app/icons/icon-192.png" alt="" />Finanzas</a>
+        <a class="btn primary sm" href="./app/">Abrir la app</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <img class="icon" src="./app/icons/icon-512.png" alt="Icono de Finanzas" />
+        <h1>Tu dinero,<br /><span>por fin claro.</span></h1>
+        <p class="lead">Gastos, presupuestos, metas medibles, varias monedas y un asesor con IA. Dicta "gasté 50 euros en Mercadona" y listo. Privada y cifrada en tu dispositivo.</p>
+        <div class="ctas">
+          <a class="btn primary" href="./app/">Usar gratis ahora</a>
+          <a class="btn ghost" href="#instalar">Instalar en mi móvil</a>
+        </div>
+        <p class="note">Sin tiendas de apps: funciona en Android, iPhone, iPad, Windows, Mac y Linux.</p>
+        <div class="shots">
+          <div class="phone glass"><img src="./site/shot-home.jpg" alt="Pantalla de inicio de la app" loading="lazy" /></div>
+          <div class="phone glass"><img src="./site/shot-fx.jpg" alt="Calculadora de pérdida por cambio de divisa" loading="lazy" /></div>
+          <div class="phone glass"><img src="./site/shot-plan.jpg" alt="Metas medibles con proyección" loading="lazy" /></div>
+        </div>
+      </section>
+
+      <h2>Todo lo que necesitas.<br />Nada que no.</h2>
+      <p class="sub">Diseñada para que llevar tus cuentas sea rápido, bonito y útil de verdad.</p>
+      <div class="grid">
+        <div class="feature glass"><div class="e">🎙️</div><h3>Registro por voz</h3><p>Di lo que gastaste y la app lo apunta en la cuenta y categoría correctas. Si falta algo, te lo pregunta con un toque.</p></div>
+        <div class="feature glass"><div class="e">✨</div><h3>Asesor con IA</h3><p>Analiza tus datos, propone presupuestos según tus ingresos, crea metas realistas y te ayuda a decidir.</p></div>
+        <div class="feature glass"><div class="e">💱</div><h3>Multimoneda real</h3><p>Bolívares, dólares, euros, USDT… Registra tasas BCV y paralelo, cambios en Wise o Binance y descubre cuánto pierdes en cada paso.</p></div>
+        <div class="feature glass"><div class="e">🎯</div><h3>Metas medibles</h3><p>Ahorro, inversión con interés compuesto, compras o deudas: cifra, fecha, aporte mensual y si vas a tiempo.</p></div>
+        <div class="feature glass"><div class="e">📊</div><h3>Presupuestos que avisan</h3><p>Topes por categoría con alertas al instante, gasto diario disponible y sugerencias según tu historial.</p></div>
+        <div class="feature glass"><div class="e">🔁</div><h3>Suscripciones y fugas</h3><p>Detecta cobros recurrentes, subidas de precio, comisiones bancarias y gastos hormiga.</p></div>
+        <div class="feature glass"><div class="e">📑</div><h3>Excel de ida y vuelta</h3><p>Importa el extracto de tu banco (Excel o CSV) y exporta todo a un libro de Excel ordenado.</p></div>
+        <div class="feature glass"><div class="e">☁️</div><h3>En todos tus dispositivos</h3><p>Sincronización cifrada de extremo a extremo: ni nuestro servidor puede leer tus datos.</p></div>
+        <div class="feature glass"><div class="e">👥</div><h3>Gastos compartidos</h3><p>Divide cuentas con amigos, pareja o familia y salda deudas con el mínimo de pagos.</p></div>
+      </div>
+
+      <h2 id="instalar">Instálala en 10 segundos</h2>
+      <p class="sub">Es una app web progresiva: se instala desde el navegador, ocupa muy poco, funciona sin conexión y se actualiza sola.</p>
+      <div class="install">
+        <div class="os glass" data-os="ios"><span class="tag">Tu dispositivo</span><h3>📱 iPhone y iPad</h3><ol><li>Abre <b>la app</b> en <b>Safari</b>.</li><li>Pulsa <b>Compartir</b> (el cuadrado con flecha).</li><li>Elige <b>Añadir a pantalla de inicio</b>.</li></ol></div>
+        <div class="os glass" data-os="android"><span class="tag">Tu dispositivo</span><h3>🤖 Android</h3><ol><li>Abre <b>la app</b> en <b>Chrome</b>.</li><li>Pulsa <b>Instalar</b> en el aviso, o en el menú <b>⋮</b> → <b>Instalar aplicación</b>.</li></ol></div>
+        <div class="os glass" data-os="desktop"><span class="tag">Tu dispositivo</span><h3>💻 Windows, Linux y Chromebook</h3><ol><li>Abre <b>la app</b> en <b>Chrome</b> o <b>Edge</b>.</li><li>Pulsa el icono de <b>instalar</b> en la barra de direcciones.</li></ol></div>
+        <div class="os glass" data-os="mac"><span class="tag">Tu dispositivo</span><h3>🍎 Mac</h3><ol><li>Abre <b>la app</b> en <b>Safari</b>.</li><li>Menú <b>Archivo</b> → <b>Añadir al Dock</b> (o usa Chrome como arriba).</li></ol></div>
+      </div>
+      <div class="ctas" style="margin-top: 26px"><a class="btn primary" href="./app/">Abrir la app</a></div>
+
+      <section class="privacy glass">
+        <div style="font-size: 40px">🔒</div>
+        <h2 style="margin: 6px 0 0">Privada por diseño</h2>
+        <p>Tus datos se cifran en tu dispositivo con tu contraseña (AES-256). Puedes usarla 100 % sin conexión y sin vincular ningún banco. Si activas la sincronización, al servidor solo llega información cifrada que nadie más puede abrir.</p>
+      </section>
+    </main>
+    <footer>Finanzas · Hecha con cariño · Orientación general, no asesoramiento financiero regulado.</footer>
+    <script>
+      // Resalta las instrucciones del sistema del visitante.
+      (function () {
+        var ua = navigator.userAgent;
+        var os = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ? 'ios' : /android/i.test(ua) ? 'android' : /mac/i.test(ua) ? 'mac' : 'desktop';
+        var el = document.querySelector('[data-os="' + os + '"]');
+        if (el) el.classList.add('me');
+      })();
+    </script>
   </body>
 </html>
