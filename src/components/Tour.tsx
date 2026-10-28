@@ -73,7 +73,7 @@ const SLIDES: Slide[] = [
     ),
     viz: (
       <div className="tv-fx">
-        <div className="tv-eq"><b>56.500 Bs</b><Icon name="swap" size={20} /><b>1.250 $</b></div>
+        <div className="tv-eq"><b>1.100.000 Bs</b><Icon name="swap" size={20} /><b>1.250 $</b></div>
         <div className="tv-chips"><span>BCV</span><span>Paralelo</span><span>Euro</span><span className="on">Acordada</span></div>
       </div>
     ),
