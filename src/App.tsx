@@ -228,6 +228,22 @@ function Lock() {
     });
   }, [mode]);
 
+  useEffect(() => {
+    const sb = supabase();
+    if (!sb) return;
+    // Errores devueltos por Google/Supabase en la URL al volver del inicio de sesión.
+    const q = new URLSearchParams(location.search + '&' + location.hash.replace(/^#/, ''));
+    const oauthError = q.get('error_description') ?? q.get('error');
+    if (oauthError) setError(`No se pudo iniciar sesión: ${oauthError.replace(/\+/g, ' ')}`);
+    const { data } = sb.auth.onAuthStateChange((ev, session) => {
+      if (session && (ev === 'SIGNED_IN' || ev === 'INITIAL_SESSION')) {
+        setSignedIn(true);
+        setMode((m) => (m === 'welcome' ? 'pass' : m));
+      }
+    });
+    return () => data.subscription.unsubscribe();
+  }, []);
+
   const submit = async (demo = false) => {
     setError('');
     if (isNew) {
@@ -267,6 +283,7 @@ function Lock() {
             <div className="app-icon"><Icon name="wallet" size={38} /></div>
             <h1 className="center" style={{ margin: '4px 0 6px', fontSize: 30, letterSpacing: '-0.04em', fontFamily: 'var(--font-display)' }}>Finanzas</h1>
             <p className="small muted center" style={{ marginTop: 0 }}>Crea tu cuenta o inicia sesión para guardar tus datos y usarlos en todos tus dispositivos.</p>
+            {error && <p className="small" style={{ color: 'var(--bad)' }}>{error}</p>}
             <AuthForm onDone={() => { setSignedIn(true); setMode('pass'); }} />
             <button className="btn ghost block mt small" onClick={() => setMode('pass')}>Usar sin cuenta, solo en este dispositivo</button>
           </div>
