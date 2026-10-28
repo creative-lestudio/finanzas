@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { isNative, listenAuthLinks } from './native';
 import { decryptJSON, encryptJSON, type EncryptedBlob, type Session } from './crypto';
 import { emptyData, migrate } from './defaults';
 import { merge3 } from './merge';
@@ -46,7 +47,8 @@ export function supabase(): SupabaseClient | null {
   if (client) return client;
   const cfg = getSupabaseConfig();
   if (!cfg) return null;
-  client = createClient(cfg.url, cfg.anonKey, { auth: { persistSession: true, storageKey: 'finanzas.auth', flowType: 'pkce' } });
+  client = createClient(cfg.url, cfg.anonKey, { auth: { persistSession: true, storageKey: 'finanzas.auth', flowType: 'pkce', detectSessionInUrl: !isNative() } });
+  void listenAuthLinks(client);
   return client;
 }
 

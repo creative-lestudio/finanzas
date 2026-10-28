@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { googleSignInNative, isNative, WEB_APP_URL } from '../lib/native';
 import { supabase } from '../lib/sync';
 import { Icon } from './icons';
 
-const redirectUrl = () => `${location.origin}${location.pathname}`;
+// En la app instalada los enlaces de los correos abren la web (allí se confirma la cuenta).
+const redirectUrl = () => (isNative() ? WEB_APP_URL : `${location.origin}${location.pathname}`);
 
 /** Inicio de sesión / registro: Google o correo y contraseña, con recuperación de contraseña. */
 export function AuthForm({ onDone }: { onDone: () => void }) {
@@ -26,6 +28,11 @@ export function AuthForm({ onDone }: { onDone: () => void }) {
 
   const google = async () => {
     setBusy(true);
+    if (isNative()) {
+      const err = await googleSignInNative(sb);
+      setBusy(false);
+      return err ? say(friendly(err)) : undefined;
+    }
     const { error } = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: redirectUrl() } });
     if (error) {
       setBusy(false);

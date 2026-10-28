@@ -1,3 +1,4 @@
+import { isNative } from './native';
 import { categorize } from './categorize';
 import { callClaude, textOf } from './ai';
 import { normalize, today } from './money';
@@ -210,12 +211,39 @@ interface SpeechRecognitionLike {
 }
 
 export function speechSupported(): boolean {
+  if (isNative()) return true; // en la app instalada se usa el reconocimiento del sistema
   const w = window as unknown as Record<string, unknown>;
   return Boolean(w.SpeechRecognition || w.webkitSpeechRecognition);
 }
 
+/** Dictado con el reconocimiento de voz de Android (el WebView no trae el del navegador). */
+function listenNative(onText: (text: string, final: boolean) => void, onError: (msg: string) => void): () => void {
+  let plugin: typeof import('@capacitor-community/speech-recognition').SpeechRecognition | null = null;
+  let last = '';
+  let done = false;
+  const finish = () => {
+    if (done) return;
+    done = true;
+    void plugin?.removeAllListeners();
+    onText(last, true);
+  };
+  void (async () => {
+    plugin = (await import('@capacitor-community/speech-recognition')).SpeechRecognition;
+    const perm = await plugin.requestPermissions();
+    if (perm.speechRecognition !== 'granted') return onError('Permite el acceso al micrófono para dictar.');
+    await plugin.addListener('partialResults', (d) => {
+      last = d.matches?.[0] ?? last;
+      onText(last, false);
+    });
+    await plugin.addListener('listeningState', (st) => st.status === 'stopped' && finish());
+    await plugin.start({ language: 'es-ES', partialResults: true, popup: false });
+  })().catch(() => onError('No se pudo iniciar el dictado. Escribe la frase.'));
+  return () => void plugin?.stop().catch(() => finish());
+}
+
 /** Escucha una frase y devuelve el texto (parcial mientras habla, final al terminar). */
 export function listen(onText: (text: string, final: boolean) => void, onError: (msg: string) => void): () => void {
+  if (isNative()) return listenNative(onText, onError);
   const w = window as unknown as Record<string, new () => SpeechRecognitionLike>;
   const Ctor = w.SpeechRecognition ?? w.webkitSpeechRecognition;
   if (!Ctor) {

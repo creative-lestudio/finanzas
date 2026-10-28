@@ -4,3 +4,4 @@ dist
 .env
 *.tsbuildinfo
 dist-artifact
+dist-native

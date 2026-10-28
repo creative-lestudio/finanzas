@@ -228,6 +228,16 @@ export function App() {
   );
 }
 
+function LockHero({ title, sub }: { title: string; sub: string }) {
+  return (
+    <div className="lock-hero">
+      <div className="app-icon"><Icon name="wallet" size={34} /></div>
+      <h1>{title}</h1>
+      <p>{sub}</p>
+    </div>
+  );
+}
+
 function Lock() {
   const store = useStore();
   const isNew = store.status === 'new';
@@ -310,10 +320,9 @@ function Lock() {
     return (
       <div className="lock">
         <div style={{ width: '100%', maxWidth: 400 }}>
+          <LockHero title="Tu dinero, con claridad." sub="Gastos, presupuestos y metas en bolívares, dólares y euros. Privada y cifrada." />
           <RecoveryNotice><></></RecoveryNotice>
-          <div className="card lg">
-            <div className="app-icon"><Icon name="wallet" size={38} /></div>
-            <h1 className="center" style={{ margin: '4px 0 6px', fontSize: 30, letterSpacing: '-0.04em', fontFamily: 'var(--font-display)' }}>Finanzas</h1>
+          <div className="card lock-card">
             <p className="small muted center" style={{ marginTop: 0 }}>Crea tu cuenta o inicia sesión para guardar tus datos y usarlos en todos tus dispositivos.</p>
             {error && <p className="small" style={{ color: 'var(--bad)' }}>{error}</p>}
             <AuthForm onDone={() => { setSignedIn(true); void afterSignIn(); }} />
@@ -327,7 +336,8 @@ function Lock() {
   if (mode === 'restore') {
     return (
       <div className="lock">
-        <div className="card lg">
+        <div style={{ width: '100%', maxWidth: 400 }}>
+        <div className="card lock-card">
           <div className="app-icon"><Icon name="cloud" size={36} /></div>
           <h1 className="center" style={{ margin: '4px 0 6px', fontSize: 26, letterSpacing: '-0.035em', fontFamily: 'var(--font-display)' }}>Recuperar mis datos</h1>
           <p className="small muted center" style={{ marginTop: 0 }}>{found ? 'Hemos encontrado tus datos en la nube. Escribe tu contraseña de cifrado para abrirlos.' : 'Inicia sesión y escribe la contraseña de cifrado que usas en tu otro dispositivo.'}</p>
@@ -344,6 +354,7 @@ function Lock() {
           )}
           <button className="btn ghost block mt small" onClick={() => setMode('pass')}>Volver</button>
         </div>
+        </div>
       </div>
     );
   }
@@ -351,15 +362,10 @@ function Lock() {
   return (
     <div className="lock">
       <div style={{ width: '100%', maxWidth: 400 }}>
+      <LockHero title={isNew ? 'Tu dinero, con claridad.' : 'Hola de nuevo'} sub={isNew ? 'Gastos, presupuestos y metas en bolívares, dólares y euros. Privada y cifrada.' : 'Introduce tu contraseña para abrir tus datos.'} />
       <RecoveryNotice><></></RecoveryNotice>
-      <form className="card lg" onSubmit={(e) => { e.preventDefault(); void submit(); }}>
-        <div className="app-icon"><Icon name="wallet" size={38} /></div>
-        <h1 className="center" style={{ margin: '4px 0 6px', fontSize: 30, letterSpacing: '-0.04em', fontFamily: 'var(--font-display)' }}>Finanzas</h1>
-        <p className="small muted center" style={{ marginTop: 0 }}>
-          {isNew
-            ? 'Crea una contraseña de cifrado. Protege tus datos y no se puede recuperar: guárdala bien.'
-            : 'Introduce tu contraseña para descifrar tus datos.'}
-        </p>
+      <form className="card lock-card" onSubmit={(e) => { e.preventDefault(); void submit(); }}>
+        {isNew && <p className="small muted center" style={{ marginTop: 0 }}>Crea una contraseña de cifrado. Protege tus datos y no se puede recuperar: guárdala bien.</p>}
         <div className="field">
           <input type="password" autoFocus autoComplete={isNew ? 'new-password' : 'current-password'} placeholder="Contraseña" value={pass} onChange={(e) => setPass(e.target.value)} aria-label="Contraseña" />
         </div>
