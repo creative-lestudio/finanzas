@@ -1,3 +1,4 @@
+import { categoryColor } from '../lib/families';
 import { useMemo, useState } from 'react';
 import { budgetAlertFor } from '../lib/budgets';
 import { categorize, detectChannel } from '../lib/categorize';
@@ -101,7 +102,7 @@ export function QuickAdd({ onClose, onVoice }: { onClose: () => void; onVoice: (
       </div>
       <div className="catgrid mb">
         {ordered.slice(0, 12).map((c) => (
-          <button key={c.id} className={chosen === c.id ? 'on' : ''} onClick={() => setCategoryId(c.id)}>
+          <button key={c.id} style={{ ['--c' as string]: categoryColor(c.id) }} className={chosen === c.id ? 'on' : ''} onClick={() => setCategoryId(c.id)}>
             <CatIcon id={c.id} emoji={c.icon} size={22} />
             <span className="ellipsis" style={{ maxWidth: '100%' }}>{c.name}</span>
           </button>

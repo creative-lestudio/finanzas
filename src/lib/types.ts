@@ -169,6 +169,8 @@ export interface Settings {
   /** Fuente de tasa preferida por moneda (p. ej. { VES: 'Paralelo' }). */
   rateSource?: Record<string, string>;
   theme?: { accent: string; mode: 'auto' | 'light' | 'dark' };
+  /** Ya completó (u omitió) la guía de primer uso. */
+  onboarded?: boolean;
   monthlyIncomeHint?: number;
   bank?: {
     provider: 'none' | 'enablebanking' | 'gocardless' | 'mock';

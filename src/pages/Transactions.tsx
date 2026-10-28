@@ -1,5 +1,6 @@
+import { categoryColor } from '../lib/families';
 import { useMemo, useState } from 'react';
-import { CatIcon, Icon } from '../components/icons';
+import { CatBadge, CatIcon, Icon } from '../components/icons';
 import { Empty, Money, Sheet, toast } from '../components/ui';
 import { aiAvailability } from '../lib/ai';
 import { categorizeWithAI, learnFromCorrection } from '../lib/categorize';
@@ -75,7 +76,7 @@ export function Transactions() {
       </div>
       <div className="grid2 mb">
         <div className="card glass"><h2>Ingresos</h2><div className="mid pos">{formatMoney(sum.income)}</div></div>
-        <div className="card glass"><h2>Gastos</h2><div className="mid">{formatMoney(sum.expenses)}</div></div>
+        <div className="card glass"><h2>Gastos</h2><div className="mid neg">{formatMoney(sum.expenses)}</div></div>
       </div>
       <div className="field">
         <input type="search" placeholder="Buscar" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Buscar movimientos" />
@@ -111,7 +112,7 @@ export function Transactions() {
             <ul className="list">
               {txs.map((t) => (
                 <li key={t.id} className="tap" onClick={() => setEditing(t)}>
-                  <span className="icon"><CatIcon id={t.categoryId} emoji={catOf(t.categoryId)?.icon} /></span>
+                  <CatBadge id={t.categoryId} emoji={catOf(t.categoryId)?.icon} />
                   <div className="grow">
                     <div className="ellipsis">{prettyDescription(t.description)}</div>
                     <div className="small muted ellipsis">
@@ -144,7 +145,7 @@ export function Transactions() {
               <p className="small muted" style={{ marginTop: 0 }}>Cambia la categoría: la app lo recordará para este comercio.</p>
               <div className="catgrid mb">
                 {data.categories.map((c) => (
-                  <button key={c.id} className={editing.categoryId === c.id ? 'on' : ''} onClick={() => { update((d) => learnFromCorrection(d, editing, c.id)); setEditing(null); }}>
+                  <button key={c.id} style={{ ['--c' as string]: categoryColor(c.id) }} className={editing.categoryId === c.id ? 'on' : ''} onClick={() => { update((d) => learnFromCorrection(d, editing, c.id)); setEditing(null); }}>
                     <CatIcon id={c.id} emoji={c.icon} size={22} />
                     <span className="ellipsis" style={{ maxWidth: '100%' }}>{c.name}</span>
                   </button>

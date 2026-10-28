@@ -4,6 +4,13 @@ export const uid = (): string =>
 const fmtCache = new Map<string, Intl.NumberFormat>();
 
 let defaultCurrency = 'EUR';
+let masked = false;
+
+/** Modo privado ("ojito"): todos los importes se muestran como ••••. */
+export function setMasked(on: boolean) {
+  masked = on;
+}
+export const isMasked = () => masked;
 
 /** Moneda que usa formatMoney cuando no se indica otra (la principal del usuario). */
 export function setDefaultCurrency(code: string) {
@@ -23,7 +30,9 @@ export function formatMoney(cents: number, currency = defaultCurrency): string {
     }
     fmtCache.set(currency, f);
   }
-  return f.format(cents / 100);
+  const text = f.format(cents / 100);
+  // Se ocultan las cifras pero se mantiene el símbolo, para saber de qué moneda se habla.
+  return masked ? text.replace(/\d(?:[\d.,\s\u00a0\u202f]*\d)?/g, '••••') : text;
 }
 
 /** Formatea una tasa con decimales razonables (40,5 / 0,9213). */
@@ -36,6 +45,8 @@ export function formatRate(rate: number): string {
 export function parseAmount(input: string): number | null {
   let s = input.trim().replace(/[€\s]/g, '');
   if (!s) return null;
+  // "1.500" en un importe es mil quinientos: un importe nunca lleva tres decimales.
+  if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
   const lastComma = s.lastIndexOf(',');
   const lastDot = s.lastIndexOf('.');
   if (lastComma > lastDot) {

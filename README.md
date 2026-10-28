@@ -28,7 +28,11 @@ Al abrir la app por primera vez puedes **probar con datos de ejemplo** (4 meses 
 | **Asesor con IA** | Analiza tus datos, propone presupuestos y metas que aplicas con un toque, y te ayuda a decidir | `lib/ai.ts`, `pages/Assistant.tsx` |
 | Ahorro automático, compartidos, salud, patrimonio | Como en la versión anterior, ahora en moneda principal | `lib/savings.ts`, `lib/shared.ts`, `lib/health.ts` |
 | **Sincronización** | Entre dispositivos con Supabase, **cifrada de extremo a extremo**, con fusión de cambios a tres bandas | `lib/sync.ts`, `lib/merge.ts`, `store.tsx` |
+| Privacidad visual | "Ojito" para ocultar todos los importes al usar la app en público | `lib/money.ts`, `App.tsx` |
+| Asistente | Personaje propio con poses según el momento; consejo del día calculado en el dispositivo | `components/Coach.tsx`, `lib/coach.ts` |
 | Diseño | Minimalista, color de marca #032a67, superficies limpias y Liquid Glass en la navegación flotante; iconos de línea propios; tema claro/oscuro/automático | `styles.css`, `lib/theme.ts`, `components/icons.tsx` |
+
+Estrategia de producto, análisis de la competencia y lo que falta para el MVP: [`docs/ESTRATEGIA.md`](docs/ESTRATEGIA.md).
 
 ## Puesta en marcha del servidor (Supabase)
 

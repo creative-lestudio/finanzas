@@ -1,3 +1,5 @@
+import { categoryColor } from '../lib/families';
+
 // Iconos de trazo fino al estilo SF Symbols (dibujados a mano, sin dependencias).
 
 const PATHS: Record<string, string> = {
@@ -32,6 +34,9 @@ const PATHS: Record<string, string> = {
   arrowUp: 'M12 19V5M6 11l6-6 6 6',
   arrowDown: 'M12 5v14M6 13l6 6 6-6',
   trend: 'M3 17l6-6 4 4 8-8M15 7h6v6',
+  eye: 'M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12ZM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z',
+  eyeOff: 'M3 3l18 18M10.6 5.1A10.4 10.4 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.1M6.6 6.6C3.7 8.4 2 12 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2',
+  pie: 'M21 12A9 9 0 1 1 12 3v9zM15 3.5A9 9 0 0 1 20.5 9H15z',
   // Categorías
   cart: 'M3 4h2l2.2 10.5a1.5 1.5 0 0 0 1.5 1.2h8.6a1.5 1.5 0 0 0 1.5-1.1L21 8H6.2M9.5 20h.01M17.5 20h.01',
   fork: 'M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M17 21V3c-2 0-3 2-3 5v5h3',
@@ -82,6 +87,15 @@ const CATEGORY_ICON: Record<string, string> = {
   bizum_out: 'phoneOut', bizum_in: 'phoneIn', other: 'box', salary: 'briefcase', other_income: 'coins',
   transfer: 'swap', exchange: 'swap', freelance: 'laptop', remittance: 'plane',
 };
+
+/** Icono de categoría dentro de su pastilla de color (el color identifica el grupo). */
+export function CatBadge({ id, emoji, size = 20 }: { id: string; emoji?: string; size?: number }) {
+  return (
+    <span className="icon cat" style={{ ['--c' as string]: categoryColor(id) }}>
+      <CatIcon id={id} emoji={emoji} size={size} />
+    </span>
+  );
+}
 
 /** Icono de una categoría: trazo propio para las de serie, el emoji para las personalizadas. */
 export function CatIcon({ id, emoji, size = 20 }: { id: string; emoji?: string; size?: number }) {

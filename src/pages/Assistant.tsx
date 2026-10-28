@@ -1,6 +1,7 @@
 import type Anthropic from '@anthropic-ai/sdk';
 import { useEffect, useRef, useState } from 'react';
-import { CatIcon, Icon } from '../components/icons';
+import { CoachAvatar, COACH } from '../components/Coach';
+import { CatBadge, Icon } from '../components/icons';
 import { Markdown, toast } from '../components/ui';
 import { advisorTurn, aiAvailability, type Proposal } from '../lib/ai';
 import { formatMoney, today, uid } from '../lib/money';
@@ -13,17 +14,22 @@ interface ChatItem {
   applied?: boolean[];
 }
 
-const SUGGESTIONS = [
-  'Analiza mis finanzas y dime qué mejorar',
-  'Propón presupuestos según mis ingresos',
-  '¿Cuánto pierdo al cambiar bolívares a dólares?',
-  'Ayúdame a crear una meta de ahorro realista',
-  '¿Me puedo permitir un gasto de 600 €?',
-  '¿Qué deuda o suscripción debería eliminar primero?',
+const SUGGESTIONS: [string, string, string][] = [
+  ['list', 'Revisar mis gastos', 'Revisa mis gastos de este mes y dime en qué puedo recortar.'],
+  ['piggy', 'Planificar un ahorro', 'Ayúdame a crear una meta de ahorro realista con mis ingresos.'],
+  ['trend', 'Analizar mis inversiones', 'Analiza mis inversiones y dime si voy bien para mis metas.'],
+  ['chart', 'Proponer presupuestos', 'Propón presupuestos por categoría según mis ingresos y gastos.'],
+  ['swap', 'Mis cambios de divisa', '¿Cuánto estoy perdiendo al cambiar bolívares y dólares? ¿Cómo lo reduzco?'],
+  ['info', 'Resolver una duda', '¿Me puedo permitir un gasto de 600 € este mes?'],
 ];
 
 // La conversación vive solo en memoria: no se guarda en ningún sitio.
-let memory: { items: ChatItem[]; history: Anthropic.Beta.BetaMessageParam[] } = { items: [], history: [] };
+let memory: { items: ChatItem[]; history: Anthropic.Beta.BetaMessageParam[]; pending?: string } = { items: [], history: [] };
+
+/** Abre el asesor con una pregunta ya hecha (por ejemplo, desde el consejo de Inicio). */
+export function askAdvisor(question: string) {
+  memory.pending = question;
+}
 
 /** Asesor financiero con IA: analiza tus datos, propone presupuestos y metas, y te ayuda a decidir. */
 export function Assistant() {
@@ -36,7 +42,15 @@ export function Assistant() {
   const avail = aiAvailability(data);
 
   useEffect(() => {
-    memory = { items, history };
+    if (memory.pending && avail.ok) {
+      const q = memory.pending;
+      memory.pending = undefined;
+      void send(q);
+    }
+  }, []);
+
+  useEffect(() => {
+    memory = { ...memory, items, history };
     end.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [items, history]);
 
@@ -104,41 +118,51 @@ export function Assistant() {
 
   if (!avail.ok) {
     return (
-      <div className="card glass center">
-        <div className="app-icon" style={{ width: 64, height: 64 }}><Icon name="sparkles" size={30} /></div>
-        <h2 style={{ textTransform: 'none', fontSize: 20, color: 'var(--text)', letterSpacing: '-0.02em' }}>Tu asesor financiero con IA</h2>
-        <p className="small secondary">Analiza tus gastos, propone presupuestos y metas medibles y te ayuda a decidir con tus propios números.</p>
-        <p className="small" style={{ color: 'var(--warn)' }}>{avail.reason}</p>
-        <p className="tiny muted">Actívalo en Ajustes → Inteligencia artificial. Se envía un resumen de tus finanzas a Claude (Anthropic); nunca contraseñas ni IBAN.</p>
-      </div>
+      <>
+        <div className="coach-hero">
+          <img src={COACH.curioso} alt="Tu asistente financiero" />
+          <div className="bubble"><b>¡Hola!</b>Soy tu asistente financiero. Para hablar conmigo necesito que actives la IA.</div>
+        </div>
+        <div className="card glass mt">
+          <p className="small" style={{ marginTop: 0, color: 'var(--warn)' }}>{avail.reason}</p>
+          <p className="small secondary">Analizo tus gastos, propongo presupuestos y metas medibles y te ayudo a decidir con tus propios números.</p>
+          <p className="tiny muted" style={{ marginBottom: 0 }}>Actívalo en Ajustes → Inteligencia artificial. Se envía un resumen de tus finanzas a Claude (Anthropic); nunca contraseñas ni IBAN.</p>
+        </div>
+      </>
     );
   }
 
   return (
     <>
       {items.length === 0 && (
-        <div className="card glass">
-          <div className="row mb">
-            <span className="icon accent"><Icon name="sparkles" size={20} /></span>
-            <div className="grow">
-              <b>Hola, soy tu asesor.</b>
-              <div className="small muted">Conozco tus cuentas, gastos, metas y cambios de divisa. Pregúntame lo que quieras.</div>
-            </div>
+        <>
+          <div className="coach-hero">
+            <img src={COACH.hola} alt="Tu asistente financiero saludando" />
+            <div className="bubble"><b>¡Hola!</b>Soy tu asistente financiero. ¿En qué puedo ayudarte hoy?</div>
           </div>
-          <div className="stack">
-            {SUGGESTIONS.map((s) => (
-              <button key={s} className="btn block tinted" style={{ justifyContent: 'flex-start', fontWeight: 500 }} onClick={() => void send(s)}>{s}</button>
+          <div className="suggest">
+            {SUGGESTIONS.map(([icon, label, q]) => (
+              <button key={label} onClick={() => void send(q)}>
+                <span className="si"><Icon name={icon} size={17} /></span>
+                {label}
+                <Icon name="chevron" size={15} className="chev" />
+              </button>
             ))}
           </div>
-        </div>
+        </>
       )}
 
       <div className="chat">
         {items.map((it, i) => (
           <div key={i} style={{ display: 'contents' }}>
-            <div className={`msg ${it.role} ${it.role === 'bot' ? 'glass' : ''}`}>
-              {it.role === 'bot' ? <Markdown text={it.text} /> : it.text}
-            </div>
+            {it.role === 'bot' ? (
+              <div className="coach-row">
+                <CoachAvatar pose={it.proposals?.length ? 'explica' : 'seguro'} />
+                <div className="msg bot glass"><Markdown text={it.text} /></div>
+              </div>
+            ) : (
+              <div className="msg user">{it.text}</div>
+            )}
             {it.proposals?.map((p, j) => (
               <div key={j} className="card glass" style={{ alignSelf: 'stretch', marginBottom: 0 }}>
                 {p.type === 'budgets' ? (
@@ -148,7 +172,7 @@ export function Assistant() {
                       {p.budgets.map((b) => (
                         <li key={b.categoryId} style={{ alignItems: 'flex-start' }}>
                           <div className="grow">
-                            <div className="row"><span className="icon" style={{ width: 28, height: 28, borderRadius: 8 }}><CatIcon id={b.categoryId} emoji={cat(b.categoryId)?.icon} size={16} /></span>{cat(b.categoryId)?.name ?? b.categoryId}</div>
+                            <div className="row"><CatBadge id={b.categoryId} emoji={cat(b.categoryId)?.icon} size={16} />{cat(b.categoryId)?.name ?? b.categoryId}</div>
                             <div className="tiny muted">{b.reason}</div>
                           </div>
                           <b className="num">{formatMoney(Math.round(b.limit * 100))}</b>
@@ -169,23 +193,32 @@ export function Assistant() {
                     <p className="tiny muted">{p.goal.reason}</p>
                   </>
                 )}
-                <button className="btn primary block mt" disabled={it.applied?.[j]} onClick={() => apply(i, j)}>
-                  {it.applied?.[j] ? <><Icon name="check" size={18} /> Aplicado</> : 'Aplicar'}
-                </button>
+                {it.applied?.[j] ? (
+                  <div className="row mt" style={{ gap: 12 }}>
+                    <CoachAvatar pose="motiva" size={44} />
+                    <div className="small"><b className="pos">¡Hecho!</b> Ya está aplicado. Te aviso de cómo vas.</div>
+                  </div>
+                ) : (
+                  <button className="btn primary block mt" onClick={() => apply(i, j)}>Aplicar</button>
+                )}
               </div>
             ))}
           </div>
         ))}
         {busy && (
-          <div className="msg bot glass">
-            <span className="typing"><i /><i /><i /></span>
+          <div className="coach-row">
+            <CoachAvatar pose="pensando" />
+            <div className="msg bot glass">
+              <div className="small muted" style={{ marginBottom: 2 }}>Analizando tus finanzas…</div>
+              <span className="typing"><i /><i /><i /></span>
+            </div>
           </div>
         )}
         <div ref={end} />
       </div>
 
-      <form className="composer glass" onSubmit={(e) => { e.preventDefault(); void send(input); }}>
-        <textarea rows={1} placeholder="Pregunta a tu asesor…" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void send(input); } }} aria-label="Mensaje" />
+      <form className="composer lg" onSubmit={(e) => { e.preventDefault(); void send(input); }}>
+        <textarea rows={1} placeholder="Pregúntame lo que quieras…" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void send(input); } }} aria-label="Mensaje" />
         <button className="icon-btn" disabled={busy || !input.trim()} aria-label="Enviar"><Icon name="send" size={20} stroke={2.4} /></button>
       </form>
       {items.length > 0 && (

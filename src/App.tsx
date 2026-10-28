@@ -6,7 +6,7 @@ import { Toaster } from './components/ui';
 import { VoiceSheet } from './components/Voice';
 import { demoData } from './lib/demo';
 import { emptyData } from './lib/defaults';
-import { today } from './lib/money';
+import { setMasked, today } from './lib/money';
 import { supabase } from './lib/sync';
 import { applySavedTheme } from './lib/theme';
 import { IS_PREVIEW } from './lib/preview';
@@ -67,6 +67,25 @@ export function App() {
     return h in TITLES ? h : 'home';
   });
   const [sheet, setSheet] = useState<'add' | 'voice' | null>(null);
+  // "Ojito": oculta los importes en toda la app (se recuerda en este dispositivo).
+  const [hidden, setHidden] = useState(() => {
+    try {
+      return localStorage.getItem('finanzas.hide') === '1';
+    } catch {
+      return false;
+    }
+  });
+  setMasked(hidden);
+  const toggleHidden = () => {
+    setHidden((h) => {
+      try {
+        localStorage.setItem('finanzas.hide', h ? '0' : '1');
+      } catch {
+        /* sin almacenamiento */
+      }
+      return !h;
+    });
+  };
   const callbackDone = useRef(false);
 
   useEffect(() => {
@@ -121,6 +140,9 @@ export function App() {
             <span />
           )}
           <div className="nav-actions">
+            <button className="icon-btn lg" onClick={toggleHidden} aria-label={hidden ? 'Mostrar importes' : 'Ocultar importes'} aria-pressed={hidden} title={hidden ? 'Mostrar importes' : 'Ocultar importes'}>
+              <Icon name={hidden ? 'eyeOff' : 'eye'} size={19} />
+            </button>
             {store.sync.status !== 'off' && (
               <button className="icon-btn lg" onClick={() => void store.syncNow()} aria-label="Sincronizar" title={store.sync.error ?? (store.sync.lastSync ? `Sincronizado ${new Date(store.sync.lastSync).toLocaleTimeString('es-ES')}` : 'Sincronizar')}>
                 <Icon name="cloud" size={19} className={store.sync.status === 'syncing' ? 'spin' : ''} />
@@ -136,7 +158,7 @@ export function App() {
         {page === 'home' && <InstallBanner />}
 
         <main>
-          {page === 'home' && <Home go={setPage} openVoice={() => setSheet('voice')} openAdd={() => setSheet('add')} />}
+          {page === 'home' && <Home go={setPage} openVoice={() => setSheet('voice')} openAdd={() => setSheet('add')} hidden={hidden} />}
           {page === 'transactions' && <Transactions />}
           {page === 'plan' && <Plan />}
           {page === 'assistant' && <Assistant />}

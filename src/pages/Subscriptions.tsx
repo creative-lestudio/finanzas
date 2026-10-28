@@ -1,4 +1,4 @@
-import { CatIcon, Icon } from '../components/icons';
+import { CatBadge, Icon } from '../components/icons';
 import { detectFees, detectSubscriptions, FEE_TIPS, isActive, type Subscription } from '../lib/insights';
 import { formatMoney, today } from '../lib/money';
 import { useStore } from '../store';
@@ -65,7 +65,7 @@ function RecurringCard({ title, items, hint }: { title: string; items: Subscript
       <ul className="list">
         {items.map((s) => (
           <li key={s.key}>
-            <span className="icon"><CatIcon id={s.categoryId} emoji={data.categories.find((c) => c.id === s.categoryId)?.icon} /></span>
+            <CatBadge id={s.categoryId} emoji={data.categories.find((c) => c.id === s.categoryId)?.icon} />
             <div className="grow">
               <div className="ellipsis">{s.name}</div>
               <div className="small muted">

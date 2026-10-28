@@ -7,7 +7,8 @@ import { emptyData, migrate } from './defaults';
 import { healthReport, netWorth } from './health';
 import { mergeMovements, parseBankCSV } from './importer';
 import { detectAntExpenses, detectFees, detectSubscriptions } from './insights';
-import { merchantKey, parseAmount } from './money';
+import { formatMoney, merchantKey, parseAmount, setMasked } from './money';
+import { spendByFamily } from './families';
 import { distribute, roundUpAmount, savingProposals } from './savings';
 import { balances, settleUp, splitByWeights, splitEqual } from './shared';
 import { addRate, displayPair, referenceTypesFor, analyzeExchange, analyzeIncomeFx, deleteExchange, fxSummary, rateFor, recordExchange, simulateChain } from './fx';
@@ -24,6 +25,8 @@ describe('importes', () => {
     expect(parseAmount('-12,5 €')).toBe(-1250);
     expect(parseAmount('1,234.56')).toBe(123456);
     expect(parseAmount('abc')).toBeNull();
+    expect(parseAmount('1.500')).toBe(150000);
+    expect(parseAmount('12.5')).toBe(1250);
   });
   it('normaliza comercios', () => {
     expect(merchantKey('COMPRA MERCADONA 2342 MADRID 12/03')).toBe('mercadona madrid');
@@ -337,5 +340,20 @@ describe('tipos de tasa', () => {
     const m = migrate(d);
     expect(m.rates[0].source).toBe('Personalizada');
     expect(m.settings.rateSource).toEqual({ EUR: 'Euro' });
+  });
+});
+
+describe('ojito', () => {
+  it('oculta las cifras y mantiene la moneda', () => {
+    setMasked(true);
+    expect(formatMoney(123456, 'EUR')).not.toMatch(/\d/);
+    expect(formatMoney(123456, 'EUR')).toContain('€');
+    expect(formatMoney(-500, 'USDT')).toContain('USDT');
+    setMasked(false);
+    expect(formatMoney(123456, 'EUR')).toMatch(/1\.?234,56/);
+  });
+  it('agrupa el gasto por familias en orden fijo', () => {
+    const r = spendByFamily({ shopping: 100, groceries: 50, salary: 999, fees: 20 });
+    expect(r.map((x) => x.family.id)).toEqual(['comida', 'compras', 'otros']);
   });
 });

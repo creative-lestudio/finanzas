@@ -3,9 +3,14 @@ import { formatMoney } from '../lib/money';
 import type { BudgetState } from '../lib/budgets';
 import { Icon } from './icons';
 
-export function Money({ cents, currency, sign = false, className = '' }: { cents: number; currency?: string; sign?: boolean; className?: string }) {
+/**
+ * Importe. Con `sign`, verde si es positivo (ingreso) y rojo si es negativo
+ * (gasto); con `tone="expense"`/"income" se colorea aunque no lleve signo.
+ */
+export function Money({ cents, currency, sign = false, tone, className = '' }: { cents: number; currency?: string; sign?: boolean; tone?: 'income' | 'expense'; className?: string }) {
+  const color = tone === 'income' || (sign && cents > 0) ? 'pos' : tone === 'expense' || (sign && cents < 0) ? 'neg' : '';
   return (
-    <span className={`num ${sign && cents > 0 ? 'pos' : ''} ${className}`}>
+    <span className={`num ${color} ${className}`}>
       {sign && cents > 0 ? '+' : ''}
       {formatMoney(cents, currency)}
     </span>

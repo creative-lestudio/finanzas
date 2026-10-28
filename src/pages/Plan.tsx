@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CatIcon, GOAL_ICONS, GoalIcon, Icon } from '../components/icons';
+import { CatBadge, GOAL_ICONS, GoalIcon, Icon } from '../components/icons';
 import { Empty, Field, Meter, Money, Segmented, Sheet, StateBadge, Switch } from '../components/ui';
 import { budgetStatus, suggestBudgets } from '../lib/budgets';
 import { CURRENCIES } from '../lib/fx';
@@ -42,7 +42,7 @@ export function Plan() {
           {statuses.map((s) => (
             <div className="card glass" key={s.budget.id} onClick={() => setEditBudget(s.budget)} style={{ cursor: 'pointer' }}>
               <div className="row between mb">
-                <b className="row"><span className="icon"><CatIcon id={s.budget.categoryId} emoji={cat(s.budget.categoryId)?.icon} /></span>{cat(s.budget.categoryId)?.name}</b>
+                <b className="row"><CatBadge id={s.budget.categoryId} emoji={cat(s.budget.categoryId)?.icon} />{cat(s.budget.categoryId)?.name}</b>
                 <StateBadge state={s.state} />
               </div>
               <Meter ratio={s.ratio} state={s.state} label={`Gastado ${Math.round(s.ratio * 100)} %`} />
@@ -59,7 +59,7 @@ export function Plan() {
               <ul className="list">
                 {suggestions.slice(0, 5).map((s) => (
                   <li key={s.categoryId}>
-                    <span className="icon"><CatIcon id={s.categoryId} emoji={cat(s.categoryId)?.icon} /></span><span className="grow">{cat(s.categoryId)?.name}</span>
+                    <CatBadge id={s.categoryId} emoji={cat(s.categoryId)?.icon} /><span className="grow">{cat(s.categoryId)?.name}</span>
                     <Money cents={s.limit} />
                     <button className="btn sm tinted" onClick={() => update((d) => ({ ...d, budgets: [...d.budgets, { id: uid(), categoryId: s.categoryId, limit: s.limit, warnAt: 0.8, rollover: false }] }))}>Añadir</button>
                   </li>

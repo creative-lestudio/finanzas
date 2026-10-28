@@ -1,3 +1,4 @@
+import { categoryColor } from '../lib/families';
 import { useEffect, useRef, useState } from 'react';
 import { aiAvailability } from '../lib/ai';
 import { detectChannel } from '../lib/categorize';
@@ -141,7 +142,7 @@ export function VoiceSheet({ onClose }: { onClose: () => void }) {
           <div className="small muted mb">Categoría {draft.missing.includes('category') && <b style={{ color: 'var(--warn)' }}>· elige una</b>}</div>
           <div className="chips mb">
             {topCats.map((c) => (
-              <button key={c.id} className={`chip ${draft.categoryId === c.id ? 'on' : ''}`} onClick={() => set({ categoryId: c.id })}><CatIcon id={c.id} emoji={c.icon} size={16} />{c.name}</button>
+              <button key={c.id} style={{ ['--c' as string]: categoryColor(c.id) }} className={`chip cat-chip ${draft.categoryId === c.id ? 'on' : ''}`} onClick={() => set({ categoryId: c.id })}><CatIcon id={c.id} emoji={c.icon} size={16} />{c.name}</button>
             ))}
           </div>
 

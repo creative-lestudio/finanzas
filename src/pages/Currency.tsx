@@ -25,11 +25,15 @@ import { useStore } from '../store';
 
 type Tab = 'summary' | 'rates' | 'calc';
 
-/** Lee una tasa: "236,5", "1.234,56" o "1.085" (con un solo punto, el punto es decimal). */
-const num = (s: string) => {
+/**
+ * Lee una tasa: "236,5", "1.234,56" o "1.085" (con un solo punto, el punto es
+ * decimal). En tasas en bolívares (`bs`), "1.100" se lee como mil cien.
+ */
+const num = (s: string, bs = false) => {
   const t = s.replace(/\s/g, '');
   if (t.includes(',')) return Number(t.replace(/\./g, '').replace(',', '.'));
-  return Number((t.match(/\./g) ?? []).length > 1 ? t.replace(/\./g, '') : t);
+  if ((t.match(/\./g) ?? []).length > 1 || (bs && /^\d{1,3}(\.\d{3})+$/.test(t))) return Number(t.replace(/\./g, ''));
+  return Number(t);
 };
 
 /** Última tasa guardada de un tipo, expresada como "1 base = x quote". */
@@ -207,13 +211,13 @@ function ExchangeForm({ onClose }: { onClose: () => void }) {
   const activeRef = refTypes.includes(refType) ? refType : refTypes[0];
   const stored = activeRef === 'Personalizada' ? rateFor(data, strong, weak, date, 'Personalizada') : lastRate(data, activeRef);
   const [refValue, setRefValue] = useState('');
-  const refShown = refValue ? num(refValue) : stored;
+  const refShown = refValue ? num(refValue, weak === 'VES') : stored;
 
   // Tasa escrita como "1 fuerte = r débil" → tasa interna origen→destino.
   const toInternal = (r: number) => (from === strong ? r : 1 / r);
   const sentC = parseAmount(sent) ?? 0;
   const feeC = Math.abs(parseAmount(fee) ?? 0);
-  const r = num(rate);
+  const r = num(rate, weak === 'VES');
   const autoReceived = sentC && r > 0 ? Math.round((Math.abs(sentC) - feeC) * toInternal(r)) : 0;
   const gotC = receivedTouched ? Math.abs(parseAmount(received) ?? 0) : autoReceived;
   const refInternal = refShown && refShown > 0 ? toInternal(refShown) : undefined;
@@ -321,9 +325,10 @@ function Rates() {
   }, [data.rates]);
 
   const prev = (t: RateType) => (t === 'Personalizada' ? rateFor(data, cBase, cQuote, date, 'Personalizada') : lastRate(data, t));
-  const filled = RATE_SOURCES.filter((t) => num(vals[t]) > 0);
-  const bcv = num(vals.BCV) || lastRate(data, 'BCV') || 0;
-  const par = num(vals.Paralelo) || lastRate(data, 'Paralelo') || 0;
+  const isBs = (t: RateType) => t !== 'Personalizada' || cQuote === 'VES';
+  const filled = RATE_SOURCES.filter((t) => num(vals[t], isBs(t)) > 0);
+  const bcv = num(vals.BCV, true) || lastRate(data, 'BCV') || 0;
+  const par = num(vals.Paralelo, true) || lastRate(data, 'Paralelo') || 0;
   const mini = { padding: '4px 22px 4px 8px', fontSize: 12, width: 'auto', backgroundPosition: 'calc(100% - 11px) 55%, calc(100% - 7px) 55%' };
 
   const save = () => {
@@ -331,7 +336,7 @@ function Rates() {
       let next = d;
       for (const t of filled) {
         const meta = RATE_TYPES[t];
-        next = addRate(next, { date, base: meta.base ?? cBase, quote: meta.quote ?? cQuote, rate: num(vals[t]), source: t });
+        next = addRate(next, { date, base: meta.base ?? cBase, quote: meta.quote ?? cQuote, rate: num(vals[t], isBs(t)), source: t });
       }
       return next;
     });
@@ -372,7 +377,7 @@ function Rates() {
         {bcv > 0 && par > 0 && (
           <p className="small secondary" style={{ margin: '10px 0 14px' }}>Brecha BCV–paralelo: <b>{(((par - bcv) / bcv) * 100).toFixed(1)} %</b></p>
         )}
-        <button className="btn primary block" disabled={!filled.length || (num(vals.Personalizada) > 0 && cBase === cQuote)} onClick={save}>Guardar tasas</button>
+        <button className="btn primary block" disabled={!filled.length || (num(vals.Personalizada, isBs('Personalizada')) > 0 && cBase === cQuote)} onClick={save}>Guardar tasas</button>
         <p className="tiny muted" style={{ marginBottom: 0 }}>Las tasas cambian cada día: escríbelas cuando cambies dinero o cobres. Los campos vacíos mantienen la última guardada.</p>
       </div>
 
@@ -427,14 +432,14 @@ function Calculator() {
   const [mid, setMid] = useState(() => String(rateFor(data, 'EUR', 'USD', today(), 'Personalizada') ?? ''));
 
   const n = Math.round(num(nominal) * 100);
-  const valid = n > 0 && num(bcv) > 0 && num(par) > 0;
+  const valid = n > 0 && num(bcv, true) > 0 && num(par, true) > 0;
   const steps: ChainStep[] = [
-    { label: 'Te pagan en Bs a tasa BCV', to: 'VES', rate: num(bcv) },
-    { label: 'Compras dólares en el paralelo', to: 'USD', rate: 1 / num(par), feePct: (num(p2pFee) || 0) / 100 },
+    { label: 'Te pagan en Bs a tasa BCV', to: 'VES', rate: num(bcv, true) },
+    { label: 'Compras dólares en el paralelo', to: 'USD', rate: 1 / num(par, true), feePct: (num(p2pFee) || 0) / 100 },
   ];
   const wr = num(wiseRate) || num(mid);
   if (wise && wr > 0) steps.push({ label: 'Pasas a euros con Wise', to: 'EUR', rate: 1 / wr, feeFixed: Math.round((num(wiseFee) || 0) * 100) });
-  const result = valid ? simulateChain({ amount: n, currency: 'USD' }, steps, { VES: num(par), EUR: 1 / (num(mid) || wr || 1) }) : [];
+  const result = valid ? simulateChain({ amount: n, currency: 'USD' }, steps, { VES: num(par, true), EUR: 1 / (num(mid) || wr || 1) }) : [];
   const last = result[result.length - 1];
 
   return (
@@ -484,7 +489,7 @@ function Calculator() {
               </div>
             </div>
           )}
-          <p className="tiny muted" style={{ marginBottom: 0 }}>Para cobrar {formatMoney(n, 'USD')} reales en bolívares necesitarías {formatMoney(Math.round(n * num(par)), 'VES')}.</p>
+          <p className="tiny muted" style={{ marginBottom: 0 }}>Para cobrar {formatMoney(n, 'USD')} reales en bolívares necesitarías {formatMoney(Math.round(n * num(par, true)), 'VES')}.</p>
         </div>
       )}
     </>

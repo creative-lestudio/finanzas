@@ -67,8 +67,8 @@ export function demoData(asOf: string): AppData {
   // el paralelo y envío a euros por Wise.
   for (let i = 3; i >= 0; i--) {
     const m = addMonths(month, -i);
-    const bcv = 200 + (3 - i) * 12;
-    const par = bcv * 1.38;
+    const bcv = 760 + (3 - i) * 40;
+    const par = bcv * 1.25;
     const day = (n: number) => `${m}-${String(Math.min(n, i === 0 ? lastDay : 28)).padStart(2, '0')}`;
     data = addRate(data, { date: day(1), base: 'USD', quote: 'VES', rate: bcv, source: 'BCV' });
     data = addRate(data, { date: day(1), base: 'USD', quote: 'VES', rate: Math.round(par * 100) / 100, source: 'Paralelo' });
@@ -106,7 +106,7 @@ export function demoData(asOf: string): AppData {
     { id: 's2', groupId: 'piso', date: `${month}-03`, description: 'Internet fibra', amount: 4500, paidBy: 'Laura', shares: { Yo: 1500, Laura: 1500, Pablo: 1500 } },
     { id: 's3', groupId: 'piso', date: `${month}-04`, description: 'Pizza viernes', amount: 4200, paidBy: 'Pablo', shares: { Yo: 2100, Laura: 2100, Pablo: 0 } },
   ];
-  data.settings = { ...data.settings, offlineOnly: true };
+  data.settings = { ...data.settings, offlineOnly: true, onboarded: true };
   data.goals = data.goals.map((g) => (g.id === 'g1' ? { ...g, kind: 'savings', deadline: `${addMonths(month, 12)}-01`, monthlyPlan: 40000, startDate: `${addMonths(month, -4)}-01`, startAmount: 200000 } : g));
   data.goals.push({ id: 'g4', name: 'Cartera indexada 20k', icon: '📈', kind: 'investment', target: 2000000, saved: 0, accountIds: ['funds'], expectedReturn: 6, monthlyPlan: 20000, deadline: `${addMonths(month, 48)}-01`, priority: 4, startDate: `${addMonths(month, -4)}-01`, startAmount: 750000 });
   data.goalMovements = [1, 2, 3].flatMap((i) => [
