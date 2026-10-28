@@ -62,34 +62,39 @@
       .btn.dark:hover { box-shadow: 0 12px 30px -10px rgb(4 19 46 / 0.55); }
       .btn.sm { padding: 9px 18px; font-size: 14px; }
 
-      /* Hero */
-      .hero { position: relative; background: var(--navy); color: #fff; padding: 150px 0 0; overflow: hidden; isolation: isolate; text-align: center; }
+      /* Hero: texto a la izquierda, móvil a la derecha */
+      .hero { position: relative; background: var(--navy); color: #fff; padding: 116px 0 72px; overflow: hidden; isolation: isolate; }
       .hero::before { content: ''; position: absolute; inset: -20% -10% auto; height: 900px; z-index: -1;
-        background: radial-gradient(50% 55% at 50% 0%, rgb(61 123 255 / 0.55), transparent 70%), radial-gradient(35% 40% at 85% 30%, rgb(91 155 255 / 0.25), transparent 70%), radial-gradient(30% 40% at 12% 40%, rgb(3 74 190 / 0.45), transparent 70%); }
+        background: radial-gradient(48% 55% at 72% 18%, rgb(61 123 255 / 0.55), transparent 70%), radial-gradient(35% 40% at 8% 40%, rgb(3 74 190 / 0.45), transparent 70%), radial-gradient(30% 30% at 95% 80%, rgb(91 155 255 / 0.22), transparent 70%); }
       .hero::after { content: ''; position: absolute; inset: 0; z-index: -1; opacity: 0.35;
         background-image: linear-gradient(rgb(255 255 255 / 0.05) 1px, transparent 1px), linear-gradient(90deg, rgb(255 255 255 / 0.05) 1px, transparent 1px); background-size: 56px 56px;
-        -webkit-mask-image: radial-gradient(60% 50% at 50% 20%, #000, transparent); mask-image: radial-gradient(60% 50% at 50% 20%, #000, transparent); }
-      .pill { display: inline-flex; align-items: center; gap: 10px; padding: 6px 14px 6px 6px; border-radius: 999px; background: rgb(255 255 255 / 0.08); border: 1px solid rgb(255 255 255 / 0.16); font-size: 13.5px; color: rgb(255 255 255 / 0.86); text-decoration: none; }
+        -webkit-mask-image: radial-gradient(70% 60% at 60% 30%, #000, transparent); mask-image: radial-gradient(70% 60% at 60% 30%, #000, transparent); }
+      .hero-grid { display: grid; grid-template-columns: 1.08fr 0.92fr; gap: 24px; align-items: center; min-height: 640px; }
+      .pill { display: inline-flex; align-items: center; gap: 10px; padding: 6px 14px 6px 6px; border-radius: 999px; background: rgb(255 255 255 / 0.08); border: 1px solid rgb(255 255 255 / 0.16); font-size: 13.5px; color: rgb(255 255 255 / 0.86); text-decoration: none; transition: background 0.2s; }
+      .pill:hover { background: rgb(255 255 255 / 0.14); }
       .pill b { background: var(--blue); color: #fff; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; letter-spacing: 0.02em; }
-      .hero h1 { font-size: clamp(46px, 8vw, 96px); line-height: 1; letter-spacing: -0.04em; word-spacing: 0.06em; font-weight: 700; margin: 26px auto 22px; max-width: 14ch; }
+      .hero h1 { font-size: clamp(46px, 6.4vw, 88px); line-height: 1; letter-spacing: -0.04em; word-spacing: 0.06em; font-weight: 700; margin: 24px 0 22px; max-width: 12ch; }
       .grad { background: linear-gradient(95deg, #fff 0%, #a9c9ff 45%, #5b9bff 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-      .hero .lead { font-size: clamp(18px, 2vw, 21px); color: rgb(255 255 255 / 0.72); max-width: 54ch; margin: 0 auto 34px; text-wrap: pretty; }
-      .ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-      .assure { display: flex; gap: 10px 26px; justify-content: center; flex-wrap: wrap; margin: 28px 0 0; padding: 0; list-style: none; font-size: 14px; color: rgb(255 255 255 / 0.6); }
+      .hero .lead { font-size: clamp(18px, 1.9vw, 21px); color: rgb(255 255 255 / 0.72); max-width: 46ch; margin: 0 0 32px; text-wrap: pretty; }
+      .ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+      .assure { display: flex; gap: 10px 24px; flex-wrap: wrap; margin: 30px 0 0; padding: 0; list-style: none; font-size: 14px; color: rgb(255 255 255 / 0.6); }
       .assure li { display: inline-flex; align-items: center; gap: 8px; }
       .assure svg { color: var(--glow); width: 16px; height: 16px; }
 
-      .stage { position: relative; height: 560px; margin-top: 64px; display: flex; justify-content: center; align-items: flex-start; }
-      .ph { position: absolute; width: 300px; border-radius: 44px; padding: 8px; background: linear-gradient(160deg, #26334d, #0a1020); box-shadow: 0 40px 100px -20px rgb(0 0 0 / 0.7), 0 0 0 1px rgb(255 255 255 / 0.12) inset; }
-      .ph img, .ph picture { display: block; width: 100%; aspect-ratio: 390 / 844; object-fit: cover; object-position: top; border-radius: 37px; }
-      .ph.c { z-index: 3; top: 0; }
-      .ph.l { z-index: 2; transform: translateX(-250px) translateY(56px) rotate(-7deg) scale(0.9); }
-      .ph.r { z-index: 2; transform: translateX(250px) translateY(56px) rotate(7deg) scale(0.9); }
-      .stage::after { content: ''; position: absolute; inset: auto 0 0; height: 220px; z-index: 5; background: linear-gradient(transparent, var(--navy)); pointer-events: none; }
-      .badge { position: absolute; z-index: 6; background: rgb(255 255 255 / 0.1); border: 1px solid rgb(255 255 255 / 0.2); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border-radius: 16px; padding: 12px 16px; text-align: left; font-size: 13px; color: rgb(255 255 255 / 0.8); box-shadow: 0 20px 50px -20px rgb(0 0 0 / 0.6); }
+      .hero-visual { position: relative; display: grid; place-items: center; min-height: 600px; perspective: 1400px; --rx: 0deg; --ry: 0deg; }
+      .hero-visual::before { content: ''; position: absolute; width: 440px; height: 440px; border-radius: 50%; background: radial-gradient(closest-side, rgb(61 123 255 / 0.55), transparent); filter: blur(6px); z-index: 0; }
+      .phone { position: relative; z-index: 2; width: 292px; border-radius: 46px; padding: 9px; background: linear-gradient(160deg, #2b3a58, #0a1020); box-shadow: 0 50px 100px -24px rgb(0 0 0 / 0.75), 0 0 0 1px rgb(255 255 255 / 0.14) inset, 0 0 0 1px rgb(0 0 0 / 0.5); transform: rotateY(var(--ry)) rotateX(var(--rx)) rotate(-2deg); transition: transform 0.25s ease-out; animation: float 7s ease-in-out infinite; }
+      .phone::before { content: ''; position: absolute; top: 18px; left: 50%; width: 86px; height: 24px; margin-left: -43px; border-radius: 99px; background: #05070d; z-index: 3; }
+      .phone::after { content: ''; position: absolute; inset: 9px; border-radius: 38px; pointer-events: none; z-index: 2; background: linear-gradient(115deg, rgb(255 255 255 / 0.16) 0%, transparent 32%); }
+      .phone picture, .phone img { display: block; width: 100%; aspect-ratio: 390 / 844; object-fit: cover; object-position: top; border-radius: 38px; }
+      .phone-back { position: absolute; z-index: 1; width: 252px; border-radius: 40px; padding: 8px; background: linear-gradient(160deg, #26334d, #0a1020); box-shadow: 0 40px 80px -24px rgb(0 0 0 / 0.7), 0 0 0 1px rgb(255 255 255 / 0.1) inset; transform: translate(150px, 46px) rotate(8deg); opacity: 0.95; }
+      .phone-back img { display: block; width: 100%; aspect-ratio: 390 / 844; object-fit: cover; object-position: top; border-radius: 33px; }
+      @keyframes float { 50% { margin-top: -10px; } }
+      .badge { position: absolute; z-index: 4; background: rgb(8 22 52 / 0.74); border: 1px solid rgb(255 255 255 / 0.2); -webkit-backdrop-filter: blur(18px) saturate(1.5); backdrop-filter: blur(18px) saturate(1.5); border-radius: 18px; padding: 12px 16px; text-align: left; font-size: 13px; color: rgb(255 255 255 / 0.8); box-shadow: 0 24px 50px -20px rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.25); animation: float 6s ease-in-out infinite; }
       .badge b { display: block; font: 700 20px var(--display); color: #fff; letter-spacing: -0.03em; }
-      .badge.a { left: calc(50% - 560px); top: 210px; } .badge.b { left: calc(50% + 340px); top: 330px; }
       .badge .ok { color: #5eead4; font-weight: 600; }
+      .badge.a { left: -12%; top: 12%; animation-delay: -1.5s; } .badge.b { right: -10%; bottom: 20%; animation-delay: -3.2s; } .badge.c { left: -4%; bottom: 7%; animation-delay: -4.6s; display: flex; align-items: center; gap: 10px; padding: 10px 14px; font-weight: 600; color: #fff; }
+      .badge.c i { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: rgb(94 234 212 / 0.2); color: #5eead4; font-style: normal; }
 
       .strip { background: var(--navy); border-top: 1px solid rgb(255 255 255 / 0.08); }
       .strip .wrap { display: grid; grid-template-columns: repeat(4, 1fr); }
@@ -190,10 +195,21 @@
       .cta { border-radius: 36px; padding: 80px 24px; text-align: center; color: #fff; position: relative; overflow: hidden; isolation: isolate; background: linear-gradient(150deg, #0b3f8f, #04132e 70%); }
       .cta::before { content: ''; position: absolute; inset: -40% 20% auto; height: 420px; z-index: -1; background: radial-gradient(closest-side, rgb(91 155 255 / 0.5), transparent); }
       .cta h2 { color: #fff; max-width: 16ch; margin: 0 auto 26px; }
-      footer { padding: 56px 0 64px; font-size: 14px; color: var(--muted); }
-      footer .wrap { display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px; }
-      footer a { text-decoration: none; margin-right: 22px; color: var(--ink-2); } footer a:hover { color: var(--ink); }
-      footer p { margin: 0 0 8px; max-width: 60ch; }
+      footer { padding: 64px 0 48px; font-size: 14px; color: var(--muted); border-top: 1px solid var(--line); margin-top: 24px; }
+      .foot { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 32px; }
+      .foot h4 { margin: 0 0 14px; font: 650 13px var(--sans); color: var(--ink); letter-spacing: 0.02em; }
+      .foot a { display: block; text-decoration: none; color: var(--ink-2); padding: 4px 0; transition: color 0.2s; } .foot a:hover { color: var(--blue); }
+      .foot .fb a.brand { display: flex; padding: 0; } .foot .fb p { margin: 14px 0 0; max-width: 36ch; line-height: 1.55; }
+      .fine { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 13px; }
+
+      /* Detalles: foco de luz que sigue al cursor en las tarjetas y brillo en el botón principal */
+      .card::after, .step::after, .col::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity 0.3s; background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 50%), rgb(61 123 255 / 0.13), transparent 60%); }
+      .card:hover::after, .step:hover::after, .col:hover::after { opacity: 1; }
+      .step, .col { position: relative; overflow: hidden; }
+      .store { position: relative; overflow: hidden; }
+      .store.white::after { content: ''; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgb(61 123 255 / 0.14) 50%, transparent 70%); transform: translateX(-100%); transition: transform 0.7s; }
+      .store.white:hover::after { transform: translateX(100%); }
+      .gallery figure .mock { transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); } .gallery figure:hover .mock { transform: translateY(-8px); }
 
       .rv { opacity: 0; transform: translateY(18px); transition: opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); }
       .rv.in { opacity: 1; transform: none; }
@@ -252,25 +268,25 @@
       .sticky-dl img { width: 40px; height: 40px; border-radius: 10px; }
       .sticky-dl span { flex: 1; display: grid; line-height: 1.2; } .sticky-dl b { font: 650 15px var(--display); } .sticky-dl small { color: var(--muted); font-size: 12px; }
 
-      @media (max-width: 1240px) { .badge { display: none; } .ph.l { transform: translateX(-190px) translateY(56px) rotate(-7deg) scale(0.85); } .ph.r { transform: translateX(190px) translateY(56px) rotate(7deg) scale(0.85); } }
+      @media (max-width: 1240px) { .badge.a { left: -2%; } .badge.b { right: -2%; } .phone-back { transform: translate(120px, 46px) rotate(8deg); } }
       @media (max-width: 860px) {
         nav { display: none; }
-        .hero { padding-top: 120px; }
-        .stage { height: 470px; margin-top: 44px; } .ph { width: 250px; } .ph.l, .ph.r { display: none; }
+        .hero { padding: 104px 0 40px; } .hero-grid { grid-template-columns: 1fr; min-height: 0; gap: 8px; } .hero-copy { text-align: center; } .hero h1 { margin-left: auto; margin-right: auto; } .hero .lead { margin-left: auto; margin-right: auto; } .ctas, .assure { justify-content: center; }
+        .hero-visual { min-height: 520px; } .phone { width: 250px; } .phone-back { width: 212px; transform: translate(118px, 40px) rotate(8deg); } .badge.a { left: 0; top: 8%; } .badge.b { right: 0; bottom: 12%; } .badge.c { display: none; }
         .strip .wrap { grid-template-columns: 1fr 1fr; } .stat:nth-child(3) { border-left: 0; padding-left: 0; }
         .bento { grid-template-columns: 1fr 1fr; } .card, .card.w3, .card.w4 { grid-column: span 2; } .card.w6 { grid-column: span 2; }
         .ig-steps { grid-template-columns: 1fr; } .ios-guide { padding: 32px 20px; }
-        .how, .cols3 { grid-template-columns: 1fr; } .dl { grid-template-columns: 1fr 1fr; } .sticky-dl { display: flex; }
+        .how, .cols3 { grid-template-columns: 1fr; } .dl { grid-template-columns: 1fr 1fr; } .sticky-dl { display: flex; } .foot { grid-template-columns: 1fr 1fr; } .foot .fb { grid-column: 1 / -1; }
         .coachc { flex-direction: column; align-items: flex-start; }
       }
       @media (max-width: 560px) {
         section { padding-top: 76px; } .secure { margin-top: 76px; padding: 76px 0; } .final { margin-top: 76px; }
         .bento { grid-template-columns: 1fr; } .card, .card.w3, .card.w4, .card.w6 { grid-column: auto; }
-        .dl { grid-template-columns: 1fr; } footer .wrap { grid-template-columns: 1fr; } .gallery figure { width: 230px; } footer { padding-bottom: 110px; }
+        .dl { grid-template-columns: 1fr; } .foot { grid-template-columns: 1fr 1fr; } .gallery figure { width: 230px; } footer { padding-bottom: 110px; }
         .stat b { font-size: 26px; } .stat { padding: 22px 12px; }
         .eq { font-size: 24px; } .cta { padding: 56px 20px; border-radius: 28px; }
       }
-      @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .rv { opacity: 1; transform: none; transition: none; } .wave i { animation: none; height: 60%; } }
+      @media (prefers-reduced-motion: reduce) { .phone, .badge { animation: none; } html { scroll-behavior: auto; } .rv { opacity: 1; transform: none; transition: none; } .wave i { animation: none; height: 60%; } }
     </style>
   </head>
   <body>
@@ -284,26 +300,28 @@
 
     <main>
       <div class="hero">
-        <div class="wrap">
-          <a class="pill" href="#divisas"><b>Nuevo</b>Cada pago en bolívares, con su equivalente →</a>
-          <h1>Tu dinero, <span class="grad">con claridad.</span></h1>
-          <p class="lead">Gastos, presupuestos y metas en bolívares, dólares y euros. Cada pago con su equivalente exacto, y tus datos cifrados en tu dispositivo.</p>
-          <div class="ctas">
-            <a class="store white" id="dl-android" href="./app/" data-state="web"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 8.6l1.4-2.4a.3.3 0 0 0-.5-.3l-1.4 2.5a8.2 8.2 0 0 0-6.6 0L8.9 5.9a.3.3 0 0 0-.5.3l1.4 2.4A7 7 0 0 0 5 14.5h14a7 7 0 0 0-4.8-5.9zM9.5 12.2a.8.8 0 1 1 0-1.6.8.8 0 0 1 0 1.6zm5 0a.8.8 0 1 1 0-1.6.8.8 0 0 1 0 1.6zM5 15.6V19a1 1 0 0 0 1 1h1v2.2a1.1 1.1 0 0 0 2.2 0V20h5.6v2.2a1.1 1.1 0 0 0 2.2 0V20h1a1 1 0 0 0 1-1v-3.4z"/></svg><span><small id="dl-android-sub">Abre la app en tu móvil</small><b id="dl-android-main">Android</b></span></a>
-            <a class="store glass" href="#descargar"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.7c0-2.4 2-3.5 2-3.6a4.3 4.3 0 0 0-3.4-1.8c-1.4-.2-2.8.8-3.5.8s-1.8-.8-3-.8a4.4 4.4 0 0 0-3.7 2.3c-1.6 2.8-.4 6.900 1.100 9.100.8 1.100 1.700 2.300 2.900 2.300 1.100 0 1.600-.7 3-.7s1.800.7 3 .7 2-1.100 2.800-2.200a9.800 9.800 0 0 0 1.200-2.600 3.900 3.900 0 0 1-2.400-3.500zM14.200 6a3.900 3.900 0 0 0 .9-2.800 3.900 3.900 0 0 0-2.600 1.300A3.700 3.700 0 0 0 11.600 6a3.200 3.200 0 0 0 2.600 0z"/></svg><span><small>Añádela a tu inicio</small><b>iPhone y iPad</b></span></a>
+        <div class="wrap hero-grid">
+          <div class="hero-copy">
+            <a class="pill" href="#divisas"><b>Nuevo</b>Cada pago en Bs, con su equivalente →</a>
+            <h1>Tu dinero, <span class="grad">con claridad.</span></h1>
+            <p class="lead">Gastos, presupuestos y metas en bolívares, dólares y euros. Cada pago con su equivalente exacto, y tus datos cifrados en tu dispositivo.</p>
+            <div class="ctas">
+              <a class="store white" id="dl-android" href="./app/" data-state="web"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 8.6l1.4-2.4a.3.3 0 0 0-.5-.3l-1.4 2.5a8.2 8.2 0 0 0-6.6 0L8.9 5.9a.3.3 0 0 0-.5.3l1.4 2.4A7 7 0 0 0 5 14.5h14a7 7 0 0 0-4.8-5.9zM9.5 12.2a.8.8 0 1 1 0-1.6.8.8 0 0 1 0 1.6zm5 0a.8.8 0 1 1 0-1.6.8.8 0 0 1 0 1.6zM5 15.6V19a1 1 0 0 0 1 1h1v2.2a1.1 1.1 0 0 0 2.2 0V20h5.6v2.2a1.1 1.1 0 0 0 2.2 0V20h1a1 1 0 0 0 1-1v-3.4z"/></svg><span><small id="dl-android-sub">Abre la app en tu móvil</small><b id="dl-android-main">Android</b></span></a>
+              <a class="store glass" href="#descargar"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.7c0-2.4 2-3.5 2-3.6a4.3 4.3 0 0 0-3.4-1.8c-1.4-.2-2.8.8-3.5.8s-1.8-.8-3-.8a4.4 4.4 0 0 0-3.7 2.3c-1.6 2.8-.4 6.900 1.100 9.100.8 1.100 1.700 2.300 2.900 2.300 1.100 0 1.600-.7 3-.7s1.800.7 3 .7 2-1.100 2.800-2.200a9.800 9.800 0 0 0 1.200-2.600 3.900 3.900 0 0 1-2.400-3.500zM14.200 6a3.900 3.900 0 0 0 .9-2.800 3.900 3.900 0 0 0-2.600 1.300A3.700 3.700 0 0 0 11.600 6a3.200 3.200 0 0 0 2.600 0z"/></svg><span><small>Añádela a tu inicio</small><b>iPhone y iPad</b></span></a>
+            </div>
+            <p class="alt"><a href="./app/">o ábrela ahora en el navegador →</a></p>
+            <ul class="assure">
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10h12v11H6zM8.5 10V7a3.5 3.5 0 0 1 7 0v3" /></svg>Cifrada de extremo a extremo</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0M12 19.5h.01" /></svg>Funciona sin conexión</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6zM12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" /></svg>Sin anuncios ni venta de datos</li>
+            </ul>
           </div>
-          <p class="alt"><a href="./app/">o ábrela ahora en el navegador →</a></p>
-          <ul class="assure">
-            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10h12v11H6zM8.5 10V7a3.5 3.5 0 0 1 7 0v3" /></svg>Cifrada de extremo a extremo</li>
-            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0M12 19.5h.01" /></svg>Funciona sin conexión</li>
-            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6zM12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" /></svg>Sin anuncios ni venta de datos</li>
-          </ul>
-          <div class="stage" aria-hidden="true">
-            <div class="ph l"><img src="./site/shot-plan.jpg" alt="" loading="lazy" /></div>
-            <div class="ph r"><img src="./site/shot-fx.jpg" alt="" loading="lazy" /></div>
-            <div class="ph c"><picture><source srcset="./site/shot-home-dark.jpg" media="(prefers-color-scheme: dark)" /><img src="./site/shot-home.jpg" alt="" /></picture></div>
+          <div class="hero-visual" id="hv" aria-hidden="true">
+            <div class="phone-back"><img src="./site/shot-plan.jpg" alt="" loading="lazy" /></div>
+            <div class="phone"><picture><source srcset="./site/shot-home-dark.jpg" media="(prefers-color-scheme: dark)" /><img src="./site/shot-home.jpg" alt="" /></picture></div>
             <div class="badge a"><span>Cobro registrado</span><b>56.500 Bs ≈ 1.250 $</b><span class="ok">Tasa acordada · 45,20</span></div>
             <div class="badge b"><span>Presupuesto</span><b>Supermercado 78 %</b><span>Te avisamos al 80 %</span></div>
+            <div class="badge c"><i>✓</i>Cifrada en tu dispositivo</div>
           </div>
         </div>
       </div>
@@ -509,13 +527,16 @@
     </div>
 
     <footer>
-      <div class="wrap">
-        <div>
-          <p><b style="color: var(--ink); font: 700 18px var(--display); letter-spacing: -0.02em;">Finanzas</b></p>
-          <p>Orientación general, no asesoramiento financiero regulado. Las tasas de cambio las introduces tú.</p>
+      <div class="wrap foot">
+        <div class="fb">
+          <a class="brand" href="./" style="color: var(--ink)"><img src="./app/icons/icon-192.png" alt="" />Finanzas</a>
+          <p>Tu dinero, con claridad. Gastos, presupuestos y metas en bolívares, dólares y euros, con tus datos cifrados en tu dispositivo.</p>
         </div>
-        <div><a href="./privacidad.html">Política de privacidad</a><a href="./condiciones.html">Condiciones del servicio</a><a href="./app/">Abrir la app</a></div>
+        <div><h4>Producto</h4><a href="#funciones">Funciones</a><a href="#divisas">Divisas</a><a href="#seguridad">Seguridad</a><a href="#faq">Preguntas</a></div>
+        <div><h4>Descargar</h4><a href="#descargar">Android</a><a href="#iphone">iPhone y iPad</a><a href="./app/">En el navegador</a></div>
+        <div><h4>Legal</h4><a href="./privacidad.html">Privacidad</a><a href="./condiciones.html">Condiciones</a></div>
       </div>
+      <div class="wrap fine">Orientación general, no asesoramiento financiero regulado. Las tasas de cambio las introduces tú.</div>
     </footer>
 
     <script>
@@ -591,6 +612,29 @@
         var upd = function () { bar.classList.toggle('show', heroOut && !dlIn); };
         new IntersectionObserver(function (e) { heroOut = !e[0].isIntersecting; upd(); }).observe(hero);
         new IntersectionObserver(function (e) { dlIn = e[0].isIntersecting; upd(); }, { threshold: 0.2 }).observe(dl);
+      })();
+
+      // Detalles: inclinación suave del móvil con el cursor y foco de luz en las tarjetas.
+      (function () {
+        var fine = matchMedia('(hover: hover)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!fine) return;
+        var hv = document.getElementById('hv');
+        if (hv) {
+          hv.parentElement.addEventListener('pointermove', function (e) {
+            var r = hv.getBoundingClientRect();
+            var x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+            hv.style.setProperty('--ry', (x * 10).toFixed(2) + 'deg');
+            hv.style.setProperty('--rx', (-y * 8).toFixed(2) + 'deg');
+          });
+          hv.parentElement.addEventListener('pointerleave', function () { hv.style.setProperty('--ry', '0deg'); hv.style.setProperty('--rx', '0deg'); });
+        }
+        document.querySelectorAll('.card, .step, .col').forEach(function (el) {
+          el.addEventListener('pointermove', function (e) {
+            var r = el.getBoundingClientRect();
+            el.style.setProperty('--mx', e.clientX - r.left + 'px');
+            el.style.setProperty('--my', e.clientY - r.top + 'px');
+          });
+        });
       })();
     </script>
   </body>
