@@ -2,10 +2,11 @@ import { categoryColor } from '../lib/families';
 import { useMemo, useState } from 'react';
 import { budgetAlertFor } from '../lib/budgets';
 import { categorize, detectChannel } from '../lib/categorize';
-import { CURRENCIES, rateFor, RATE_SOURCES } from '../lib/fx';
-import { formatMoney, formatRate, merchantKey, monthKey, parseAmount, today, uid } from '../lib/money';
+import { addRate } from '../lib/fx';
+import { formatMoney, merchantKey, monthKey, parseAmount, today, uid } from '../lib/money';
 import type { AppData, Transaction } from '../lib/types';
 import { useStore } from '../store';
+import { Equivalent, type EquivResult } from './Equivalent';
 import { CatIcon, Icon } from './icons';
 import { Sheet, toast } from './ui';
 
@@ -39,11 +40,8 @@ export function QuickAdd({ onClose, onVoice }: { onClose: () => void; onVoice: (
   const usable = data.accounts.filter((a) => a.kind !== 'investment' && a.kind !== 'crypto' && a.kind !== 'loan');
   const [accountId, setAccountId] = useState(usable.find((a) => a.kind === 'cash')?.id ?? usable[0]?.id);
   const [date, setDate] = useState(today());
-  // Valor nominal en otra moneda (ej. te pagan 800 $ en bolívares a tasa BCV).
-  const [fxOn, setFxOn] = useState(false);
-  const [fxAmount, setFxAmount] = useState('');
-  const [fxCurrency, setFxCurrency] = useState('USD');
-  const [fxSource, setFxSource] = useState('BCV');
+  // Equivalente en otra moneda (cobros y pagos en bolívares, p. ej.).
+  const [equiv, setEquiv] = useState<EquivResult | null>(null);
 
   const account = data.accounts.find((a) => a.id === accountId);
   const currency = account?.currency ?? data.settings.currency;
@@ -58,14 +56,11 @@ export function QuickAdd({ onClose, onVoice }: { onClose: () => void; onVoice: (
   const signed = cents ? (kind === 'expense' ? -Math.abs(cents) : Math.abs(cents)) : 0;
   const suggested = description ? categorize(description, signed || -1, data).categoryId : null;
   const chosen = categoryId ?? (suggested && cats.some((c) => c.id === suggested) ? suggested : null);
-  const fxCents = parseAmount(fxAmount);
-  const paidRate = fxOn && fxCents && cents ? Math.abs(cents) / Math.abs(fxCents) : null;
-  const marketRate = fxOn ? rateFor(data, fxCurrency, currency, date) : null;
 
   const save = () => {
     if (!signed || !chosen || !accountId) return;
     const desc = description.trim() || data.categories.find((c) => c.id === chosen)!.name;
-    const { next, message } = saveTransaction(data, {
+    const { next, message } = saveTransaction(equiv?.saveRate ? addRate(data, equiv.saveRate) : data, {
       accountId,
       date,
       amount: signed,
@@ -73,7 +68,7 @@ export function QuickAdd({ onClose, onVoice }: { onClose: () => void; onVoice: (
       categoryId: chosen,
       categorySource: 'user',
       channel: account?.kind === 'cash' ? 'cash' : detectChannel(desc),
-      fx: paidRate && fxCents ? { amount: Math.abs(fxCents), currency: fxCurrency, rate: Math.round(paidRate * 10000) / 10000, source: fxSource } : undefined,
+      fx: equiv?.fx,
     });
     update(() => next);
     toast(message);
@@ -126,37 +121,7 @@ export function QuickAdd({ onClose, onVoice }: { onClose: () => void; onVoice: (
           </label>
         </div>
       </div>
-      {kind === 'income' && (
-        <div className="card glass" style={{ padding: 14 }}>
-          <label className="switch-row" style={{ margin: 0, color: 'var(--text)', fontSize: 15 }}>
-            <span className="grow">Me pagaron un importe en otra moneda<div className="tiny muted">Ej.: 800 $ ingresados en bolívares a tasa BCV</div></span>
-            <input type="checkbox" className="switch" checked={fxOn} onChange={(e) => setFxOn(e.target.checked)} />
-          </label>
-          {fxOn && (
-            <>
-              <div className="grid2 mt">
-                <input inputMode="decimal" placeholder="800" value={fxAmount} onChange={(e) => setFxAmount(e.target.value)} aria-label="Importe nominal" />
-                <select value={fxCurrency} onChange={(e) => setFxCurrency(e.target.value)} aria-label="Moneda nominal">
-                  {CURRENCIES.filter((c) => c.code !== currency).map((c) => <option key={c.code} value={c.code}>{c.flag} {c.code}</option>)}
-                </select>
-              </div>
-              <div className="field mt">
-                <label>Tasa usada para pagarte
-                  <select value={fxSource} onChange={(e) => setFxSource(e.target.value)}>{RATE_SOURCES.map((s) => <option key={s}>{s}</option>)}</select>
-                </label>
-              </div>
-              {paidRate && (
-                <p className="small" style={{ margin: 0 }}>
-                  Te pagaron a <b>{formatRate(paidRate)} {currency}/{fxCurrency}</b>.
-                  {marketRate && marketRate > paidRate && (
-                    <> A tasa de mercado ({formatRate(marketRate)}) eso vale <b>{formatMoney(Math.round(Math.abs(cents!) / marketRate), fxCurrency)}</b>: pierdes <b className="negc">{formatMoney(Math.abs(fxCents!) - Math.round(Math.abs(cents!) / marketRate), fxCurrency)}</b>.</>
-                  )}
-                </p>
-              )}
-            </>
-          )}
-        </div>
-      )}
+      <Equivalent key={currency} currency={currency} date={date} cents={signed ? Math.abs(signed) : null} defaultOpen={currency === 'VES'} onChange={setEquiv} />
       <button className="btn primary block mt" disabled={!signed || !chosen} onClick={save}>
         Guardar {signed ? formatMoney(signed, currency) : ''}
       </button>

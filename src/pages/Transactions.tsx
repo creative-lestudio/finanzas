@@ -4,7 +4,8 @@ import { CatBadge, CatIcon, Icon } from '../components/icons';
 import { Empty, Money, Sheet, toast } from '../components/ui';
 import { aiAvailability } from '../lib/ai';
 import { categorizeWithAI, learnFromCorrection } from '../lib/categorize';
-import { deleteExchange, txCurrency } from '../lib/fx';
+import { Equivalent, type EquivResult } from '../components/Equivalent';
+import { addRate, convert, deleteExchange, txCurrency } from '../lib/fx';
 import { monthSummary } from '../lib/insights';
 import { addMonths, capitalize, formatMoney, formatRate, prettyDescription, today } from '../lib/money';
 import type { Transaction } from '../lib/types';
@@ -21,6 +22,7 @@ export function Transactions() {
   const [acc, setAcc] = useState<string>('');
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [busy, setBusy] = useState(false);
+  const [equiv, setEquiv] = useState<EquivResult | null>(null);
 
   const catOf = (id: string) => data.categories.find((c) => c.id === id);
   const accOf = (id: string) => data.accounts.find((a) => a.id === id);
@@ -119,6 +121,7 @@ export function Transactions() {
                       {catOf(t.categoryId)?.name} · {accOf(t.accountId)?.name}
                       {t.channel === 'bizum' && ' · Bizum'}
                       {t.fx && ` · ${formatMoney(t.fx.amount, t.fx.currency)} a ${formatRate(t.fx.rate)}`}
+                      {!t.fx && txCurrency(data, t) === 'VES' && (() => { const e = convert(data, Math.abs(t.amount), 'VES', 'USD', t.date); return e ? ` · ≈ ${formatMoney(e, 'USD')} (est.)` : ''; })()}
                       {t.categorySource === 'ai' && ' · IA'}
                     </div>
                   </div>
@@ -152,6 +155,16 @@ export function Transactions() {
                 ))}
               </div>
             </>
+          )}
+          {!editing.exchangeId && txCurrency(data, editing) !== 'USD' && (
+            <div className="mb">
+              <Equivalent key={editing.id} currency={txCurrency(data, editing)} date={editing.date} cents={Math.abs(editing.amount)} initial={editing.fx} defaultOpen={txCurrency(data, editing) === 'VES'} onChange={setEquiv} />
+              <button className="btn tinted block mt" disabled={!equiv} onClick={() => {
+                update((d) => ({ ...(equiv?.saveRate ? addRate(d, equiv.saveRate) : d), transactions: d.transactions.map((x) => (x.id === editing.id ? { ...x, fx: equiv?.fx } : x)) }));
+                toast('Equivalente guardado');
+                setEditing(null);
+              }}>Guardar equivalente</button>
+            </div>
           )}
           <button className="btn danger block" onClick={() => remove(editing)}><Icon name="trash" size={18} /> Eliminar</button>
         </Sheet>
