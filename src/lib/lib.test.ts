@@ -384,3 +384,16 @@ describe('hoja propia (Tipo, Cuenta, Moneda, Monto)', () => {
     expect(parseLedger(csvRows('Fecha,Concepto,Importe\n2026-01-01,x,5'))).toBeNull();
   });
 });
+
+describe('valoración de bolívares', () => {
+  it('usa Paralelo por defecto aunque haya una BCV más reciente', () => {
+    let d = emptyData();
+    d.settings = { ...d.settings, currency: 'EUR', rateSource: {} };
+    d = addRate(d, { date: '2026-10-01', base: 'USD', quote: 'VES', rate: 1100, source: 'Paralelo' });
+    d = addRate(d, { date: '2026-10-05', base: 'USD', quote: 'VES', rate: 880, source: 'BCV' });
+    expect(rateFor(d, 'USD', 'VES', '2026-10-06')).toBe(1100);
+    expect(rateFor(d, 'USD', 'VES', '2026-10-06', 'BCV')).toBe(880);
+    const solo = addRate(emptyData(), { date: '2026-10-05', base: 'USD', quote: 'VES', rate: 880, source: 'BCV' });
+    expect(rateFor(solo, 'USD', 'VES', '2026-10-06')).toBe(880);
+  });
+});

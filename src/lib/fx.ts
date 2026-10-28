@@ -116,7 +116,9 @@ export function rateFor(
   const f = PEGGED[from] ?? from;
   const t = PEGGED[to] ?? to;
   if (f === t) return 1;
-  const pref = source ?? data.settings.rateSource?.[f === data.settings.currency ? t : f] ?? data.settings.rateSource?.[t];
+  // Los bolívares se valoran por defecto a tasa paralelo (lo que cuesta de verdad comprar divisa);
+  // si ese día solo hay otra tasa guardada, se usa esa.
+  const pref = source ?? data.settings.rateSource?.[f === data.settings.currency ? t : f] ?? data.settings.rateSource?.[t] ?? (f === 'VES' || t === 'VES' ? 'Paralelo' : undefined);
   const tryPair = (a: string, b: string) => (pref ? direct(data.rates, a, b, date, pref) : null) ?? direct(data.rates, a, b, date);
   const d = tryPair(f, t);
   if (d !== null) return d;
