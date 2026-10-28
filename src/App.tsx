@@ -213,7 +213,7 @@ export function App() {
 function Lock() {
   const store = useStore();
   const isNew = store.status === 'new';
-  const [mode, setMode] = useState<'pass' | 'restore'>('pass');
+  const [mode, setMode] = useState<'welcome' | 'pass' | 'restore'>(isNew && supabase() ? 'welcome' : 'pass');
   const [pass, setPass] = useState('');
   const [pass2, setPass2] = useState('');
   const [error, setError] = useState(store.sync.error ?? '');
@@ -221,7 +221,11 @@ function Lock() {
   const [signedIn, setSignedIn] = useState(false);
 
   useEffect(() => {
-    void supabase()?.auth.getSession().then(({ data }) => setSignedIn(Boolean(data.session)));
+    void supabase()?.auth.getSession().then(({ data }) => {
+      setSignedIn(Boolean(data.session));
+      // Al volver de Google ya hay sesión: salta directo a la contraseña de cifrado.
+      if (data.session) setMode((m) => (m === 'welcome' ? 'pass' : m));
+    });
   }, [mode]);
 
   const submit = async (demo = false) => {
@@ -234,6 +238,7 @@ function Lock() {
       // En la vista previa de claude.ai la IA funciona con tu cuenta de Claude.
       if (IS_PREVIEW) initial.settings = { ...initial.settings, offlineOnly: false };
       await store.create(pass, initial);
+      if (signedIn) await store.linkCloud(pass).catch(() => undefined);
     } else {
       setBusy(true);
       if (!(await store.open(pass))) {
@@ -252,6 +257,23 @@ function Lock() {
     else if (r !== 'ok') setError(String(r));
     setBusy(false);
   };
+
+  if (mode === 'welcome') {
+    return (
+      <div className="lock">
+        <div style={{ width: '100%', maxWidth: 400 }}>
+          <RecoveryNotice><></></RecoveryNotice>
+          <div className="card lg">
+            <div className="app-icon"><Icon name="wallet" size={38} /></div>
+            <h1 className="center" style={{ margin: '4px 0 6px', fontSize: 30, letterSpacing: '-0.04em', fontFamily: 'var(--font-display)' }}>Finanzas</h1>
+            <p className="small muted center" style={{ marginTop: 0 }}>Crea tu cuenta o inicia sesión para guardar tus datos y usarlos en todos tus dispositivos.</p>
+            <AuthForm onDone={() => { setSignedIn(true); setMode('pass'); }} />
+            <button className="btn ghost block mt small" onClick={() => setMode('pass')}>Usar sin cuenta, solo en este dispositivo</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (mode === 'restore') {
     return (
@@ -286,7 +308,7 @@ function Lock() {
         <h1 className="center" style={{ margin: '4px 0 6px', fontSize: 30, letterSpacing: '-0.04em', fontFamily: 'var(--font-display)' }}>Finanzas</h1>
         <p className="small muted center" style={{ marginTop: 0 }}>
           {isNew
-            ? 'Crea una contraseña. Cifra tus datos en este dispositivo y no se puede recuperar: guárdala bien.'
+            ? 'Crea una contraseña de cifrado. Protege tus datos y no se puede recuperar: guárdala bien.'
             : 'Introduce tu contraseña para descifrar tus datos.'}
         </p>
         <div className="field">
@@ -306,7 +328,7 @@ function Lock() {
             </button>
             {supabase() && (
               <button type="button" className="btn ghost block mt small" onClick={() => setMode('restore')}>
-                Ya uso Finanzas en otro dispositivo
+                Ya tengo datos guardados en mi cuenta
               </button>
             )}
           </>
