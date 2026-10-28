@@ -96,19 +96,26 @@
       .assure li { display: inline-flex; align-items: center; gap: 8px; }
       .assure svg { color: var(--glow); width: 16px; height: 16px; }
 
-      .hero-visual { position: relative; display: grid; place-items: center; min-height: 600px; perspective: 1400px; --rx: 0deg; --ry: 0deg; }
+      .hero-visual { position: relative; display: grid; place-items: center; min-height: 600px; perspective: 1400px; --rx: 5deg; --ry: -14deg; }
       .hero-visual::before { content: ''; position: absolute; width: 440px; height: 440px; border-radius: 50%; background: radial-gradient(closest-side, rgb(61 123 255 / 0.55), transparent); filter: blur(6px); z-index: 0; }
-      .phone { position: relative; z-index: 2; width: 292px; border-radius: 46px; padding: 9px; background: linear-gradient(160deg, #2b3a58, #0a1020); box-shadow: 0 50px 100px -24px rgb(0 0 0 / 0.75), 0 0 0 1px rgb(255 255 255 / 0.14) inset, 0 0 0 1px rgb(0 0 0 / 0.5); transform: rotateY(var(--ry)) rotateX(var(--rx)) rotate(-2deg); transition: transform 0.25s ease-out; animation: float 7s ease-in-out infinite; }
-      .phone::before { content: ''; position: absolute; top: 18px; left: 50%; width: 86px; height: 24px; margin-left: -43px; border-radius: 99px; background: #05070d; z-index: 3; }
-      .phone::after { content: ''; position: absolute; inset: 9px; border-radius: 38px; pointer-events: none; z-index: 2; background: linear-gradient(115deg, rgb(255 255 255 / 0.16) 0%, transparent 32%); }
-      .phone picture, .phone img { display: block; width: 100%; aspect-ratio: 390 / 844; object-fit: cover; object-position: top; border-radius: 38px; }
-      .phone-back { position: absolute; z-index: 1; width: 252px; border-radius: 40px; padding: 8px; background: linear-gradient(160deg, #26334d, #0a1020); box-shadow: 0 40px 80px -24px rgb(0 0 0 / 0.7), 0 0 0 1px rgb(255 255 255 / 0.1) inset; transform: translate(150px, 46px) rotate(8deg); opacity: 0.95; }
-      .phone-back img { display: block; width: 100%; aspect-ratio: 390 / 844; object-fit: cover; object-position: top; border-radius: 33px; }
+      /* iPhone Pro en plata (titanio): marco metálico con grosor, bisel negro, isla dinámica y botones laterales */
+      .iph { --w: 292px; --r: 52px; position: relative; width: var(--w); padding: 4px; border-radius: var(--r); background: linear-gradient(145deg, #f4f5f7 0%, #c3c7cf 18%, #eef0f3 36%, #a5aab4 60%, #e4e7eb 82%, #b6bbc4 100%);
+        box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.75), inset 0 0 8px rgb(0 0 0 / 0.28), 1px 1px 0 #b2b8c1, 2px 2px 0 #a3a9b3, 3px 3px 0 #949aa5, 4px 4px 0 #868c97, 5px 5px 0 #7a808b, 6px 6px 0 #6f7580; }
+      .iph-in { position: relative; padding: 7px; border-radius: calc(var(--r) - 4px); background: #05060a; box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08), inset 0 0 14px rgb(0 0 0 / 0.9); }
+      .iph-in picture, .iph-in img { display: block; width: 100%; aspect-ratio: 390 / 844; object-fit: cover; object-position: top; border-radius: calc(var(--r) - 11px); }
+      .iph-in .isl { position: absolute; top: 18px; left: 50%; width: 31%; height: 27px; transform: translateX(-50%); border-radius: 99px; background: #020306; z-index: 3; box-shadow: 0 0 0 1px rgb(255 255 255 / 0.04); }
+      .iph-in .isl::after { content: ''; position: absolute; right: 9px; top: 50%; width: 9px; height: 9px; margin-top: -4.5px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #25324f 0%, #0a0f1c 55%, #000 100%); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06); }
+      .iph-in .glare { position: absolute; inset: 7px; border-radius: calc(var(--r) - 11px); pointer-events: none; z-index: 2; background: linear-gradient(112deg, rgb(255 255 255 / 0.2) 0%, rgb(255 255 255 / 0.05) 24%, transparent 38%), linear-gradient(0deg, rgb(255 255 255 / 0.05), transparent 20%); }
+      .iph .b { position: absolute; width: 4px; border-radius: 2px; background: linear-gradient(90deg, #8d939e, #d9dde3 55%, #9aa0ab); box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.25); }
+      .iph .b.act { left: -4px; top: 13%; height: 4.2%; } .iph .b.vu { left: -4px; top: 20%; height: 7.4%; } .iph .b.vd { left: -4px; top: 29%; height: 7.4%; }
+      .iph .b.pw { right: -4px; top: 22%; height: 11%; background: linear-gradient(90deg, #9aa0ab, #d9dde3 45%, #8d939e); } .iph .b.cc { right: -4px; top: 60%; height: 7%; background: linear-gradient(90deg, #9aa0ab, #d9dde3 45%, #8d939e); }
+      .scene { position: relative; z-index: 2; transform-style: preserve-3d; transform: rotateY(var(--ry, -14deg)) rotateX(var(--rx, 5deg)) rotateZ(1.5deg); transition: transform 0.3s ease-out; animation: float 7s ease-in-out infinite; }
+      .scene::after { content: ''; position: absolute; left: 6%; right: -8%; bottom: -42px; height: 60px; z-index: -1; border-radius: 50%; background: radial-gradient(closest-side, rgb(0 0 0 / 0.6), transparent); filter: blur(10px); transform: translateZ(-60px); }
       @keyframes float { 50% { margin-top: -10px; } }
-      .badge { position: absolute; z-index: 4; background: rgb(8 22 52 / 0.74); border: 1px solid rgb(255 255 255 / 0.2); -webkit-backdrop-filter: blur(18px) saturate(1.5); backdrop-filter: blur(18px) saturate(1.5); border-radius: 18px; padding: 12px 16px; text-align: left; font-size: 13px; color: rgb(255 255 255 / 0.8); box-shadow: 0 24px 50px -20px rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.25); animation: float 6s ease-in-out infinite; }
+      .badge { position: absolute; z-index: 5; background: rgb(8 22 52 / 0.78); border: 1px solid rgb(255 255 255 / 0.2); -webkit-backdrop-filter: blur(18px) saturate(1.5); backdrop-filter: blur(18px) saturate(1.5); border-radius: 18px; padding: 12px 16px; text-align: left; font-size: 13px; color: rgb(255 255 255 / 0.8); box-shadow: 0 24px 50px -20px rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.25); animation: float 6s ease-in-out infinite; }
       .badge b { display: block; font: 700 20px var(--display); color: #fff; letter-spacing: -0.03em; }
       .badge .ok { color: #5eead4; font-weight: 600; }
-      .badge.a { left: -12%; top: 12%; animation-delay: -1.5s; } .badge.b { right: -10%; bottom: 20%; animation-delay: -3.2s; } .badge.c { left: -4%; bottom: 7%; animation-delay: -4.6s; display: flex; align-items: center; gap: 10px; padding: 10px 14px; font-weight: 600; color: #fff; }
+      .badge.a { left: -14%; top: 20%; animation-delay: -1.5s; } .badge.b { right: -12%; bottom: 17%; animation-delay: -3.2s; } .badge.c { display: none; left: -4%; bottom: 7%; animation-delay: -4.6s; display: flex; align-items: center; gap: 10px; padding: 10px 14px; font-weight: 600; color: #fff; }
       .badge.c i { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: rgb(94 234 212 / 0.2); color: #5eead4; font-style: normal; }
 
       .strip { background: var(--navy); border-top: 1px solid rgb(255 255 255 / 0.08); }
@@ -261,8 +268,7 @@
       .sc-ic { flex: none; width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; background: rgb(91 155 255 / 0.18); color: #a9c9ff; }
       .sc-card b { display: block; font: 650 18px var(--display); letter-spacing: -0.02em; margin-bottom: 4px; } .sc-card p { margin: 0; color: rgb(255 255 255 / 0.66); font-size: 14.5px; line-height: 1.45; }
       .sc-phone { align-self: end; padding-top: 24px; }
-      .sc-phone .mock { padding: 9px; border-radius: 46px 46px 0 0; box-shadow: 0 -30px 100px -20px rgb(61 123 255 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.12) inset; }
-      .sc-phone .mock img { border-radius: 38px 38px 0 0; aspect-ratio: 390 / 760; }
+      .sc-phone { filter: drop-shadow(0 -30px 60px rgb(61 123 255 / 0.4)); } .sc-phone .iph { margin: 0 auto; }
       .sc-stage::after { content: ''; position: absolute; inset: auto 0 0; height: 90px; z-index: 2; background: linear-gradient(transparent, var(--bg)); pointer-events: none; }
 
       /* Crucetas y píldoras decorativas */
@@ -271,13 +277,6 @@
       .pills i:nth-child(1) { left: 6%; top: 18%; transform: rotate(-8deg); } .pills i:nth-child(2) { right: 8%; top: 14%; transform: rotate(7deg); animation-delay: -2s; } .pills i:nth-child(3) { left: 12%; bottom: 14%; transform: rotate(6deg); animation-delay: -4s; } .pills i:nth-child(4) { right: 12%; bottom: 18%; transform: rotate(-6deg); animation-delay: -1s; }
       .btn.arrow { padding: 8px 8px 8px 26px; gap: 14px; } .btn.arrow .circ { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--blue); color: #fff; transition: transform 0.3s; } .btn.arrow:hover .circ { transform: rotate(45deg); }
 
-      /* QR flotante */
-      .qr-float { position: fixed; right: 20px; bottom: 20px; z-index: 35; width: 176px; padding: 12px 12px 14px; border-radius: 24px; text-align: center; background: color-mix(in srgb, var(--navy) 90%, transparent); color: #fff; border: 1px solid rgb(255 255 255 / 0.14); box-shadow: 0 24px 60px -16px rgb(4 19 46 / 0.7); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); transition: opacity 0.35s, transform 0.35s; }
-      .qr-float.hide { opacity: 0; transform: translateY(20px); pointer-events: none; }
-      .qr-float img { display: block; width: 100%; border-radius: 14px; background: #fff; padding: 4px; }
-      .qr-float p { margin: 10px 0 4px; font-size: 12.5px; font-weight: 600; } .qr-float .stores { display: flex; gap: 12px; justify-content: center; color: rgb(255 255 255 / 0.7); }
-      .qr-float button { position: absolute; top: -10px; right: -10px; width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgb(255 255 255 / 0.2); background: var(--navy); color: #fff; cursor: pointer; display: grid; place-items: center; padding: 0; }
-      @media (max-width: 1100px) { .qr-float { display: none; } }
 
       /* Galería (sin uso) */
       .gallery { display: flex; gap: 28px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 12px max(20px, calc((100vw - 1160px) / 2 + 20px)) 36px; scrollbar-width: none; }
@@ -325,11 +324,11 @@
       .sticky-dl img { width: 40px; height: 40px; border-radius: 10px; }
       .sticky-dl span { flex: 1; display: grid; line-height: 1.2; } .sticky-dl b { font: 650 15px var(--display); } .sticky-dl small { color: var(--muted); font-size: 12px; }
 
-      @media (max-width: 1240px) { .badge.a { left: -2%; } .badge.b { right: -2%; } .phone-back { transform: translate(120px, 46px) rotate(8deg); } }
+      @media (max-width: 1240px) { .badge.a { left: -2%; } .badge.b { right: -2%; }  }
       @media (max-width: 860px) {
         nav { display: none; }
         .hero { padding: 112px 0 40px; } .hero-grid { grid-template-columns: 1fr; min-height: 0; gap: 8px; } .hero-copy { text-align: center; } .hero h1 { margin-left: auto; margin-right: auto; } .hero .lead { margin-left: auto; margin-right: auto; } .ctas, .assure { justify-content: center; }
-        .hero-visual { min-height: 520px; } .phone { width: 250px; } .phone-back { width: 212px; transform: translate(118px, 40px) rotate(8deg); } .badge.a { left: 0; top: 8%; } .badge.b { right: 0; bottom: 12%; } .badge.c { display: none; }
+        .hero-visual { min-height: 520px; } .iph { --w: 250px; --r: 46px; } .badge.a { left: 0; top: 8%; } .badge.b { right: 0; bottom: 12%; } .badge.c { display: none; }
         .strip .wrap { grid-template-columns: 1fr 1fr; } .stat:nth-child(3) { border-left: 0; padding-left: 0; }
         .bento { grid-template-columns: 1fr 1fr; } .card, .card.w3, .card.w4 { grid-column: span 2; } .card.w6 { grid-column: span 2; }
         .sc-cols { grid-template-columns: 1fr 1fr; height: auto; overflow: visible; } .sc-phone { grid-column: 1 / -1; order: -1; max-width: 300px; margin: 0 auto; } .sc-side { padding-top: 0; } .sc-stage { padding-bottom: 40px; } .sc-stage::after { display: none; } .sc-word { top: 10px; }
@@ -345,7 +344,7 @@
         .stat b { font-size: 26px; } .stat { padding: 22px 12px; }
         .eq { font-size: 24px; } .cta { padding: 56px 20px; border-radius: 28px; }
       }
-      @media (prefers-reduced-motion: reduce) { .phone, .badge { animation: none; } html { scroll-behavior: auto; } .rv { opacity: 1; transform: none; transition: none; } .wave i { animation: none; height: 60%; } }
+      @media (prefers-reduced-motion: reduce) { .scene, .badge { animation: none; } html { scroll-behavior: auto; } .rv { opacity: 1; transform: none; transition: none; } .wave i { animation: none; height: 60%; } }
     </style>
   </head>
   <body>
@@ -383,11 +382,10 @@
           </div>
           <div class="hero-visual" id="hv" aria-hidden="true">
             <span class="cross" style="right: 2%; top: 4%"></span><span class="cross" style="left: 8%; bottom: 2%; opacity: .6"></span>
-            <div class="phone-back"><img src="./site/shot-plan.jpg" alt="" loading="lazy" /></div>
-            <div class="phone"><picture><source srcset="./site/shot-home-dark.jpg" media="(prefers-color-scheme: dark)" /><img src="./site/shot-home.jpg" alt="" /></picture></div>
+            <div class="scene"><div class="iph"><span class="b act"></span><span class="b vu"></span><span class="b vd"></span><span class="b pw"></span><span class="b cc"></span>
+              <div class="iph-in"><i class="isl"></i><picture><source srcset="./site/shot-home-dark.jpg" media="(prefers-color-scheme: dark)" /><img src="./site/shot-home.jpg" alt="" /></picture><i class="glare"></i></div></div></div>
             <div class="badge a"><span>Cobro registrado</span><b>56.500 Bs ≈ 1.250 $</b><span class="ok">Tasa acordada · 45,20</span></div>
             <div class="badge b"><span>Presupuesto</span><b>Supermercado 78 %</b><span>Te avisamos al 80 %</span></div>
-            <div class="badge c"><i>✓</i>Cifrada en tu dispositivo</div>
           </div>
         </div>
       </div>
@@ -411,7 +409,7 @@
               <div class="sc-card rv"><span class="sc-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7" /></svg></span><div><b>Multimoneda</b><p>Bolívares, dólares, euros y USDT en un solo balance.</p></div></div>
               <div class="sc-card rv"><span class="sc-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-4a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0-4a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" /></svg></span><div><b>Metas de ahorro</b><p>Cifra, fecha y aporte mensual; sigue tu progreso.</p></div></div>
             </div>
-            <div class="sc-phone rv"><div class="mock"><img src="./site/shot-plan.jpg" alt="Presupuestos con barras de progreso por categoría" loading="lazy" /></div></div>
+            <div class="sc-phone rv"><div class="iph" style="--w: 330px; --r: 56px"><span class="b act"></span><span class="b vu"></span><span class="b vd"></span><span class="b pw"></span><div class="iph-in"><i class="isl"></i><img src="./site/shot-plan.jpg" alt="Presupuestos con barras de progreso por categoría" loading="lazy" /><i class="glare"></i></div></div></div>
             <div class="sc-side">
               <div class="sc-card rv"><span class="sc-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3ZM5 11a7 7 0 0 0 14 0M12 18v3" /></svg></span><div><b>Registro por voz</b><p>Anota un gasto hablando, sin escribir.</p></div></div>
               <div class="sc-card rv"><span class="sc-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18H6zM9 7h6M9 11h.01M12 11h.01M15 11h.01M9 15h.01M12 15h.01M15 15h.01" /></svg></span><div><b>Calculadora de tasas</b><p>Convierte entre monedas con la tasa que tú elijas.</p></div></div>
@@ -593,12 +591,6 @@
       </div>
     </main>
 
-    <aside class="qr-float" id="qrf" aria-label="Código QR para descargar">
-      <button type="button" id="qrx" aria-label="Cerrar"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
-      <img src="./site/qr.svg" alt="Código QR de Finanzas" width="152" height="152" />
-      <p>Escanea para descargar</p>
-      <div class="stores"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.7c0-2.4 2-3.5 2-3.6a4.3 4.3 0 0 0-3.4-1.8c-1.4-.2-2.8.8-3.5.8s-1.8-.8-3-.8a4.4 4.4 0 0 0-3.700 2.300c-1.600 2.800-.4 6.900 1.100 9.100.8 1.100 1.700 2.300 2.900 2.300 1.100 0 1.600-.7 3-.7s1.800.7 3 .7 2-1.100 2.800-2.200a9.800 9.800 0 0 0 1.200-2.600 3.900 3.900 0 0 1-2.400-3.500zM14.200 6a3.900 3.900 0 0 0 .9-2.800 3.900 3.900 0 0 0-2.600 1.300A3.700 3.700 0 0 0 11.600 6a3.200 3.200 0 0 0 2.600 0z"/></svg><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 8.6l1.4-2.4a.3.3 0 0 0-.5-.3l-1.4 2.5a8.2 8.2 0 0 0-6.6 0L8.9 5.9a.3.3 0 0 0-.5.3l1.4 2.4A7 7 0 0 0 5 14.5h14a7 7 0 0 0-4.8-5.9zM5 15.6V19a1 1 0 0 0 1 1h1v2.2a1.1 1.1 0 0 0 2.2 0V20h5.6v2.2a1.1 1.1 0 0 0 2.2 0V20h1a1 1 0 0 0 1-1v-3.4z"/></svg></div>
-    </aside>
 
     <div class="sticky-dl" id="sticky" aria-hidden="true">
       <img src="./app/icons/icon-192.png" alt="" /><span><b>Finanzas</b><small>Gratis · privada · sin conexión</small></span>
@@ -706,10 +698,10 @@
           hv.parentElement.addEventListener('pointermove', function (e) {
             var r = hv.getBoundingClientRect();
             var x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
-            hv.style.setProperty('--ry', (x * 10).toFixed(2) + 'deg');
-            hv.style.setProperty('--rx', (-y * 8).toFixed(2) + 'deg');
+            hv.style.setProperty('--ry', (-14 + x * 12).toFixed(2) + 'deg');
+            hv.style.setProperty('--rx', (5 - y * 9).toFixed(2) + 'deg');
           });
-          hv.parentElement.addEventListener('pointerleave', function () { hv.style.setProperty('--ry', '0deg'); hv.style.setProperty('--rx', '0deg'); });
+          hv.parentElement.addEventListener('pointerleave', function () { hv.style.setProperty('--ry', '-14deg'); hv.style.setProperty('--rx', '5deg'); });
         }
         document.querySelectorAll('.card, .step, .col').forEach(function (el) {
           el.addEventListener('pointermove', function (e) {
@@ -720,7 +712,7 @@
         });
       })();
 
-      // Tema manual, QR flotante (se oculta al llegar a la descarga) y cabecera.
+      // Tema manual claro/oscuro.
       (function () {
         var root = document.documentElement, btn = document.getElementById('theme');
         if (btn) btn.addEventListener('click', function () {
@@ -729,17 +721,6 @@
           root.setAttribute('data-theme', next);
           try { localStorage.setItem('finanzas.site-theme', next); } catch (e) {}
         });
-        var qr = document.getElementById('qrf'), x = document.getElementById('qrx');
-        if (!qr) return;
-        try { if (localStorage.getItem('finanzas.qr-closed') === '1') qr.remove(); } catch (e) {}
-        if (x) x.addEventListener('click', function () { qr.remove(); try { localStorage.setItem('finanzas.qr-closed', '1'); } catch (e) {} });
-        if (!('IntersectionObserver' in window)) return;
-        var hide = { d: false, f: false, h: true };
-        var upd = function () { qr.classList.toggle('hide', hide.d || hide.f || hide.h); };
-        var d = document.getElementById('descargar'), f = document.querySelector('footer'), h = document.querySelector('.hero');
-        new IntersectionObserver(function (e) { hide.d = e[0].isIntersecting; upd(); }, { threshold: 0.15 }).observe(d);
-        new IntersectionObserver(function (e) { hide.f = e[0].isIntersecting; upd(); }).observe(f);
-        new IntersectionObserver(function (e) { hide.h = e[0].intersectionRatio > 0.35; upd(); }, { threshold: [0, 0.35, 0.6, 1] }).observe(h);
       })();
     </script>
   </body>
