@@ -55,7 +55,7 @@ export interface RateQuote {
   base: string;
   quote: string;
   rate: number;
-  /** BCV, Paralelo, Wise, Binance P2P, Mercado medio... */
+  /** BCV, Euro, Paralelo o Personalizada (ver RATE_TYPES). */
   source: string;
 }
 

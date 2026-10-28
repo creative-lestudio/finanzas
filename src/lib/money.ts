@@ -14,7 +14,8 @@ export function formatMoney(cents: number, currency = defaultCurrency): string {
   let f = fmtCache.get(currency);
   if (!f) {
     try {
-      f = new Intl.NumberFormat('es-ES', { style: 'currency', currency });
+      // El dólar se muestra como "$" (no "US$"), como se escribe a diario.
+      f = new Intl.NumberFormat('es-ES', { style: 'currency', currency, ...(currency === 'USD' ? { currencyDisplay: 'narrowSymbol' as const } : {}) });
     } catch {
       // Monedas no ISO (USDT, USDC...): número + código.
       const n = new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -93,3 +94,21 @@ export function merchantKey(description: string): string {
     .slice(0, 3)
     .join(' ');
 }
+
+/**
+ * Concepto legible para mostrar: los bancos escriben "COMPRA MERCADONA 2342
+ * MADRID"; se muestra "Mercadona 2342 Madrid". No cambia el dato guardado.
+ */
+export function prettyDescription(text: string): string {
+  const letters = text.replace(/[^A-Za-zÁÉÍÓÚÑáéíóúñ]/g, '');
+  const shouting = letters.length > 3 && letters === letters.toUpperCase();
+  let t = text.trim();
+  if (shouting) {
+    t = t.replace(/^(COMPRA( EN)?|PAGO( EN)?|RECIBO|ADEUDO|CARGO)\s+/i, '');
+    t = t.toLowerCase().replace(/(^|[\s(/-])(\p{L})/gu, (_, p: string, c: string) => p + c.toUpperCase());
+  }
+  return t;
+}
+
+/** "octubre de 2026" → "Octubre de 2026". */
+export const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);

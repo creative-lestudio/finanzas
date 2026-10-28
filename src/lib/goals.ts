@@ -117,11 +117,11 @@ export function goalProgress(data: AppData, goal: Goal, asOf = today()): GoalPro
 }
 
 export const GOAL_STATUS_LABEL: Record<GoalStatus, string> = {
-  done: '✓ Conseguida',
-  ahead: '↑ Por delante',
-  on_track: '✓ En camino',
-  behind: '⚠ Retrasada',
-  no_plan: '○ Sin plan',
+  done: 'Conseguida',
+  ahead: 'Por delante',
+  on_track: 'En camino',
+  behind: 'Retrasada',
+  no_plan: 'Sin plan',
 };
 
 export const GOAL_KIND_LABEL: Record<NonNullable<Goal['kind']>, string> = {

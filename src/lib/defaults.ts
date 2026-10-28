@@ -103,7 +103,7 @@ export function emptyData(): AppData {
       aiCategorization: false,
       currency: 'EUR',
       bank: { provider: 'none' },
-      theme: { accent: '#0a84ff', mode: 'auto' },
+      theme: { accent: '#032a67', mode: 'auto' },
     },
   };
 }
@@ -116,8 +116,14 @@ export function migrate(data: AppData | (Omit<AppData, 'version'> & { version: n
     ...d,
     version: 2,
     categories: [...d.categories, ...DEFAULT_CATEGORIES.filter((c) => !d.categories.some((x) => x.id === c.id))],
-    rates: d.rates ?? [],
+    // Desde la v2.1 solo hay cuatro tipos de tasa; las demás fuentes pasan a "Personalizada".
+    rates: (d.rates ?? []).map((r) => (['BCV', 'Euro', 'Paralelo', 'Personalizada'].includes(r.source) ? r : { ...r, source: 'Personalizada' })),
     exchanges: d.exchanges ?? [],
-    settings: { ...emptyData().settings, ...d.settings, theme: d.settings?.theme ?? emptyData().settings.theme },
+    settings: {
+      ...emptyData().settings,
+      ...d.settings,
+      theme: d.settings?.theme ?? emptyData().settings.theme,
+      rateSource: Object.fromEntries(Object.entries(d.settings?.rateSource ?? {}).filter(([, v]) => ['BCV', 'Euro', 'Paralelo', 'Personalizada'].includes(v))),
+    },
   };
 }

@@ -1,3 +1,4 @@
+import { Icon } from '../components/icons';
 import { useState } from 'react';
 import { formatMoney, parseAmount, today, uid } from '../lib/money';
 import { balances, settleUp, splitByWeights, splitEqual } from '../lib/shared';
@@ -96,7 +97,7 @@ function GroupView({ group, onAdd }: { group: Group; onAdd: () => void }) {
         <ul className="list">
           {expenses.map((e) => (
             <li key={e.id}>
-              <span className="icon">{e.settlement ? '🤝' : '🧾'}</span>
+              <span className="icon"><Icon name={e.settlement ? 'check' : 'receipt'} size={19} /></span>
               <div className="grow">
                 <div className="ellipsis">{e.description}</div>
                 <div className="small muted">{e.date} · pagó {e.paidBy}</div>

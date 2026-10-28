@@ -114,7 +114,7 @@ export function App() {
       <div className="app">
         <header className="nav">
           {parent ? (
-            <button className="back" onClick={() => setPage(parent)}>
+            <button className="back lg" onClick={() => setPage(parent)}>
               <Icon name="back" size={22} stroke={2.4} /> {TITLES[parent]}
             </button>
           ) : (
@@ -122,12 +122,12 @@ export function App() {
           )}
           <div className="nav-actions">
             {store.sync.status !== 'off' && (
-              <button className="icon-btn glass" onClick={() => void store.syncNow()} aria-label="Sincronizar" title={store.sync.error ?? (store.sync.lastSync ? `Sincronizado ${new Date(store.sync.lastSync).toLocaleTimeString('es-ES')}` : 'Sincronizar')}>
+              <button className="icon-btn lg" onClick={() => void store.syncNow()} aria-label="Sincronizar" title={store.sync.error ?? (store.sync.lastSync ? `Sincronizado ${new Date(store.sync.lastSync).toLocaleTimeString('es-ES')}` : 'Sincronizar')}>
                 <Icon name="cloud" size={19} className={store.sync.status === 'syncing' ? 'spin' : ''} />
                 {store.sync.status === 'error' && <span style={{ position: 'absolute', top: 6, right: 6, width: 8, height: 8, borderRadius: 4, background: 'var(--bad)' }} />}
               </button>
             )}
-            <button className="icon-btn glass" onClick={store.lock} aria-label="Bloquear">
+            <button className="icon-btn lg" onClick={store.lock} aria-label="Bloquear">
               <Icon name="lock" size={19} />
             </button>
           </div>
@@ -151,7 +151,7 @@ export function App() {
               <ul className="list">
                 {MORE.map(([p, icon, label, hint]) => (
                   <li key={p} className="tap" onClick={() => setPage(p)}>
-                    <span className="icon accent"><Icon name={icon} size={20} /></span>
+                    <span className="icon"><Icon name={icon} size={19} /></span>
                     <div className="grow">
                       <div>{label}</div>
                       <div className="small muted ellipsis">{hint}</div>
@@ -167,7 +167,7 @@ export function App() {
 
       <div className="dock">
         <div className="dock-inner">
-          <nav className="tabbar glass" aria-label="Secciones">
+          <nav className="tabbar lg" aria-label="Secciones">
             {TABS.map(([p, icon, label]) => (
               <button key={p} className={tab === p ? 'on' : ''} onClick={() => setPage(p)} aria-current={tab === p ? 'page' : undefined}>
                 <Icon name={icon} size={23} stroke={tab === p ? 2.2 : 1.8} />
@@ -175,7 +175,7 @@ export function App() {
               </button>
             ))}
           </nav>
-          <button className="fab" onClick={() => setSheet('add')} aria-label="Añadir movimiento" onContextMenu={(e) => { e.preventDefault(); setSheet('voice'); }}>
+          <button className="fab lg tint" onClick={() => setSheet('add')} aria-label="Añadir movimiento" onContextMenu={(e) => { e.preventDefault(); setSheet('voice'); }}>
             <Icon name="plus" size={28} stroke={2.4} />
           </button>
         </div>
@@ -234,9 +234,9 @@ function Lock() {
   if (mode === 'restore') {
     return (
       <div className="lock">
-        <div className="card glass">
+        <div className="card lg">
           <div className="app-icon"><Icon name="cloud" size={36} /></div>
-          <h1 className="center" style={{ margin: '4px 0 6px', fontSize: 26, letterSpacing: '-0.03em' }}>Recuperar mis datos</h1>
+          <h1 className="center" style={{ margin: '4px 0 6px', fontSize: 26, letterSpacing: '-0.035em', fontFamily: 'var(--font-display)' }}>Recuperar mis datos</h1>
           <p className="small muted center" style={{ marginTop: 0 }}>Inicia sesión y escribe la contraseña de cifrado que usas en tu otro dispositivo.</p>
           {!signedIn ? (
             <AuthForm onDone={() => setSignedIn(true)} />
@@ -257,9 +257,9 @@ function Lock() {
 
   return (
     <div className="lock">
-      <form className="card glass" onSubmit={(e) => { e.preventDefault(); void submit(); }}>
+      <form className="card lg" onSubmit={(e) => { e.preventDefault(); void submit(); }}>
         <div className="app-icon"><Icon name="wallet" size={38} /></div>
-        <h1 className="center" style={{ margin: '4px 0 6px', fontSize: 28, letterSpacing: '-0.03em' }}>Finanzas</h1>
+        <h1 className="center" style={{ margin: '4px 0 6px', fontSize: 30, letterSpacing: '-0.04em', fontFamily: 'var(--font-display)' }}>Finanzas</h1>
         <p className="small muted center" style={{ marginTop: 0 }}>
           {isNew
             ? 'Crea una contraseña. Cifra tus datos en este dispositivo y no se puede recuperar: guárdala bien.'

@@ -72,7 +72,8 @@ export function demoData(asOf: string): AppData {
     const day = (n: number) => `${m}-${String(Math.min(n, i === 0 ? lastDay : 28)).padStart(2, '0')}`;
     data = addRate(data, { date: day(1), base: 'USD', quote: 'VES', rate: bcv, source: 'BCV' });
     data = addRate(data, { date: day(1), base: 'USD', quote: 'VES', rate: Math.round(par * 100) / 100, source: 'Paralelo' });
-    data = addRate(data, { date: day(1), base: 'EUR', quote: 'USD', rate: 1.085, source: 'Mercado medio' });
+    data = addRate(data, { date: day(1), base: 'EUR', quote: 'VES', rate: Math.round(bcv * 1.085 * 100) / 100, source: 'Euro' });
+    data = addRate(data, { date: day(1), base: 'EUR', quote: 'USD', rate: 1.085, source: 'Personalizada' });
     if (i === 0 && lastDay < 5) continue;
     const ves = Math.round(80000 * bcv);
     data = mergeMovements(data, 'ves', [{ date: day(5), amount: ves, description: 'PAGO CLIENTE VENEZUELA' }]).data;
@@ -83,7 +84,7 @@ export function demoData(asOf: string): AppData {
     const usd = Math.round(ves / (par * 1.01));
     data = recordExchange(data, { date: day(6), fromAccountId: 'ves', fromAmount: ves, toAccountId: 'usd', toAmount: usd, fee: 0, platform: 'Binance P2P', referenceRate: 1 / par, referenceSource: 'Paralelo' });
     const sent = usd - 2000;
-    data = recordExchange(data, { date: day(7), fromAccountId: 'usd', fromAmount: sent, toAccountId: 'main', toAmount: Math.round((sent - 450) / 1.092), fee: 450, platform: 'Wise', referenceRate: 1 / 1.085, referenceSource: 'Mercado medio' });
+    data = recordExchange(data, { date: day(7), fromAccountId: 'usd', fromAmount: sent, toAccountId: 'main', toAmount: Math.round((sent - 450) / 1.092), fee: 450, platform: 'Wise', referenceRate: 1 / 1.085, referenceSource: 'Personalizada' });
   }
   data.settings = { ...data.settings, rateSource: { VES: 'Paralelo' } };
 

@@ -33,9 +33,49 @@ export const CURRENCIES: CurrencyInfo[] = [
   { code: 'PAB', name: 'Balboa panameño', flag: '🇵🇦' },
 ];
 
-export const RATE_SOURCES = ['BCV', 'Paralelo', 'Binance P2P', 'Wise', 'Mercado medio', 'Banco', 'Manual'];
+/**
+ * Las tasas las introduce el usuario cada día. Cuatro tipos:
+ *  - BCV: bolívares por dólar, tasa oficial.
+ *  - Euro: bolívares por euro, tasa oficial del BCV.
+ *  - Paralelo: bolívares por dólar en el mercado.
+ *  - Personalizada: cualquier otro par (p. ej. 1 € = 1,085 $ en Wise).
+ */
+export type RateType = 'BCV' | 'Euro' | 'Paralelo' | 'Personalizada';
+
+export const RATE_SOURCES: RateType[] = ['BCV', 'Euro', 'Paralelo', 'Personalizada'];
+
+export const RATE_TYPES: Record<RateType, { base?: string; quote?: string; hint: string }> = {
+  BCV: { base: 'USD', quote: 'VES', hint: 'Bs por dólar · oficial' },
+  Euro: { base: 'EUR', quote: 'VES', hint: 'Bs por euro · oficial' },
+  Paralelo: { base: 'USD', quote: 'VES', hint: 'Bs por dólar · mercado' },
+  Personalizada: { hint: 'Cualquier par de monedas' },
+};
+
+/** Convierte fuentes antiguas o desconocidas al tipo "Personalizada". */
+export const normalizeSource = (s: string): RateType => (RATE_SOURCES.includes(s as RateType) ? (s as RateType) : 'Personalizada');
+
+// Orden de "fortaleza" para mostrar tasas como la gente las piensa: 1 USD = 236 Bs, 1 € = 1,08 $.
+const STRENGTH = ['GBP', 'EUR', 'CHF', 'USD', 'USDT', 'USDC', 'PAB', 'CAD', 'BRL', 'PEN', 'DOP', 'MXN', 'ARS', 'CLP', 'COP', 'VES'];
+
+/** Devuelve el par ordenado [fuerte, débil] para mostrar "1 fuerte = x débil". */
+export function displayPair(a: string, b: string): [string, string] {
+  const ia = STRENGTH.indexOf(a);
+  const ib = STRENGTH.indexOf(b);
+  return (ia === -1 ? 99 : ia) <= (ib === -1 ? 99 : ib) ? [a, b] : [b, a];
+}
+
+/** Tipos de tasa que tienen sentido como referencia para un cambio entre dos monedas. */
+export function referenceTypesFor(a: string, b: string): RateType[] {
+  const norm = (c: string) => PEGGED[c] ?? c;
+  const set = new Set([norm(a), norm(b)]);
+  if (set.has('VES') && set.has('USD')) return ['Paralelo', 'BCV', 'Personalizada'];
+  if (set.has('VES') && set.has('EUR')) return ['Euro', 'Personalizada'];
+  return ['Personalizada'];
+}
 
 export const PLATFORMS = ['Wise', 'Binance P2P', 'Mercado paralelo', 'Zinli', 'Zelle', 'Banco', 'Casa de cambio', 'Western Union', 'Remitly', 'Revolut', 'Efectivo', 'Otra'];
+
+const PEGGED: Record<string, string> = { USDT: 'USD', USDC: 'USD', PAB: 'USD' };
 
 export const currencyInfo = (code: string): CurrencyInfo =>
   CURRENCIES.find((c) => c.code === code) ?? { code, name: code, flag: '💱', custom: true };
@@ -59,7 +99,6 @@ function direct(rates: RateQuote[], from: string, to: string, date: string, sour
   return (best ?? fallback)?.rate ?? null;
 }
 
-const PEGGED: Record<string, string> = { USDT: 'USD', USDC: 'USD', PAB: 'USD' };
 
 /**
  * Tasa para convertir 1 `from` en `to` en una fecha. Usa la fuente preferida

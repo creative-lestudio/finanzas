@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Icon } from '../components/icons';
+import { CatIcon, GOAL_ICONS, GoalIcon, Icon } from '../components/icons';
 import { Empty, Field, Meter, Money, Segmented, Sheet, StateBadge, Switch } from '../components/ui';
 import { budgetStatus, suggestBudgets } from '../lib/budgets';
 import { CURRENCIES } from '../lib/fx';
@@ -42,7 +42,7 @@ export function Plan() {
           {statuses.map((s) => (
             <div className="card glass" key={s.budget.id} onClick={() => setEditBudget(s.budget)} style={{ cursor: 'pointer' }}>
               <div className="row between mb">
-                <b>{cat(s.budget.categoryId)?.icon} {cat(s.budget.categoryId)?.name}</b>
+                <b className="row"><span className="icon"><CatIcon id={s.budget.categoryId} emoji={cat(s.budget.categoryId)?.icon} /></span>{cat(s.budget.categoryId)?.name}</b>
                 <StateBadge state={s.state} />
               </div>
               <Meter ratio={s.ratio} state={s.state} label={`Gastado ${Math.round(s.ratio * 100)} %`} />
@@ -50,7 +50,7 @@ export function Plan() {
                 <span><Money cents={s.spent} /> <span className="muted">de</span> <Money cents={s.limit} /></span>
                 <span className="muted">{s.remaining >= 0 ? `${formatMoney(s.dailyAllowance)}/día` : `${formatMoney(-s.remaining)} de más`}</span>
               </div>
-              {s.projected > s.limit && s.state !== 'over' && <div className="small" style={{ marginTop: 6, color: 'var(--warn)' }}>⚠ Al ritmo actual acabarás el mes en {formatMoney(s.projected)}.</div>}
+              {s.projected > s.limit && s.state !== 'over' && <div className="small" style={{ marginTop: 8, color: 'var(--warn)' }}>Al ritmo actual acabarás el mes en {formatMoney(s.projected)}.</div>}
             </div>
           ))}
           {suggestions.length > 0 && (
@@ -59,7 +59,7 @@ export function Plan() {
               <ul className="list">
                 {suggestions.slice(0, 5).map((s) => (
                   <li key={s.categoryId}>
-                    <span className="grow">{cat(s.categoryId)?.icon} {cat(s.categoryId)?.name}</span>
+                    <span className="icon"><CatIcon id={s.categoryId} emoji={cat(s.categoryId)?.icon} /></span><span className="grow">{cat(s.categoryId)?.name}</span>
                     <Money cents={s.limit} />
                     <button className="btn sm tinted" onClick={() => update((d) => ({ ...d, budgets: [...d.budgets, { id: uid(), categoryId: s.categoryId, limit: s.limit, warnAt: 0.8, rollover: false }] }))}>Añadir</button>
                   </li>
@@ -78,10 +78,11 @@ export function Plan() {
             const p = goalProgress(data, g, now);
             return (
               <div className="card glass" key={g.id}>
-                <div className="row between" style={{ alignItems: 'flex-start' }}>
-                  <div className="grow" onClick={() => setEditGoal(g)} style={{ cursor: 'pointer' }}>
-                    <div className="tiny muted">{GOAL_KIND_LABEL[g.kind ?? 'savings']}{g.accountIds?.length ? ' · medida con saldo de cuentas' : ''}</div>
-                    <b style={{ fontSize: 18 }}>{g.icon} {g.name}</b>
+                <div className="row" onClick={() => setEditGoal(g)} style={{ cursor: 'pointer' }}>
+                  <span className="icon"><GoalIcon icon={g.icon} /></span>
+                  <div className="grow">
+                    <div style={{ fontWeight: 600, fontSize: 17, letterSpacing: '-0.02em' }} className="ellipsis">{g.name}</div>
+                    <div className="tiny muted">{GOAL_KIND_LABEL[g.kind ?? 'savings']}{g.accountIds?.length ? ' · medida con tus cuentas' : ''}</div>
                   </div>
                   <span className={`badge ${p.status}`}>{GOAL_STATUS_LABEL[p.status]}</span>
                 </div>
@@ -104,7 +105,7 @@ export function Plan() {
               </div>
             );
           })}
-          <button className="btn block glass" onClick={() => setEditGoal({ icon: '🐷', kind: 'savings', priority: data.goals.length + 1 })}><Icon name="plus" size={18} /> Nueva meta</button>
+          <button className="btn block glass" onClick={() => setEditGoal({ icon: 'piggy', kind: 'savings', priority: data.goals.length + 1 })}><Icon name="plus" size={18} /> Nueva meta</button>
         </>
       )}
 
@@ -119,7 +120,7 @@ export function Plan() {
             <input type="range" min={0} max={30} value={r.percentOfIncome} disabled={!r.enabled} onChange={(e) => update((d) => ({ ...d, savingsRules: { ...r, percentOfIncome: Number(e.target.value) } }))} />
           </Field>
           <div className="alert good small">
-            <span>💡</span>
+            <Icon name="info" size={18} />
             <div>Según tus últimos 3 meses, puedes apartar con seguridad unos <b>{formatMoney(safeToSave(data, month))}</b> este mes, dejando un colchón del 10 % de tus ingresos.</div>
           </div>
         </div>
@@ -150,7 +151,7 @@ export function Plan() {
         </Sheet>
       )}
       {moveGoal && (
-        <Sheet title={`${moveGoal.icon} ${moveGoal.name}`} onClose={() => setMoveGoal(null)}>
+        <Sheet title={moveGoal.name} onClose={() => setMoveGoal(null)}>
           <GoalMove currency={moveGoal.currency ?? data.settings.currency} onDone={(amount) => { update((d) => applyGoalMovement(d, moveGoal.id, amount, amount < 0 ? 'withdraw' : 'manual', now)); setMoveGoal(null); }} />
         </Sheet>
       )}
@@ -169,7 +170,7 @@ function BudgetForm({ value, onSave, onDelete }: { value: Partial<Budget>; onSav
     <>
       <Field label="Categoría">
         <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-          {data.categories.filter((c) => c.kind === 'expense').map((c) => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+          {data.categories.filter((c) => c.kind === 'expense').map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
       </Field>
       <Field label={`Tope mensual (${data.settings.currency})`}><input inputMode="decimal" value={limit} onChange={(e) => setLimit(e.target.value)} /></Field>
@@ -181,12 +182,12 @@ function BudgetForm({ value, onSave, onDelete }: { value: Partial<Budget>; onSav
   );
 }
 
-const ICONS = ['🛟', '🏖️', '🧾', '🏠', '🚗', '🎓', '💍', '🎁', '📈', '💳', '✈️', '🐷'];
+const ICONS = GOAL_ICONS;
 
 function GoalForm({ value, onSave, onDelete }: { value: Partial<Goal>; onSave: (g: Goal) => void; onDelete?: () => void }) {
   const { data } = useStore();
   const [name, setName] = useState(value.name ?? '');
-  const [icon, setIcon] = useState(value.icon ?? '🐷');
+  const [icon, setIcon] = useState(value.icon ?? 'piggy');
   const [kind, setKind] = useState<GoalKind>(value.kind ?? 'savings');
   const [currency, setCurrency] = useState(value.currency ?? data.settings.currency);
   const [target, setTarget] = useState(value.target ? String(value.target / 100) : '');
@@ -210,7 +211,7 @@ function GoalForm({ value, onSave, onDelete }: { value: Partial<Goal>; onSave: (
           <button key={k} className={kind === k ? 'on' : ''} onClick={() => setKind(k)}>{GOAL_KIND_LABEL[k]}</button>
         ))}
       </div>
-      <div className="chips mb">{ICONS.map((i) => <button key={i} className={`chip ${icon === i ? 'on' : ''}`} onClick={() => setIcon(i)}>{i}</button>)}</div>
+      <div className="chips mb">{ICONS.map((i) => <button key={i} aria-label={i} className={`chip ${icon === i ? 'on' : ''}`} onClick={() => setIcon(i)} style={{ padding: 10 }}><GoalIcon icon={i} size={18} /></button>)}</div>
       <Field label="Nombre"><input value={name} placeholder={kind === 'investment' ? 'Cartera indexada 20.000 €' : kind === 'debt' ? 'Liquidar tarjeta' : 'Fondo de emergencia 6 meses'} onChange={(e) => setName(e.target.value)} /></Field>
       <div className="grid2">
         <Field label="Objetivo"><input inputMode="decimal" value={target} onChange={(e) => setTarget(e.target.value)} /></Field>

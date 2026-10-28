@@ -14,12 +14,12 @@ export function Health() {
   return (
     <>
       <div className="card glass" style={{ textAlign: 'center' }}>
-        <div className="ring" style={{ background: `conic-gradient(var(--accent) ${r.score * 3.6}deg, var(--fill) 0)` }}>
+        <div className="ring" style={{ background: `conic-gradient(var(--accent-fill) ${r.score * 3.6}deg, var(--fill-2) 0)` }}>
           <div>
             <b>{r.score}</b>
           </div>
         </div>
-        <div style={{ fontWeight: 700, fontSize: 18 }}>{r.grade}</div>
+        <div style={{ fontWeight: 600, fontSize: 19, letterSpacing: '-0.02em' }}>{r.grade}</div>
         {r.monthsOfData < 3 && <p className="small muted">Basado en {r.monthsOfData || 'menos de 1'} mes(es) de datos. La puntuación será más precisa con 3 meses.</p>}
       </div>
 
@@ -27,8 +27,8 @@ export function Health() {
         <div className="card glass">
           <h2>Tus próximos pasos</h2>
           {r.tips.map((t, i) => (
-            <div className="alert" key={i}>
-              <b>{i + 1}</b>
+            <div className="step" key={i} style={{ gridTemplateColumns: '26px 1fr' }}>
+              <span className="n">{i + 1}</span>
               <div className="small">{t}</div>
             </div>
           ))}

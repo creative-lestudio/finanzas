@@ -286,7 +286,7 @@ function RulesSection() {
       <div className="row">
         <input placeholder="Texto, p. ej. 'frutería paco'" value={rulePattern} onChange={(e) => setRulePattern(e.target.value)} />
         <select value={ruleCat} onChange={(e) => setRuleCat(e.target.value)} style={{ maxWidth: 140 }}>
-          {data.categories.map((c) => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+          {data.categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
         <button className="icon-btn" style={{ background: 'var(--accent)', color: 'var(--on-accent)', flex: 'none' }} disabled={!rulePattern.trim()} aria-label="Añadir regla" onClick={() => { update((d) => ({ ...d, rules: [...d.rules, { id: uid(), pattern: normalize(rulePattern), categoryId: ruleCat }] })); setRulePattern(''); }}>
           <Icon name="plus" size={20} stroke={2.4} />

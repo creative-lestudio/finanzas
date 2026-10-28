@@ -1,6 +1,9 @@
 import type { Settings } from './types';
 
+export const BRAND = '#032a67';
+
 export const ACCENTS: [string, string][] = [
+  ['Marino', BRAND],
   ['Azul', '#0a84ff'],
   ['Índigo', '#5e5ce6'],
   ['Morado', '#bf5af2'],
@@ -29,14 +32,14 @@ export function onColor(hex: string): string {
 
 /** Aplica el color principal y el tema claro/oscuro/automático a toda la app. */
 export function applyTheme(theme: Settings['theme']) {
-  const accent = theme?.accent ?? '#0a84ff';
+  const accent = theme?.accent ?? BRAND;
   const root = document.documentElement;
   root.style.setProperty('--accent', accent);
   root.style.setProperty('--on-accent', onColor(accent));
   if (!theme || theme.mode === 'auto') root.removeAttribute('data-theme');
   else root.setAttribute('data-theme', theme.mode);
   const dark = theme?.mode === 'dark' || (theme?.mode !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#000000' : '#f2f2f7');
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#04070d' : '#f3f5f9');
   try {
     localStorage.setItem('finanzas.theme', JSON.stringify({ accent, mode: theme?.mode ?? 'auto' }));
   } catch {

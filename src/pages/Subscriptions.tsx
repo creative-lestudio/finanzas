@@ -1,3 +1,4 @@
+import { CatIcon, Icon } from '../components/icons';
 import { detectFees, detectSubscriptions, FEE_TIPS, isActive, type Subscription } from '../lib/insights';
 import { formatMoney, today } from '../lib/money';
 import { useStore } from '../store';
@@ -34,12 +35,12 @@ export function Subscriptions() {
       <div className="card glass">
         <h2>Comisiones bancarias</h2>
         {fees.length === 0 ? (
-          <Empty>✓ No se han detectado comisiones. ¡Bien!</Empty>
+          <Empty>No se han detectado comisiones.</Empty>
         ) : (
           <>
             <p className="small" style={{ marginTop: 0 }}>Últimos 12 meses: <b>{formatMoney(yearlyFees)}</b> en comisiones.</p>
             {kinds.map((k) => (
-              <div className="alert warning small" key={k}><span>💡</span><div>{FEE_TIPS[k]}</div></div>
+              <div className="alert small" key={k}><Icon name="info" size={18} /><div>{FEE_TIPS[k]}</div></div>
             ))}
             <ul className="list small">
               {fees.slice(0, 12).map((f) => (
@@ -64,12 +65,12 @@ function RecurringCard({ title, items, hint }: { title: string; items: Subscript
       <ul className="list">
         {items.map((s) => (
           <li key={s.key}>
-            <span className="icon">{data.categories.find((c) => c.id === s.categoryId)?.icon ?? '🔁'}</span>
+            <span className="icon"><CatIcon id={s.categoryId} emoji={data.categories.find((c) => c.id === s.categoryId)?.icon} /></span>
             <div className="grow">
               <div className="ellipsis">{s.name}</div>
               <div className="small muted">
                 {FREQ[s.frequency]} · próximo ~{s.nextDate}
-                {s.priceIncrease ? <span style={{ color: 'var(--warn)' }}> · ↑ subió {formatMoney(s.priceIncrease, s.currency)}</span> : null}
+                {s.priceIncrease ? <span style={{ color: 'var(--warn)' }}> · subió {formatMoney(s.priceIncrease, s.currency)}</span> : null}
               </div>
             </div>
             <div style={{ textAlign: 'right' }}>

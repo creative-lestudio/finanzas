@@ -4,7 +4,7 @@ import { detectChannel } from '../lib/categorize';
 import { formatMoney, parseAmount } from '../lib/money';
 import { accountChoices, listen, parseVoiceAI, parseVoiceLocal, speechSupported, withMissing, type VoiceDraft } from '../lib/voice';
 import { useStore } from '../store';
-import { Icon } from './icons';
+import { CatIcon, Icon } from './icons';
 import { saveTransaction } from './QuickAdd';
 import { Sheet, toast } from './ui';
 
@@ -107,7 +107,7 @@ export function VoiceSheet({ onClose }: { onClose: () => void }) {
     <Sheet title="Dictar movimiento" onClose={onClose}>
       {supported ? (
         <>
-          <button className={`mic ${live ? 'live' : ''}`} onClick={() => (live ? stop.current() : start())} aria-label={live ? 'Detener' : 'Hablar'}>
+          <button className={`mic lg tint ${live ? 'live' : ''}`} onClick={() => (live ? stop.current() : start())} aria-label={live ? 'Detener' : 'Hablar'}>
             <Icon name="mic" size={38} stroke={2} />
           </button>
           <div className="transcript">{text || <span className="muted">{live ? 'Te escucho…' : error || 'Pulsa y habla'}</span>}</div>
@@ -135,13 +135,13 @@ export function VoiceSheet({ onClose }: { onClose: () => void }) {
               <input inputMode="decimal" className="amount-input" placeholder="¿Cuánto?" autoFocus onBlur={(e) => set({ amount: Math.abs(parseAmount(e.target.value) ?? 0) || null })} aria-label="Importe" />
             )}
             <div className="secondary">{draft.description || '—'} · {draft.date}</div>
-            {thinking && <div className="tiny muted mt">✨ Completando con IA…</div>}
+            {thinking && <div className="tiny muted mt">Completando con IA…</div>}
           </div>
 
           <div className="small muted mb">Categoría {draft.missing.includes('category') && <b style={{ color: 'var(--warn)' }}>· elige una</b>}</div>
           <div className="chips mb">
             {topCats.map((c) => (
-              <button key={c.id} className={`chip ${draft.categoryId === c.id ? 'on' : ''}`} onClick={() => set({ categoryId: c.id })}>{c.icon} {c.name}</button>
+              <button key={c.id} className={`chip ${draft.categoryId === c.id ? 'on' : ''}`} onClick={() => set({ categoryId: c.id })}><CatIcon id={c.id} emoji={c.icon} size={16} />{c.name}</button>
             ))}
           </div>
 

@@ -8,14 +8,16 @@ import type { Account, AccountKind } from '../lib/types';
 import { useStore } from '../store';
 
 export const KIND_LABEL: Record<AccountKind, string> = {
-  checking: '🏦 Cuentas corrientes',
-  savings: '💰 Ahorro',
-  cash: '💶 Efectivo',
-  investment: '📈 Inversiones',
-  crypto: '₿ Criptomonedas',
-  card: '💳 Tarjetas de crédito',
-  loan: '📉 Préstamos e hipotecas',
+  checking: 'Cuentas corrientes',
+  savings: 'Ahorro',
+  cash: 'Efectivo',
+  investment: 'Inversiones',
+  crypto: 'Criptomonedas',
+  card: 'Tarjetas de crédito',
+  loan: 'Préstamos e hipotecas',
 };
+
+const KIND_ICON: Record<AccountKind, string> = { checking: 'bank', savings: 'piggy', cash: 'banknote', investment: 'trend', crypto: 'coins', card: 'card', loan: 'receipt' };
 
 /** Visión global del patrimonio: todo lo que tienes y lo que debes, en tu moneda principal. */
 export function Wealth() {
@@ -51,7 +53,7 @@ export function Wealth() {
               <ul className="list">
                 {accs.map((a) => (
                   <li key={a.id} className="tap" onClick={() => setEdit(a)}>
-                    <span className="icon">{CURRENCIES.find((c) => c.code === a.currency)?.flag ?? '💱'}</span>
+                    <span className="icon"><Icon name={KIND_ICON[a.kind]} size={19} /></span>
                     <div className="grow">
                       <div className="ellipsis">{a.name}</div>
                       <div className="small muted">

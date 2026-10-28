@@ -5,7 +5,7 @@ import { CURRENCIES, rateFor, RATE_SOURCES } from '../lib/fx';
 import { formatMoney, formatRate, merchantKey, monthKey, parseAmount, today, uid } from '../lib/money';
 import type { AppData, Transaction } from '../lib/types';
 import { useStore } from '../store';
-import { Icon } from './icons';
+import { CatIcon, Icon } from './icons';
 import { Sheet, toast } from './ui';
 
 /** Guarda un movimiento manual, ajusta el saldo y avisa si se acerca a un presupuesto. */
@@ -81,7 +81,7 @@ export function QuickAdd({ onClose, onVoice }: { onClose: () => void; onVoice: (
 
   return (
     <Sheet title="Nuevo movimiento" onClose={onClose}>
-      <button className="pill-mic glass" onClick={onVoice}>
+      <button className="pill-mic lg" onClick={onVoice}>
         <span className="dot"><Icon name="mic" size={18} /></span>
         <span className="grow">
           <b>Dictar</b>
@@ -102,7 +102,7 @@ export function QuickAdd({ onClose, onVoice }: { onClose: () => void; onVoice: (
       <div className="catgrid mb">
         {ordered.slice(0, 12).map((c) => (
           <button key={c.id} className={chosen === c.id ? 'on' : ''} onClick={() => setCategoryId(c.id)}>
-            <span>{c.icon}</span>
+            <CatIcon id={c.id} emoji={c.icon} size={22} />
             <span className="ellipsis" style={{ maxWidth: '100%' }}>{c.name}</span>
           </button>
         ))}

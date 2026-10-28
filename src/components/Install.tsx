@@ -64,7 +64,7 @@ export function InstallBanner() {
           Instalar
         </button>
       )}
-      <button className="btn ghost sm" onClick={close} aria-label="Cerrar">✕</button>
+      <button className="icon-btn" style={{ width: 30, height: 30 }} onClick={close} aria-label="Cerrar"><Icon name="close" size={14} stroke={2.4} /></button>
     </div>
   );
 }

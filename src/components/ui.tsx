@@ -31,7 +31,7 @@ export function Sheet({ title, onClose, children, action }: { title: string; onC
           <h3>{title}</h3>
           <div className="row">
             {action}
-            <button className="icon-btn" style={{ background: 'var(--fill)', width: 32, height: 32 }} onClick={onClose} aria-label="Cerrar">
+            <button className="icon-btn" style={{ width: 32, height: 32 }} onClick={onClose} aria-label="Cerrar">
               <Icon name="close" size={16} stroke={2.4} />
             </button>
           </div>
@@ -42,7 +42,7 @@ export function Sheet({ title, onClose, children, action }: { title: string; onC
   );
 }
 
-const STATE_LABEL: Record<BudgetState, string> = { ok: '✓ En orden', warning: '⚠ Cerca del tope', over: '✕ Superado' };
+const STATE_LABEL: Record<BudgetState, string> = { ok: 'En orden', warning: 'Cerca del tope', over: 'Superado' };
 
 export function StateBadge({ state }: { state: BudgetState }) {
   return <span className={`badge ${state}`}>{STATE_LABEL[state]}</span>;
@@ -95,7 +95,7 @@ export function Toaster() {
     return () => window.clearTimeout(t);
   }, [msg]);
   return msg ? (
-    <div className="toast glass" role="status" onClick={() => setMsg(null)}>
+    <div className="toast lg" role="status" onClick={() => setMsg(null)}>
       {msg}
     </div>
   ) : null;

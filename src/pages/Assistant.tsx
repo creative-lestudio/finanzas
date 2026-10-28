@@ -1,6 +1,6 @@
 import type Anthropic from '@anthropic-ai/sdk';
 import { useEffect, useRef, useState } from 'react';
-import { Icon } from '../components/icons';
+import { CatIcon, Icon } from '../components/icons';
 import { Markdown, toast } from '../components/ui';
 import { advisorTurn, aiAvailability, type Proposal } from '../lib/ai';
 import { formatMoney, today, uid } from '../lib/money';
@@ -81,7 +81,7 @@ export function Assistant() {
           {
             id: uid(),
             name: g.name,
-            icon: g.kind === 'investment' ? '📈' : g.kind === 'debt' ? '💳' : g.kind === 'purchase' ? '🛍️' : '🐷',
+            icon: g.kind === 'investment' ? 'trend' : g.kind === 'debt' ? 'card' : g.kind === 'purchase' ? 'gift' : 'piggy',
             kind: g.kind,
             currency: g.currency,
             target: Math.round(g.target * 100),
@@ -148,7 +148,7 @@ export function Assistant() {
                       {p.budgets.map((b) => (
                         <li key={b.categoryId} style={{ alignItems: 'flex-start' }}>
                           <div className="grow">
-                            <div>{cat(b.categoryId)?.icon} {cat(b.categoryId)?.name ?? b.categoryId}</div>
+                            <div className="row"><span className="icon" style={{ width: 28, height: 28, borderRadius: 8 }}><CatIcon id={b.categoryId} emoji={cat(b.categoryId)?.icon} size={16} /></span>{cat(b.categoryId)?.name ?? b.categoryId}</div>
                             <div className="tiny muted">{b.reason}</div>
                           </div>
                           <b className="num">{formatMoney(Math.round(b.limit * 100))}</b>

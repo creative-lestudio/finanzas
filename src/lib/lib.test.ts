@@ -3,14 +3,14 @@ import { budgetStatus } from './budgets';
 import { categorize, learnFromCorrection, matchesPattern } from './categorize';
 import { createSession, decryptJSON, encryptJSON, unlock } from './crypto';
 import { demoData } from './demo';
-import { emptyData } from './defaults';
+import { emptyData, migrate } from './defaults';
 import { healthReport, netWorth } from './health';
 import { mergeMovements, parseBankCSV } from './importer';
 import { detectAntExpenses, detectFees, detectSubscriptions } from './insights';
 import { merchantKey, parseAmount } from './money';
 import { distribute, roundUpAmount, savingProposals } from './savings';
 import { balances, settleUp, splitByWeights, splitEqual } from './shared';
-import { addRate, analyzeExchange, analyzeIncomeFx, deleteExchange, fxSummary, rateFor, recordExchange, simulateChain } from './fx';
+import { addRate, displayPair, referenceTypesFor, analyzeExchange, analyzeIncomeFx, deleteExchange, fxSummary, rateFor, recordExchange, simulateChain } from './fx';
 import { futureValue, goalProgress } from './goals';
 import { merge3 } from './merge';
 import { parseVoiceLocal } from './voice';
@@ -188,7 +188,7 @@ describe('divisas', () => {
     ];
     d = addRate(d, { date: '2026-10-01', base: 'USD', quote: 'VES', rate: 40, source: 'BCV' });
     d = addRate(d, { date: '2026-10-01', base: 'USD', quote: 'VES', rate: 50, source: 'Paralelo' });
-    d = addRate(d, { date: '2026-10-01', base: 'EUR', quote: 'USD', rate: 1.1, source: 'Mercado medio' });
+    d = addRate(d, { date: '2026-10-01', base: 'EUR', quote: 'USD', rate: 1.1, source: 'Personalizada' });
     return d;
   };
 
@@ -319,5 +319,23 @@ describe('excel', () => {
     const fresh = applyExcelImport(emptyData(), imp, 'cash');
     expect(fresh.added).toBe(d.transactions.length);
     expect(fresh.data.accounts.some((a) => a.name === 'Banesco (Bs)' && a.currency === 'VES')).toBe(true);
+  });
+});
+
+describe('tipos de tasa', () => {
+  it('ordena el par como se lee y propone referencias según las monedas', () => {
+    expect(displayPair('VES', 'USD')).toEqual(['USD', 'VES']);
+    expect(displayPair('USD', 'EUR')).toEqual(['EUR', 'USD']);
+    expect(referenceTypesFor('VES', 'USDT')).toEqual(['Paralelo', 'BCV', 'Personalizada']);
+    expect(referenceTypesFor('EUR', 'VES')).toEqual(['Euro', 'Personalizada']);
+    expect(referenceTypesFor('USD', 'EUR')).toEqual(['Personalizada']);
+  });
+  it('migra fuentes antiguas a Personalizada', () => {
+    const d = emptyData();
+    d.rates = [{ id: 'r', date: '2026-01-01', base: 'EUR', quote: 'USD', rate: 1.1, source: 'Mercado medio' }];
+    d.settings.rateSource = { VES: 'Binance P2P', EUR: 'Euro' };
+    const m = migrate(d);
+    expect(m.rates[0].source).toBe('Personalizada');
+    expect(m.settings.rateSource).toEqual({ EUR: 'Euro' });
   });
 });
