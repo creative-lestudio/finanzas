@@ -3,327 +3,339 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Finanzas — tu dinero, en claro</title>
-    <meta name="description" content="App de finanzas personales gratuita y privada: gastos, presupuestos, metas medibles, bolívares, dólares y euros, registro por voz y asesor con IA. Instálala en Android, iPhone o tu ordenador." />
+    <title>Finanzas — tu dinero, con claridad</title>
+    <meta name="description" content="Finanzas personales privadas y cifradas: gastos, presupuestos y metas en bolívares, dólares y euros, con el equivalente exacto de cada pago. Instálala en Android, iPhone o tu ordenador." />
     <meta name="theme-color" content="#032a67" />
-    <meta property="og:title" content="Finanzas — tu dinero, en claro" />
-    <meta property="og:description" content="Gastos, presupuestos, metas, divisas y asesor con IA. Privada y cifrada. Instálala desde el navegador." />
+    <meta property="og:title" content="Finanzas — tu dinero, con claridad" />
+    <meta property="og:description" content="Gastos, presupuestos y metas en varias monedas, con cada pago en su equivalente. Privada y cifrada." />
     <meta property="og:image" content="./app/icons/icon-512.png" />
     <link rel="icon" href="./app/icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./app/icons/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..650&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&display=swap" />
     <style>
-      /* Página de producto: una sola columna amplia, superficies limpias y cristal solo en lo que flota. */
+      /* Sobria y editorial: papel cálido, azul marino, una sola tipografía con serifa para los titulares y líneas finas en vez de cajas. */
       :root {
-        --brand: #032a67;
-        --brand-ink: #032a67;
-        --brand-soft: rgb(3 42 103 / 0.07);
-        --bg: #f3f5f9;
-        --surface: #ffffff;
-        --text: #0a1324;
-        --text-2: rgb(10 19 36 / 0.66);
-        --muted: rgb(10 19 36 / 0.46);
-        --hairline: rgb(10 25 60 / 0.09);
-        --fill: rgb(10 30 80 / 0.05);
-        --lg-bg: rgb(255 255 255 / 0.55);
-        --lg-rim: rgb(255 255 255 / 0.95);
-        --lg-shadow: 0 16px 40px rgb(5 20 50 / 0.14), 0 2px 6px rgb(5 20 50 / 0.06);
-        --bad: #c4201c;
-        --good: #1a7f43;
-        --wash: rgb(3 42 103 / 0.14);
-        --display: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif;
-        --body: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+        --brand: #032a67; --brand-ink: #032a67; --bg: #f7f6f2; --surface: #ffffff; --ink: #0b1324;
+        --ink-2: rgb(11 19 36 / 0.7); --muted: rgb(11 19 36 / 0.5); --line: rgb(11 19 36 / 0.11); --soft: rgb(3 42 103 / 0.06);
+        --gold: #9a7634; --bad: #b3261e; --good: #17703d; --on-brand: #fff; --btn: #032a67; --btn-ink: #fff;
+        --serif: 'Newsreader', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+        --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+        --shadow: 0 1px 2px rgb(11 19 36 / 0.05), 0 24px 60px -20px rgb(11 19 36 / 0.25);
         color-scheme: light;
       }
       @media (prefers-color-scheme: dark) {
         :root:not([data-theme='light']) {
-          --brand-ink: #a9c6ff;
-          --brand-soft: rgb(80 130 230 / 0.16);
-          --bg: #04070d;
-          --surface: #0d121b;
-          --text: #eef2f8;
-          --text-2: rgb(238 242 248 / 0.7);
-          --muted: rgb(238 242 248 / 0.46);
-          --hairline: rgb(255 255 255 / 0.08);
-          --fill: rgb(255 255 255 / 0.06);
-          --lg-bg: rgb(28 34 46 / 0.45);
-          --lg-rim: rgb(255 255 255 / 0.3);
-          --lg-shadow: 0 16px 44px rgb(0 0 0 / 0.55);
-          --bad: #ff6b63;
-          --good: #42d27a;
-          --wash: rgb(3 42 103 / 0.9);
+          --brand-ink: #a9c6ff; --bg: #070b14; --surface: #0e1522; --ink: #eef1f7; --ink-2: rgb(238 241 247 / 0.72);
+          --muted: rgb(238 241 247 / 0.48); --line: rgb(255 255 255 / 0.1); --soft: rgb(120 160 235 / 0.1); --gold: #d4b06a;
+          --bad: #ff7b73; --good: #4ad483; --btn: #eef1f7; --btn-ink: #04122e; --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 24px 60px -20px rgb(0 0 0 / 0.7);
           color-scheme: dark;
         }
       }
-      :root[data-theme='dark'] {
-        --brand-ink: #a9c6ff; --brand-soft: rgb(80 130 230 / 0.16); --bg: #04070d; --surface: #0d121b; --text: #eef2f8;
-        --text-2: rgb(238 242 248 / 0.7); --muted: rgb(238 242 248 / 0.46); --hairline: rgb(255 255 255 / 0.08); --fill: rgb(255 255 255 / 0.06);
-        --lg-bg: rgb(28 34 46 / 0.45); --lg-rim: rgb(255 255 255 / 0.3); --lg-shadow: 0 16px 44px rgb(0 0 0 / 0.55); --bad: #ff6b63; --good: #42d27a;
-        --wash: rgb(3 42 103 / 0.9); color-scheme: dark;
-      }
       * { box-sizing: border-box; }
-      html, body { margin: 0; }
-      body { background: var(--bg); color: var(--text); font: 17px/1.5 var(--body); -webkit-font-smoothing: antialiased; letter-spacing: -0.012em; overflow-x: hidden; font-optical-sizing: auto; }
+      html { scroll-behavior: smooth; }
+      body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.6 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
       a { color: inherit; }
-      :focus-visible { outline: 2px solid var(--brand-ink); outline-offset: 3px; }
-      .wash { position: absolute; inset: 0 0 auto; height: 900px; z-index: -1; pointer-events: none;
-        background: radial-gradient(70% 60% at 50% -10%, var(--wash), transparent 70%), radial-gradient(40% 40% at 90% 10%, rgb(11 74 168 / 0.12), transparent 70%); }
-      .wrap { max-width: 1120px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); }
+      :focus-visible { outline: 2px solid var(--brand-ink); outline-offset: 3px; border-radius: 4px; }
+      .wrap { max-width: 1120px; margin: 0 auto; padding: 0 max(20px, env(safe-area-inset-left)); }
+      .serif { font-family: var(--serif); }
 
-      /* Liquid Glass para lo que flota */
-      .lg { position: relative; isolation: isolate; background: var(--lg-bg); -webkit-backdrop-filter: blur(24px) saturate(1.9); backdrop-filter: blur(24px) saturate(1.9); box-shadow: var(--lg-shadow); }
-      .lg::before { content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
-        background: linear-gradient(150deg, var(--lg-rim), transparent 32%, transparent 68%, rgb(255 255 255 / 0.4));
-        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
-      .surface { background: var(--surface); box-shadow: 0 0 0 0.5px var(--hairline); }
+      /* Navegación */
+      header { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 82%, transparent); -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4); border-bottom: 1px solid var(--line); }
+      .bar { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 20px; }
+      .brand { display: flex; align-items: center; gap: 10px; font: 600 19px var(--serif); text-decoration: none; letter-spacing: -0.01em; }
+      .brand img { width: 28px; height: 28px; border-radius: 7px; }
+      nav { display: flex; gap: 28px; font-size: 14.5px; color: var(--ink-2); }
+      nav a { text-decoration: none; } nav a:hover { color: var(--ink); }
+      .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 24px; border-radius: 10px; font: 550 15.5px var(--sans); text-decoration: none; border: 1px solid transparent; cursor: pointer; transition: transform 0.2s, background 0.2s, box-shadow 0.2s; }
+      .btn:active { transform: scale(0.98); }
+      .btn.primary { background: var(--btn); color: var(--btn-ink); }
+      .btn.primary:hover { box-shadow: 0 6px 20px -6px rgb(3 42 103 / 0.5); }
+      .btn.line { border-color: var(--line); background: transparent; color: var(--ink); }
+      .btn.line:hover { background: var(--soft); }
+      .btn.sm { padding: 9px 16px; font-size: 14px; }
 
-      header { position: sticky; top: max(10px, env(safe-area-inset-top)); z-index: 10; margin-top: 10px; }
-      .bar { display: flex; align-items: center; justify-content: space-between; border-radius: 999px; padding: 8px 8px 8px 14px; max-width: 760px; margin: 0 auto; }
-      .brand { display: flex; align-items: center; gap: 10px; font-weight: 650; text-decoration: none; letter-spacing: -0.02em; }
-      .brand img { width: 30px; height: 30px; border-radius: 8px; }
-      .bar nav { display: flex; gap: 22px; font-size: 14px; color: var(--text-2); }
-      .bar nav a { text-decoration: none; }
-      .bar nav a:hover { color: var(--text); }
-      .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 24px; border-radius: 999px; font-weight: 600; text-decoration: none; border: none; cursor: pointer; font-size: 16px; letter-spacing: -0.015em; transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1), background 0.2s; }
-      .btn:active { transform: scale(0.97); }
-      .btn.primary { background: var(--brand); color: #fff; }
-      :root[data-theme='dark'] .btn.primary { background: #2c5bb0; }
-      @media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .btn.primary { background: #2c5bb0; } }
-      .btn.ghost { background: var(--fill); color: var(--text); }
-      .btn.sm { padding: 9px 18px; font-size: 14px; }
-
-      .hero { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 40px; align-items: center; padding: 72px 0 40px; }
-      .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--brand-ink); background: var(--brand-soft); padding: 6px 12px; border-radius: 999px; }
-      h1 { font-family: var(--display); font-size: clamp(44px, 7vw, 80px); line-height: 1.0; letter-spacing: -0.05em; margin: 18px 0 18px; font-weight: 700; text-wrap: balance; }
-      h1 span { color: var(--brand-ink); }
-      .lead { font-size: clamp(18px, 2.2vw, 21px); color: var(--text-2); max-width: 34ch; margin: 0 0 28px; text-wrap: pretty; }
+      /* Portada */
+      .hero { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 56px; align-items: center; padding: 88px 0 72px; }
+      .eyebrow { display: inline-flex; align-items: center; gap: 10px; font: 600 12.5px var(--sans); letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
+      .eyebrow::before { content: ''; width: 28px; height: 1px; background: currentColor; }
+      h1, h2, h3 { font-family: var(--serif); font-weight: 500; margin: 0; text-wrap: balance; }
+      h1 { font-size: clamp(44px, 6.4vw, 80px); line-height: 1.02; letter-spacing: -0.025em; margin: 20px 0 22px; }
+      h1 em { font-style: italic; color: var(--brand-ink); }
+      .lead { font-size: clamp(18px, 2vw, 20px); color: var(--ink-2); max-width: 46ch; margin: 0 0 32px; text-wrap: pretty; }
       .ctas { display: flex; gap: 12px; flex-wrap: wrap; }
-      .facts { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 26px; font-size: 14px; color: var(--muted); }
-      .facts span { display: inline-flex; align-items: center; gap: 6px; }
-      .facts svg { color: var(--brand-ink); }
+      .assure { display: flex; gap: 22px; flex-wrap: wrap; margin: 30px 0 0; padding: 0; list-style: none; font-size: 14px; color: var(--muted); }
+      .assure li { display: inline-flex; align-items: center; gap: 8px; }
+      .assure svg { color: var(--brand-ink); }
 
-      .device { position: relative; justify-self: center; width: min(340px, 82vw); }
-      .phone { border-radius: 52px; padding: 10px; }
-      .phone picture, .phone img { display: block; width: 100%; aspect-ratio: 390 / 844; object-fit: cover; object-position: top; border-radius: 42px; }
-      .float { position: absolute; border-radius: 20px; padding: 12px 16px; font-size: 14px; max-width: 230px; animation: bob 7s ease-in-out infinite; }
-      .float b { display: block; font-family: var(--display); font-size: 20px; letter-spacing: -0.03em; }
-      .float.a { left: -64px; top: 44%; }
-      .float.b { right: -54px; bottom: 18%; animation-delay: -3.5s; }
-      .float .neg { color: var(--bad); }
-      @keyframes bob { 50% { transform: translateY(-8px); } }
+      .device { position: relative; justify-self: center; width: min(330px, 80vw); }
+      .phone { border-radius: 46px; padding: 9px; background: #0b1324; box-shadow: var(--shadow); }
+      .phone picture, .phone img { display: block; width: 100%; aspect-ratio: 390 / 844; object-fit: cover; object-position: top; border-radius: 38px; }
+      .proof { position: absolute; left: -64px; bottom: 56px; width: 250px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; box-shadow: var(--shadow); }
+      .proof .k { font-size: 12px; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; }
+      .proof .v { font: 500 26px/1.15 var(--serif); margin: 6px 0 2px; letter-spacing: -0.01em; }
+      .proof .v small { font: 500 15px var(--sans); color: var(--ink-2); }
+      .proof .s { font-size: 13px; color: var(--ink-2); }
+      .proof .s b { color: var(--good); font-weight: 600; }
 
-      h2 { font-family: var(--display); font-size: clamp(32px, 5vw, 52px); letter-spacing: -0.045em; line-height: 1.05; margin: 0 0 14px; font-weight: 700; text-wrap: balance; }
-      .sec { padding: 72px 0 0; }
-      .sec > .wrap > p.sub { color: var(--text-2); max-width: 56ch; margin: 0 0 32px; font-size: 18px; }
+      /* Cifras de confianza */
+      .facts { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+      .facts .wrap { display: grid; grid-template-columns: repeat(4, 1fr); }
+      .fact { padding: 28px 24px; border-left: 1px solid var(--line); }
+      .fact:first-child { border-left: 0; padding-left: 0; }
+      .fact b { display: block; font: 500 34px/1.1 var(--serif); letter-spacing: -0.02em; color: var(--brand-ink); }
+      .fact span { font-size: 14px; color: var(--ink-2); }
 
-      /* Calculadora BCV / paralelo */
-      .calc { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-radius: 32px; overflow: hidden; }
-      .calc .in { padding: 28px; display: grid; gap: 16px; align-content: start; }
+      section { padding: 104px 0 0; }
+      .head { max-width: 680px; margin-bottom: 52px; }
+      h2 { font-size: clamp(34px, 4.6vw, 54px); line-height: 1.06; letter-spacing: -0.022em; margin: 16px 0 16px; }
+      .head p { color: var(--ink-2); font-size: 18.5px; margin: 0; text-wrap: pretty; }
+
+      /* Divisas */
+      .split { display: grid; grid-template-columns: 1fr 1.02fr; gap: 64px; align-items: start; }
+      .steps { list-style: none; margin: 28px 0 0; padding: 0; counter-reset: s; }
+      .steps li { counter-increment: s; display: grid; grid-template-columns: 44px 1fr; gap: 6px 16px; padding: 18px 0; border-top: 1px solid var(--line); }
+      .steps li:last-child { border-bottom: 1px solid var(--line); }
+      .steps li::before { content: counter(s); grid-row: span 2; font: 500 30px/1 var(--serif); color: var(--gold); }
+      .steps b { font-weight: 600; } .steps span { color: var(--ink-2); font-size: 15.5px; }
+      .calc { border-radius: 20px; overflow: hidden; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+      .calc .in { padding: 28px; display: grid; gap: 14px; }
+      .calc .ttl { font: 500 22px var(--serif); margin: 0 0 4px; }
       .calc label { display: grid; gap: 6px; font-size: 13px; color: var(--muted); font-weight: 500; }
-      .calc input { font: 600 26px/1.2 var(--display); letter-spacing: -0.03em; padding: 12px 14px; border-radius: 14px; border: none; background: var(--fill); color: var(--text); width: 100%; font-variant-numeric: tabular-nums; }
-      .calc input:focus { outline: none; box-shadow: 0 0 0 1.5px var(--brand-ink), 0 0 0 5px var(--brand-soft); }
-      .calc .out { padding: 28px; background: var(--brand); color: #fff; display: grid; align-content: center; gap: 6px; position: relative; overflow: hidden; }
-      .calc .out::before { content: ''; position: absolute; inset: -40% -20% auto auto; width: 320px; height: 320px; border-radius: 50%; background: radial-gradient(closest-side, rgb(120 170 255 / 0.35), transparent); }
-      .calc .out .k { font-size: 14px; opacity: 0.75; }
-      .calc .out .v { font: 700 clamp(40px, 6vw, 64px)/1 var(--display); letter-spacing: -0.05em; font-variant-numeric: tabular-nums; }
-      .calc .out .s { font-size: 15px; opacity: 0.85; margin-top: 8px; }
+      .calc input { font: 500 24px/1.2 var(--serif); padding: 11px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); width: 100%; font-variant-numeric: tabular-nums; }
+      .calc input:focus { outline: none; border-color: var(--brand-ink); box-shadow: 0 0 0 4px var(--soft); }
+      .calc .out { padding: 24px 28px; background: var(--brand); color: #fff; display: grid; gap: 4px; }
+      .calc .out .k { font-size: 13px; opacity: 0.75; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; }
+      .calc .out .v { font: 500 clamp(38px, 5vw, 52px)/1.05 var(--serif); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+      .calc .out .s { font-size: 14.5px; opacity: 0.85; }
 
-      .bento { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-      .tile { border-radius: 28px; padding: 26px; min-height: 210px; display: flex; flex-direction: column; gap: 10px; }
-      .tile.wide { grid-column: span 2; }
-      .tile.full { grid-column: 1 / -1; }
-      .tile .ic { width: 44px; height: 44px; border-radius: 13px; display: grid; place-items: center; background: var(--brand-soft); color: var(--brand-ink); }
-      .tile h3 { margin: 6px 0 0; font-family: var(--display); font-size: 21px; letter-spacing: -0.03em; }
-      .tile p { margin: 0; color: var(--text-2); font-size: 15.5px; }
-      .quote { margin-top: auto; font: 500 18px/1.35 var(--display); letter-spacing: -0.02em; padding: 14px 16px; border-radius: 18px; background: var(--fill); }
-      .quote small { display: block; font: 500 13px var(--body); color: var(--muted); margin-top: 4px; }
+      /* Funciones */
+      .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 48px; }
+      .feat { padding: 28px 0 36px; border-top: 1px solid var(--line); }
+      .feat .ic { color: var(--brand-ink); display: block; margin-bottom: 18px; }
+      .feat h3 { font-size: 24px; letter-spacing: -0.012em; margin-bottom: 8px; }
+      .feat p { margin: 0; color: var(--ink-2); font-size: 16px; }
 
+      /* Asistente */
+      .coach { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 64px; align-items: center; }
+      .coach img { width: min(340px, 100%); aspect-ratio: 1; border-radius: 50%; display: block; margin: 0 auto; box-shadow: var(--shadow), 0 0 0 10px var(--soft); }
+      .chat { display: grid; gap: 10px; margin-top: 28px; max-width: 480px; }
+      .chat .b { justify-self: start; max-width: 92%; padding: 13px 18px; border-radius: 18px 18px 18px 4px; font-size: 15.5px; background: var(--surface); border: 1px solid var(--line); }
+      .chat .u { justify-self: end; padding: 11px 16px; border-radius: 18px 18px 4px 18px; font-size: 15.5px; background: var(--btn); color: var(--btn-ink); font-weight: 500; }
+
+      /* Seguridad */
+      .secure { margin-top: 104px; background: var(--brand); color: #fff; padding: 96px 0; }
+      :root[data-theme='dark'] .secure, :root:not([data-theme='light']) .secure { }
+      .secure .eyebrow { color: #d9bd86; }
+      .secure h2 { color: #fff; }
+      .secure .head p { color: rgb(255 255 255 / 0.78); }
+      .cols3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px; }
+      .col { border-top: 1px solid rgb(255 255 255 / 0.22); padding-top: 24px; }
+      .col svg { color: #d9bd86; margin-bottom: 14px; display: block; }
+      .col h3 { font-size: 23px; margin-bottom: 8px; color: #fff; }
+      .col p { margin: 0; color: rgb(255 255 255 / 0.74); font-size: 15.5px; }
+      .secure .more { margin-top: 44px; }
+      .secure .btn.line { border-color: rgb(255 255 255 / 0.35); color: #fff; }
+      .secure .btn.line:hover { background: rgb(255 255 255 / 0.08); }
+
+      /* Instalar */
       .install { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-      .os { border-radius: 26px; padding: 24px; }
-      .os.me { box-shadow: 0 0 0 2px var(--brand-ink); }
-      .os .tag { display: none; font-size: 12px; font-weight: 600; color: var(--brand-ink); margin-bottom: 8px; }
+      .os { border-radius: 14px; padding: 22px; background: var(--surface); border: 1px solid var(--line); }
+      .os.me { border-color: var(--brand-ink); box-shadow: 0 0 0 3px var(--soft); }
+      .os .tag { display: none; font: 600 11.5px var(--sans); letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
       .os.me .tag { display: block; }
-      .os h3 { margin: 0 0 10px; font-size: 18px; letter-spacing: -0.02em; }
-      .os ol { margin: 0; padding-left: 18px; color: var(--text-2); font-size: 15px; }
-      .os li { margin-bottom: 6px; }
-      .os b { color: var(--text); font-weight: 600; }
+      .os h3 { font-size: 21px; margin: 0 0 10px; }
+      .os ol { margin: 0; padding-left: 18px; color: var(--ink-2); font-size: 15px; }
+      .os li { margin-bottom: 6px; } .os b { color: var(--ink); font-weight: 600; }
 
-      .privacy { margin-top: 72px; border-radius: 36px; padding: 48px 32px; text-align: center; background: var(--brand); color: #fff; position: relative; overflow: hidden; }
-      .privacy::before { content: ''; position: absolute; inset: auto auto -60% -10%; width: 520px; height: 520px; border-radius: 50%; background: radial-gradient(closest-side, rgb(120 170 255 / 0.3), transparent); }
-      .privacy h2 { color: #fff; }
-      .privacy p { color: rgb(255 255 255 / 0.8); max-width: 56ch; margin: 0 auto 24px; position: relative; }
-      .privacy .btn { background: #fff; color: #032a67; position: relative; }
-      footer { text-align: center; color: var(--muted); font-size: 13px; padding: 40px 20px 60px; }
+      .final { text-align: center; padding: 120px 0 112px; }
+      .final h2 { margin: 0 auto 28px; max-width: 18ch; }
+      footer { border-top: 1px solid var(--line); padding: 44px 0 56px; font-size: 14px; color: var(--muted); }
+      footer .wrap { display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px; }
+      footer a { text-decoration: none; margin-right: 22px; color: var(--ink-2); } footer a:hover { color: var(--ink); }
+      footer p { margin: 0 0 8px; max-width: 60ch; }
 
-
-      /* Personaje */
-      .coach { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 0; border-radius: 36px; overflow: hidden; background: linear-gradient(150deg, #0b3f8f, #032a67 60%, #021a42); color: #fff; }
-      .coach .pic { display: grid; place-items: center; padding: 40px; } .coach img { width: min(360px, 100%); aspect-ratio: 1; border-radius: 50%; display: block; box-shadow: 0 30px 80px rgb(0 0 0 / 0.45), 0 0 0 6px rgb(255 255 255 / 0.08); }
-      .coach .copy { padding: 40px 36px; display: grid; align-content: center; gap: 14px; }
-      .coach h2 { color: #fff; margin: 0; }
-      .coach h2 span { color: #7fb0ff; }
-      .coach p { color: rgb(255 255 255 / 0.78); margin: 0; font-size: 18px; max-width: 40ch; }
-      .chatmock { display: grid; gap: 10px; margin-top: 8px; }
-      .chatmock .b { justify-self: start; max-width: 92%; padding: 12px 16px; border-radius: 20px 20px 20px 6px; font-size: 15px; background: rgb(255 255 255 / 0.12); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); box-shadow: inset 0 0 0 0.5px rgb(255 255 255 / 0.25); }
-      .chatmock .u { justify-self: end; padding: 10px 14px; border-radius: 20px 20px 6px 20px; font-size: 15px; background: #fff; color: #032a67; font-weight: 500; }
-      @media (max-width: 760px) { .coach { grid-template-columns: 1fr; } .coach .pic { padding: 32px 32px 0; } .coach img { width: min(240px, 70%); } .coach .copy { padding: 28px 22px; } }
-      @media (max-width: 900px) {
-        .hero { grid-template-columns: 1fr; text-align: center; padding-top: 48px; }
-        .lead { margin-left: auto; margin-right: auto; }
-        .ctas, .facts { justify-content: center; }
-        .float.a { left: -14px; } .float.b { right: -10px; }
-        .bento { grid-template-columns: 1fr 1fr; } .tile.wide { grid-column: span 2; }
+      @media (max-width: 960px) {
+        .hero { grid-template-columns: 1fr; gap: 48px; padding: 56px 0 56px; text-align: left; }
+        .proof { left: -8px; bottom: 36px; width: 220px; }
+        .split, .coach { grid-template-columns: 1fr; gap: 40px; }
+        .grid3, .cols3 { grid-template-columns: 1fr 1fr; gap: 0 32px; }
+        .cols3 { gap: 40px 32px; }
         .install { grid-template-columns: 1fr 1fr; }
-        .bar nav { display: none; }
+        nav { display: none; }
+        .facts .wrap { grid-template-columns: 1fr 1fr; }
+        .fact:nth-child(3) { border-left: 0; padding-left: 0; }
       }
       @media (max-width: 600px) {
-        .calc { grid-template-columns: 1fr; }
-        .bento, .install { grid-template-columns: 1fr; } .tile.wide { grid-column: auto; }
-        .float { max-width: 180px; font-size: 13px; padding: 10px 12px; } .float b { font-size: 17px; }
-        .privacy { padding: 40px 22px; }
+        section { padding-top: 72px; } .secure { padding: 72px 0; margin-top: 72px; }
+        .grid3, .cols3, .install { grid-template-columns: 1fr; }
+        .proof { position: static; width: auto; margin-top: 16px; }
+        .fact { padding: 22px 14px; } .fact b { font-size: 28px; }
+        footer .wrap { grid-template-columns: 1fr; }
       }
-      @media (prefers-reduced-motion: reduce) { .float { animation: none; } }
+      @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .btn { transition: none; } }
     </style>
   </head>
   <body>
-    <div class="wash" aria-hidden="true"></div>
-    <div class="wrap">
-      <header>
-        <div class="bar lg">
-          <a class="brand" href="./"><img src="./app/icons/icon-192.png" alt="" />Finanzas</a>
-          <nav aria-label="Secciones"><a href="#asistente">Asistente</a><a href="#divisas">Divisas</a><a href="#funciones">Funciones</a><a href="#instalar">Instalar</a></nav>
-          <a class="btn primary sm" href="./app/">Abrir la app</a>
-        </div>
-      </header>
+    <header>
+      <div class="wrap bar">
+        <a class="brand" href="./"><img src="./app/icons/icon-192.png" alt="" />Finanzas</a>
+        <nav aria-label="Secciones"><a href="#divisas">Divisas</a><a href="#funciones">Funciones</a><a href="#asistente">Asistente</a><a href="#seguridad">Seguridad</a><a href="#instalar">Instalar</a></nav>
+        <a class="btn primary sm" href="./app/">Abrir la app</a>
+      </div>
+    </header>
 
-      <section class="hero">
+    <main>
+      <div class="wrap hero">
         <div>
-          <span class="eyebrow">Gratis · Privada · Sin tiendas de apps</span>
-          <h1>Tu dinero,<br /><span>en claro.</span></h1>
-          <p class="lead">Gastos, presupuestos y metas en bolívares, dólares y euros. Dicta «gasté 50 euros en Mercadona» y queda apuntado.</p>
+          <span class="eyebrow">Finanzas personales</span>
+          <h1>Tu dinero,<br /><em>con claridad.</em></h1>
+          <p class="lead">Gastos, presupuestos y metas en bolívares, dólares y euros, con el equivalente exacto de cada pago. Privada por diseño.</p>
           <div class="ctas">
-            <a class="btn primary" href="./app/">Empezar ahora</a>
-            <a class="btn ghost" href="#instalar">Instalar en el móvil</a>
+            <a class="btn primary" href="./app/">Empezar gratis</a>
+            <a class="btn line" href="#divisas">Ver cómo funciona</a>
           </div>
-          <div class="facts">
-            <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10h12v11H6zM8.5 10V7a3.5 3.5 0 0 1 7 0v3" /></svg>Cifrada en tu dispositivo</span>
-            <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0M12 19.5h.01" /></svg>Funciona sin conexión</span>
-            <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5h14v10H5zM2 19h20" /></svg>Android, iPhone y ordenador</span>
-          </div>
+          <ul class="assure">
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10h12v11H6zM8.5 10V7a3.5 3.5 0 0 1 7 0v3" /></svg>Cifrada en tu dispositivo</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0M12 19.5h.01" /></svg>Funciona sin conexión</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6zM12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" /></svg>Sin anuncios ni venta de datos</li>
+          </ul>
         </div>
         <div class="device">
-          <div class="phone lg">
+          <div class="phone">
             <picture>
               <source srcset="./site/shot-home-dark.jpg" media="(prefers-color-scheme: dark)" />
               <img src="./site/shot-home.jpg" alt="Pantalla de inicio de Finanzas con el patrimonio neto, accesos rápidos y el gasto mensual" />
             </picture>
           </div>
-          <div class="float a lg"><span class="neg"><b>−160,00 $</b></span>por cobrar 800 $ a tasa BCV</div>
-          <div class="float b lg"><b>Supermercado</b>«Gasté 50 euros en Mercadona»</div>
-        </div>
-      </section>
-    </div>
-
-    <section class="sec" id="divisas">
-      <div class="wrap">
-        <h2>¿Cuánto pierdes al cobrar a tasa BCV?</h2>
-        <p class="sub">Si te pagan en bolívares a la tasa oficial y compras dólares en el paralelo, la diferencia sale de tu bolsillo. Pon tus tasas de hoy.</p>
-        <div class="calc surface">
-          <form class="in" id="calc" autocomplete="off">
-            <label for="amt">Te deben (USD)<input id="amt" inputmode="decimal" value="800" /></label>
-            <label for="bcv">Tasa BCV (Bs por $)<input id="bcv" inputmode="decimal" value="880" /></label>
-            <label for="par">Tasa paralelo (Bs por $)<input id="par" inputmode="decimal" value="1.100" /></label>
-          </form>
-          <div class="out" aria-live="polite">
-            <span class="k">Pierdes</span>
-            <span class="v" id="loss">—</span>
-            <span class="s" id="detail"></span>
+          <div class="proof" role="img" aria-label="Ejemplo: un cobro de 56.500 bolívares registrado como 1.250 dólares a tasa acordada">
+            <div class="k">Cobro registrado</div>
+            <div class="v">56.500 <small>Bs</small> ≈ 1.250 <small>$</small></div>
+            <div class="s">Tasa acordada 45,20 · cuenta como <b>+1.250 $</b></div>
           </div>
         </div>
       </div>
-    </section>
 
+      <div class="facts">
+        <div class="wrap">
+          <div class="fact"><b>AES-256</b><span>Cifrado de tus datos con tu contraseña</span></div>
+          <div class="fact"><b>600.000</b><span>Iteraciones para proteger tu clave</span></div>
+          <div class="fact"><b>0</b><span>Anuncios y datos vendidos</span></div>
+          <div class="fact"><b>4 tasas</b><span>BCV, Euro, Paralelo y la tuya</span></div>
+        </div>
+      </div>
 
-    <section class="sec" id="asistente">
-      <div class="wrap">
-        <div class="coach">
-          <div class="pic"><img src="./site/coach-avatar.webp" alt="El asistente de Finanzas: un joven con gafas y americana azul marino" loading="lazy" /></div>
-          <div class="copy">
-            <h2>Tu <span>aliado</span> financiero</h2>
-            <p>Un asistente cercano y claro que conoce tus números, te explica las cosas fácil y te acompaña en cada decisión.</p>
-            <div class="chatmock" aria-hidden="true">
-              <div class="u">¿En qué se me va el dinero?</div>
-              <div class="b">Este mes llevas un 20 % más en comida que de costumbre. ¿Te propongo un presupuesto de 320 € para el súper?</div>
-              <div class="u">Sí, aplícalo</div>
-              <div class="b">¡Hecho! Te aviso cuando llegues al 80 %.</div>
+      <section id="divisas">
+        <div class="wrap split">
+          <div>
+            <span class="eyebrow">Hecha para cobrar en varias monedas</span>
+            <h2>Cada pago, con su equivalente.</h2>
+            <p style="color: var(--ink-2); font-size: 18.5px; margin: 0;">Si te pagan en bolívares a una tasa pactada, tu ingreso no es lo que marca la tasa del día: es lo que acordaste. Finanzas lo registra así y lo cuenta en tu moneda principal.</p>
+            <ol class="steps">
+              <li><b>Registra el pago en bolívares</b><span>Desde el móvil, por voz o a mano.</span></li>
+              <li><b>Indica la tasa o el monto acordado</b><span>BCV, Euro, Paralelo o la tuya; o directamente «1.250 $».</span></li>
+              <li><b>Ves el valor real</b><span>Tus ingresos, gastos y presupuestos se calculan con ese equivalente.</span></li>
+            </ol>
+          </div>
+          <div class="calc">
+            <form class="in" id="calc" autocomplete="off">
+              <h3 class="ttl">¿Cuánto pierdes al cobrar a tasa BCV?</h3>
+              <label for="amt">Te deben (USD)<input id="amt" inputmode="decimal" value="800" /></label>
+              <label for="bcv">Tasa BCV (Bs por $)<input id="bcv" inputmode="decimal" value="880" /></label>
+              <label for="par">Tasa paralelo (Bs por $)<input id="par" inputmode="decimal" value="1.100" /></label>
+            </form>
+            <div class="out" aria-live="polite">
+              <span class="k">Pierdes</span>
+              <span class="v" id="loss">—</span>
+              <span class="s" id="detail"></span>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="sec" id="funciones">
-      <div class="wrap">
-        <h2>Todo lo que necesitas.<br />Nada que sobre.</h2>
-        <p class="sub">Pensada para registrar en segundos y entender tus números de un vistazo.</p>
-        <div class="bento">
-          <div class="tile surface wide">
-            <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3ZM5 11a7 7 0 0 0 14 0M12 18v3" /></svg></span>
-            <h3>Registro por voz</h3>
-            <p>Habla como hablas. La app reconoce importe, moneda, comercio y cuenta, y si falta algo te lo pregunta con un toque.</p>
-            <div class="quote">«Pagué 12 en efectivo en la farmacia»<small>Salud · Efectivo · −12,00 €</small></div>
+      <section id="funciones">
+        <div class="wrap">
+          <div class="head">
+            <span class="eyebrow">Funciones</span>
+            <h2>Todo lo que necesitas. Nada que sobre.</h2>
+            <p>Pensada para registrar en segundos y entender tus números de un vistazo.</p>
           </div>
-          <div class="tile surface">
-            <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8zM19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z" /></svg></span>
-            <h3>Asesor con IA</h3>
-            <p>Analiza tus números, propone presupuestos según tus ingresos y te ayuda a decidir.</p>
-          </div>
-          <div class="tile surface">
-            <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7" /></svg></span>
-            <h3>Bolívares, dólares, euros</h3>
-            <p>Tasas BCV, Euro, Paralelo o la tuya. Cada cambio en Wise o Binance, con lo que te cuesta.</p>
-          </div>
-          <div class="tile surface">
-            <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-4a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0-4a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" /></svg></span>
-            <h3>Metas medibles</h3>
-            <p>Cifra, fecha y aporte mensual. Sabes si vas en camino o retrasado, con interés compuesto si inviertes.</p>
-          </div>
-          <div class="tile surface">
-            <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></svg></span>
-            <h3>Presupuestos que avisan</h3>
-            <p>Topes por categoría, aviso al instante y lo que te queda por día hasta fin de mes.</p>
-          </div>
-          <div class="tile surface full">
-            <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a5 5 0 1 1 .9-9.9A6 6 0 0 1 19 10a4 4 0 0 1-1 8z" /></svg></span>
-            <h3>En todos tus dispositivos</h3>
-            <p>Sincronización cifrada de extremo a extremo y Excel de ida y vuelta.</p>
+          <div class="grid3">
+            <div class="feat"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3ZM5 11a7 7 0 0 0 14 0M12 18v3" /></svg></span><h3>Registro en segundos</h3><p>Dicta «gasté 50 euros en Mercadona» o apúntalo con un toque. La app reconoce importe, moneda y comercio.</p></div>
+            <div class="feat"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></svg></span><h3>Presupuestos que avisan</h3><p>Topes por categoría, aviso a tiempo y lo que te queda por día hasta fin de mes.</p></div>
+            <div class="feat"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-4a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0-4a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" /></svg></span><h3>Metas medibles</h3><p>Cifra, fecha y aporte mensual. Sabes si vas en camino, con interés compuesto si inviertes.</p></div>
+            <div class="feat"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8zM19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z" /></svg></span><h3>Asesor con IA</h3><p>Analiza tus números, propone presupuestos según tus ingresos y te ayuda a decidir.</p></div>
+            <div class="feat"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h10l4 4v14H5zM14 3v5h5M8 13h8M8 17h8" /></svg></span><h3>Excel y copias</h3><p>Importa y exporta en Excel o CSV. Copias automáticas cifradas para que nada se pierda.</p></div>
+            <div class="feat"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a5 5 0 1 1 .9-9.9A6 6 0 0 1 19 10a4 4 0 0 1-1 8z" /></svg></span><h3>En todos tus dispositivos</h3><p>Inicia sesión con Google o correo y tus datos te siguen, cifrados de extremo a extremo.</p></div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="sec" id="instalar">
-      <div class="wrap">
-        <h2>Instálala en diez segundos</h2>
-        <p class="sub">Se instala desde el navegador, ocupa muy poco, funciona sin conexión y se actualiza sola.</p>
-        <div class="install">
-          <div class="os surface" data-os="ios"><span class="tag">Tu dispositivo</span><h3>iPhone y iPad</h3><ol><li>Abre la app en <b>Safari</b>.</li><li>Pulsa <b>Compartir</b>.</li><li>Elige <b>Añadir a pantalla de inicio</b>.</li></ol></div>
-          <div class="os surface" data-os="android"><span class="tag">Tu dispositivo</span><h3>Android</h3><ol><li>Abre la app en <b>Chrome</b>.</li><li>Pulsa <b>Instalar</b> en el aviso o en el menú <b>⋮</b>.</li></ol></div>
-          <div class="os surface" data-os="desktop"><span class="tag">Tu dispositivo</span><h3>Windows y Linux</h3><ol><li>Abre la app en <b>Chrome</b> o <b>Edge</b>.</li><li>Pulsa el icono de <b>instalar</b> en la barra de direcciones.</li></ol></div>
-          <div class="os surface" data-os="mac"><span class="tag">Tu dispositivo</span><h3>Mac</h3><ol><li>Abre la app en <b>Safari</b>.</li><li><b>Archivo</b> → <b>Añadir al Dock</b>.</li></ol></div>
+      <section id="asistente">
+        <div class="wrap coach">
+          <img src="./site/coach-avatar.webp" alt="El asistente de Finanzas: un joven con gafas y americana azul marino" loading="lazy" />
+          <div>
+            <span class="eyebrow">Asistente</span>
+            <h2>Un aliado que conoce tus números.</h2>
+            <p style="color: var(--ink-2); font-size: 18.5px; margin: 0;">Cercano, claro y sin jerga. Te explica lo que pasa con tu dinero y te acompaña en cada decisión.</p>
+            <div class="chat" aria-hidden="true">
+              <div class="u">¿En qué se me va el dinero?</div>
+              <div class="b">Este mes llevas un 20 % más en comida que de costumbre. ¿Te propongo un presupuesto de 320 € para el súper?</div>
+              <div class="u">Sí, aplícalo</div>
+              <div class="b">Hecho. Te aviso cuando llegues al 80 %.</div>
+            </div>
+          </div>
         </div>
+      </section>
 
-        <section class="privacy">
-          <h2>Tus datos son tuyos</h2>
-          <p>Todo se cifra en tu dispositivo con tu contraseña. Puedes usarla sin conexión y sin vincular ningún banco. Si sincronizas, al servidor solo llega información cifrada que nadie más puede abrir.</p>
-          <a class="btn" href="./app/">Abrir Finanzas</a>
-        </section>
+      <div class="secure" id="seguridad">
+        <div class="wrap">
+          <div class="head">
+            <span class="eyebrow">Seguridad y privacidad</span>
+            <h2>Tus datos, bajo tu llave.</h2>
+            <p>Tu información financiera es solo tuya. Está diseñada para que ni nosotros podamos leerla.</p>
+          </div>
+          <div class="cols3">
+            <div class="col"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10h12v11H6zM8.5 10V7a3.5 3.5 0 0 1 7 0v3" /></svg><h3>Cifrada en tu dispositivo</h3><p>Todo se cifra con AES-256 y una clave derivada de tu contraseña. La contraseña nunca sale de tu dispositivo.</p></div>
+            <div class="col"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a5 5 0 1 1 .9-9.9A6 6 0 0 1 19 10a4 4 0 0 1-1 8z" /></svg><h3>Sincronización a ciegas</h3><p>Si activas la sincronización, al servidor solo llegan datos ya cifrados. Cada cuenta solo accede a lo suyo.</p></div>
+            <div class="col"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 10a4 4 0 1 0-3.5 4L21 14v-3h-3v-2h-3" /></svg><h3>Tú decides</h3><p>Funciona sin conexión y sin vincular ningún banco. Exporta tus datos o borra tu cuenta cuando quieras.</p></div>
+          </div>
+          <div class="more"><a class="btn line" href="./privacidad.html">Leer la política de privacidad</a></div>
+        </div>
       </div>
-    </section>
 
-    <footer>Finanzas · Orientación general, no asesoramiento financiero regulado.</footer>
+      <section id="instalar">
+        <div class="wrap">
+          <div class="head">
+            <span class="eyebrow">Instalación</span>
+            <h2>Instálala en diez segundos.</h2>
+            <p>Se instala desde el navegador, ocupa muy poco, funciona sin conexión y se actualiza sola.</p>
+          </div>
+          <div class="install">
+            <div class="os" data-os="ios"><span class="tag">Tu dispositivo</span><h3>iPhone y iPad</h3><ol><li>Abre la app en <b>Safari</b>.</li><li>Pulsa <b>Compartir</b>.</li><li>Elige <b>Añadir a pantalla de inicio</b>.</li></ol></div>
+            <div class="os" data-os="android"><span class="tag">Tu dispositivo</span><h3>Android</h3><ol><li>Abre la app en <b>Chrome</b>.</li><li>Pulsa <b>Instalar</b> en el aviso o en el menú <b>⋮</b>.</li></ol></div>
+            <div class="os" data-os="desktop"><span class="tag">Tu dispositivo</span><h3>Windows y Linux</h3><ol><li>Abre la app en <b>Chrome</b> o <b>Edge</b>.</li><li>Pulsa el icono de <b>instalar</b> en la barra de direcciones.</li></ol></div>
+            <div class="os" data-os="mac"><span class="tag">Tu dispositivo</span><h3>Mac</h3><ol><li>Abre la app en <b>Safari</b>.</li><li><b>Archivo</b> → <b>Añadir al Dock</b>.</li></ol></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="wrap final">
+        <h2>Empieza hoy, con tus propios números.</h2>
+        <a class="btn primary" href="./app/">Abrir Finanzas</a>
+      </div>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <div>
+          <p><b style="color: var(--ink); font-family: var(--serif); font-size: 18px; font-weight: 600;">Finanzas</b></p>
+          <p>Orientación general, no asesoramiento financiero regulado. Las tasas de cambio las introduces tú.</p>
+        </div>
+        <div><a href="./privacidad.html">Política de privacidad</a><a href="./condiciones.html">Condiciones del servicio</a><a href="./app/">Abrir la app</a></div>
+      </div>
+    </footer>
 
     <script>
       // Resalta las instrucciones del sistema del visitante.
