@@ -20,8 +20,11 @@ echo "  ANDROID_KEYSTORE_BASE64   = (el texto largo que sale abajo)"
 echo "  ANDROID_KEYSTORE_PASSWORD = la contraseña que acabas de elegir"
 echo "  ANDROID_KEY_ALIAS         = $ALIAS"
 echo
-echo "----- ANDROID_KEYSTORE_BASE64 (copia todo) -----"
-base64 -w0 "$OUT" 2>/dev/null || base64 "$OUT" | tr -d '\n'
+# Portátil (Mac y Linux): una sola línea, sin saltos.
+openssl base64 -A -in "$OUT" > "$OUT.base64.txt"
+echo "El valor de ANDROID_KEYSTORE_BASE64 está en UNA sola línea en este archivo:"
+echo "  $OUT.base64.txt"
+echo "Ábrelo con un editor de texto (o: cat \"$OUT.base64.txt\" | pbcopy en Mac), copia TODO su contenido"
+echo "y pégalo como valor del secreto, sin añadir nada más."
 echo
-echo "-------------------------------------------------"
-echo "No compartas ese texto ni el archivo con nadie, ni lo subas al repositorio."
+echo "No compartas esos archivos con nadie, ni los subas al repositorio."
