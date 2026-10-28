@@ -46,7 +46,7 @@ export function supabase(): SupabaseClient | null {
   if (client) return client;
   const cfg = getSupabaseConfig();
   if (!cfg) return null;
-  client = createClient(cfg.url, cfg.anonKey, { auth: { persistSession: true, storageKey: 'finanzas.auth' } });
+  client = createClient(cfg.url, cfg.anonKey, { auth: { persistSession: true, storageKey: 'finanzas.auth', flowType: 'pkce' } });
   return client;
 }
 
