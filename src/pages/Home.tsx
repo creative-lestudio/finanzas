@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import type { Page } from '../App';
 import { COACH } from '../components/Coach';
+import { FirstSteps } from '../components/FirstSteps';
 import { Setup } from '../components/Setup';
 import { CatBadge, GoalIcon, Icon } from '../components/icons';
 import { Money } from '../components/ui';
@@ -90,6 +91,7 @@ export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void
   return (
     <>
       {needsSetup && <Setup />}
+      {!needsSetup && <FirstSteps go={go} openAdd={openAdd} />}
       {/* Tarjetas deslizables: patrimonio, posición global y inversiones */}
       <div className="carousel" ref={carousel} onScroll={onScroll} aria-label="Tus saldos">
         <section className="balance b1" onClick={() => go('wealth')} aria-label="Patrimonio neto">

@@ -171,6 +171,10 @@ export interface Settings {
   theme?: { accent: string; mode: 'auto' | 'light' | 'dark' };
   /** Ya completó (u omitió) la guía de primer uso. */
   onboarded?: boolean;
+  /** Ya vio (u omitió) el recorrido de la app. */
+  tourDone?: boolean;
+  /** Ocultó la lista de primeros pasos de Inicio. */
+  checklistHidden?: boolean;
   monthlyIncomeHint?: number;
   bank?: {
     provider: 'none' | 'enablebanking' | 'gocardless' | 'mock';

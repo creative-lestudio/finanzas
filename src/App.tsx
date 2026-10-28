@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Icon } from './components/icons';
 import { InstallBanner } from './components/Install';
+import { Tour } from './components/Tour';
 import { QuickAdd } from './components/QuickAdd';
 import { Toaster } from './components/ui';
 import { VoiceSheet } from './components/Voice';
@@ -67,6 +68,22 @@ export function App() {
     return h in TITLES ? h : 'home';
   });
   const [sheet, setSheet] = useState<'add' | 'voice' | null>(null);
+  // Recorrido de primer uso: se muestra una vez (tras el asistente inicial) y se puede repetir desde Ajustes.
+  const [tour, setTour] = useState(false);
+  const d0 = store.data as typeof store.data | null;
+  const needsSetup = !d0 || (!d0.settings.onboarded && d0.transactions.length === 0 && d0.accounts.length <= 1);
+  useEffect(() => {
+    if (d0 && !d0.settings.tourDone && !needsSetup && !IS_PREVIEW) setTour(true);
+  }, [d0?.settings.tourDone, needsSetup]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    const open = () => setTour(true);
+    window.addEventListener('finanzas:tour', open);
+    return () => window.removeEventListener('finanzas:tour', open);
+  }, []);
+  const closeTour = () => {
+    setTour(false);
+    if (store.data && !store.data.settings.tourDone) store.update((d) => ({ ...d, settings: { ...d.settings, tourDone: true } }));
+  };
   // "Ojito": oculta los importes en toda la app (se recuerda en este dispositivo).
   const [hidden, setHidden] = useState(() => {
     try {
@@ -223,6 +240,7 @@ export function App() {
       )}
       {sheet === 'add' && <QuickAdd onClose={() => setSheet(null)} onVoice={() => setSheet('voice')} />}
       {sheet === 'voice' && <VoiceSheet onClose={() => setSheet(null)} />}
+      {tour && <Tour onClose={closeTour} />}
       <Toaster />
     </>
   );

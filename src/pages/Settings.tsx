@@ -62,6 +62,13 @@ export function Settings() {
       </div>
 
       <div className="section-title">Cuenta y sincronización</div>
+      <div className="card glass">
+        <h2>Ayuda</h2>
+        <button className="btn tinted block" onClick={() => window.dispatchEvent(new Event('finanzas:tour'))}>
+          <Icon name="info" size={18} /> Ver el recorrido de la app
+        </button>
+        <button className="btn ghost block mt small" onClick={() => setSettings({ checklistHidden: false })}>Mostrar los primeros pasos en Inicio</button>
+      </div>
       <SyncSection />
 
       <div className="section-title">Inteligencia artificial</div>
