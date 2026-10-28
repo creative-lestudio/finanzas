@@ -6,10 +6,16 @@ create table if not exists public.vaults (
   user_id uuid primary key default auth.uid() references auth.users (id) on delete cascade,
   blob jsonb not null,
   version integer not null default 1,
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  -- Tope de tamaño por bóveda (10 MB de JSON cifrado): evita abusos de almacenamiento.
+  constraint vault_size check (pg_column_size(blob) < 10485760)
 );
 
 alter table public.vaults enable row level security;
+
+-- Sin sesión (rol anon) no hay acceso a nada; con sesión, solo a la propia fila.
+revoke all on public.vaults from anon;
+grant select, insert, update, delete on public.vaults to authenticated;
 
 drop policy if exists "vault: solo el dueño" on public.vaults;
 create policy "vault: solo el dueño" on public.vaults
@@ -58,3 +64,5 @@ $$;
 
 -- Solo la función de servidor (service_role) puede contar usos.
 revoke execute on function public.bump_ai_usage(uuid) from public, anon, authenticated;
+grant execute on function public.bump_ai_usage(uuid) to service_role;
+grant select, insert, update on public.ai_usage to service_role;

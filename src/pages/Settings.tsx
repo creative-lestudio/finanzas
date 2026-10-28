@@ -108,6 +108,16 @@ function SyncSection() {
     void sb?.auth.getUser().then(({ data }) => setUser(data.user?.email ?? null));
   }, [sb, store.sync.status]);
 
+  const deleteAccount = async () => {
+    if (!sb) return;
+    if (!confirm('Se eliminará tu cuenta y la copia cifrada en la nube. No se puede deshacer. Tus datos en este dispositivo se conservan. ¿Continuar?')) return;
+    const { error } = await sb.functions.invoke('delete-account');
+    if (error) return toast('No se pudo eliminar la cuenta. Inténtalo de nuevo.');
+    await store.unlinkCloud();
+    setUser(null);
+    toast('Cuenta eliminada');
+  };
+
   const link = async () => {
     setBusy(true);
     try {
@@ -157,6 +167,8 @@ function SyncSection() {
             <button className="btn tinted" onClick={() => void store.syncNow()}>Sincronizar ahora</button>
             <button className="btn" onClick={() => void store.unlinkCloud()}>Desactivar</button>
           </div>
+          <button className="btn danger block mt" onClick={() => void deleteAccount()}>Eliminar mi cuenta y mis datos de la nube</button>
+          <p className="tiny muted" style={{ marginBottom: 0 }}>Borra tu cuenta y la copia cifrada del servidor. Los datos de este dispositivo no se tocan.</p>
         </>
       )}
       <button className="btn ghost sm mt" onClick={() => setCfgOpen(!cfgOpen)}>{cfgOpen ? 'Ocultar' : 'Servidor propio (avanzado)'}</button>

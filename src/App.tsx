@@ -20,7 +20,7 @@ import { handleBankCallback, Settings } from './pages/Settings';
 import { Subscriptions } from './pages/Subscriptions';
 import { Transactions } from './pages/Transactions';
 import { Wealth } from './pages/Wealth';
-import { AuthForm } from './components/AuthForm';
+import { AuthForm, RecoveryNotice } from './components/AuthForm';
 import { useStore } from './store';
 
 export type Page = 'home' | 'transactions' | 'plan' | 'assistant' | 'more' | 'fx' | 'groups' | 'wealth' | 'health' | 'subs' | 'settings';
@@ -279,6 +279,8 @@ function Lock() {
 
   return (
     <div className="lock">
+      <div style={{ width: '100%', maxWidth: 400 }}>
+      <RecoveryNotice><></></RecoveryNotice>
       <form className="card lg" onSubmit={(e) => { e.preventDefault(); void submit(); }}>
         <div className="app-icon"><Icon name="wallet" size={38} /></div>
         <h1 className="center" style={{ margin: '4px 0 6px', fontSize: 30, letterSpacing: '-0.04em', fontFamily: 'var(--font-display)' }}>Finanzas</h1>
@@ -315,6 +317,7 @@ function Lock() {
           </button>
         )}
       </form>
+      </div>
     </div>
   );
 }
