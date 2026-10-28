@@ -198,6 +198,50 @@
       .rv { opacity: 0; transform: translateY(18px); transition: opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); }
       .rv.in { opacity: 1; transform: none; }
 
+
+      /* Botones de descarga */
+      .store { display: inline-flex; align-items: center; gap: 12px; padding: 12px 24px 12px 18px; border-radius: 16px; text-decoration: none; text-align: left; transition: transform 0.2s, box-shadow 0.25s, background 0.2s; border: 1px solid transparent; }
+      .store span { display: grid; line-height: 1.15; } .store small { font-size: 11.5px; opacity: 0.7; font-weight: 500; } .store b { font: 650 18px var(--display); letter-spacing: -0.02em; }
+      .store.white { background: #fff; color: var(--navy); } .store.white:hover { box-shadow: 0 14px 40px -10px rgb(255 255 255 / 0.45); transform: translateY(-1px); }
+      .store.glass { background: rgb(255 255 255 / 0.08); color: #fff; border-color: rgb(255 255 255 / 0.2); } .store.glass:hover { background: rgb(255 255 255 / 0.14); transform: translateY(-1px); }
+      .alt { margin: 16px 0 0; font-size: 14px; } .alt a { color: rgb(255 255 255 / 0.65); text-decoration: none; border-bottom: 1px solid rgb(255 255 255 / 0.25); } .alt a:hover { color: #fff; }
+
+      /* Galería */
+      .gallery { display: flex; gap: 28px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 12px max(20px, calc((100vw - 1160px) / 2 + 20px)) 36px; scrollbar-width: none; }
+      .gallery::-webkit-scrollbar { display: none; }
+      .gallery figure { flex: 0 0 auto; margin: 0; width: 260px; scroll-snap-align: center; }
+      .mock { border-radius: 40px; padding: 8px; background: linear-gradient(160deg, #26334d, #0a1020); box-shadow: 0 40px 70px -34px rgb(4 19 46 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.1) inset; }
+      .mock img, .mock picture { display: block; width: 100%; aspect-ratio: 390 / 844; object-fit: cover; object-position: top; border-radius: 33px; }
+      .gallery figcaption { padding: 18px 8px 0; color: var(--ink-2); font-size: 14.5px; } .gallery figcaption b { display: block; font: 650 18px var(--display); letter-spacing: -0.02em; color: var(--ink); margin-bottom: 2px; }
+
+      /* Descarga */
+      .dl { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+      .os { border-radius: 24px; padding: 26px; background: var(--surface); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+      .os.me { border-color: var(--blue); box-shadow: 0 0 0 4px var(--soft); }
+      .os .tag { display: none; font: 600 12px var(--sans); color: var(--blue); }
+      .os.me .tag { display: block; }
+      .os .oh { display: flex; align-items: center; gap: 10px; color: var(--ink); } .os h3 { font-size: 22px; letter-spacing: -0.03em; font-weight: 650; margin: 0; }
+      .os .od { margin: 0; color: var(--ink-2); font-size: 15px; }
+      .os .btn { margin: 6px 0 4px; width: 100%; }
+      .os ol { margin: 0; padding-left: 18px; color: var(--ink-2); font-size: 14.5px; } .os li { margin-bottom: 6px; } .os b { color: var(--ink); font-weight: 600; }
+      .os.qr { align-items: center; text-align: center; justify-content: center; }
+      .os.qr img { width: 168px; height: 168px; border-radius: 16px; border: 1px solid var(--line); background: #fff; padding: 4px; }
+
+      /* Preguntas */
+      .faq { max-width: 760px; margin: 0 auto; display: grid; gap: 10px; }
+      .faq details { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 0 22px; }
+      .faq summary { cursor: pointer; list-style: none; padding: 20px 0; font: 600 17px var(--display); letter-spacing: -0.02em; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+      .faq summary::-webkit-details-marker { display: none; }
+      .faq summary::after { content: '+'; font: 400 24px/1 var(--sans); color: var(--blue); transition: transform 0.25s; }
+      .faq details[open] summary::after { transform: rotate(45deg); }
+      .faq details p { margin: 0 0 20px; color: var(--ink-2); font-size: 16px; }
+
+      /* Barra de descarga en móvil */
+      .sticky-dl { position: fixed; left: 12px; right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); z-index: 40; display: none; align-items: center; gap: 12px; padding: 10px 10px 10px 12px; border-radius: 20px; background: color-mix(in srgb, var(--surface) 88%, transparent); -webkit-backdrop-filter: blur(18px) saturate(1.5); backdrop-filter: blur(18px) saturate(1.5); border: 1px solid var(--line); box-shadow: 0 20px 50px -16px rgb(4 19 46 / 0.45); transform: translateY(140%); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+      .sticky-dl.show { transform: none; }
+      .sticky-dl img { width: 40px; height: 40px; border-radius: 10px; }
+      .sticky-dl span { flex: 1; display: grid; line-height: 1.2; } .sticky-dl b { font: 650 15px var(--display); } .sticky-dl small { color: var(--muted); font-size: 12px; }
+
       @media (max-width: 1240px) { .badge { display: none; } .ph.l { transform: translateX(-190px) translateY(56px) rotate(-7deg) scale(0.85); } .ph.r { transform: translateX(190px) translateY(56px) rotate(7deg) scale(0.85); } }
       @media (max-width: 860px) {
         nav { display: none; }
@@ -205,13 +249,13 @@
         .stage { height: 470px; margin-top: 44px; } .ph { width: 250px; } .ph.l, .ph.r { display: none; }
         .strip .wrap { grid-template-columns: 1fr 1fr; } .stat:nth-child(3) { border-left: 0; padding-left: 0; }
         .bento { grid-template-columns: 1fr 1fr; } .card, .card.w3, .card.w4 { grid-column: span 2; } .card.w6 { grid-column: span 2; }
-        .how, .cols3 { grid-template-columns: 1fr; } .install { grid-template-columns: 1fr 1fr; }
+        .how, .cols3 { grid-template-columns: 1fr; } .dl { grid-template-columns: 1fr 1fr; } .sticky-dl { display: flex; }
         .coachc { flex-direction: column; align-items: flex-start; }
       }
       @media (max-width: 560px) {
         section { padding-top: 76px; } .secure { margin-top: 76px; padding: 76px 0; } .final { margin-top: 76px; }
         .bento { grid-template-columns: 1fr; } .card, .card.w3, .card.w4, .card.w6 { grid-column: auto; }
-        .install { grid-template-columns: 1fr; } footer .wrap { grid-template-columns: 1fr; }
+        .dl { grid-template-columns: 1fr; } footer .wrap { grid-template-columns: 1fr; } .gallery figure { width: 230px; } footer { padding-bottom: 110px; }
         .stat b { font-size: 26px; } .stat { padding: 22px 12px; }
         .eq { font-size: 24px; } .cta { padding: 56px 20px; border-radius: 28px; }
       }
@@ -222,8 +266,8 @@
     <header>
       <div class="wrap bar">
         <a class="brand" href="./"><img src="./app/icons/icon-192.png" alt="" />Finanzas</a>
-        <nav aria-label="Secciones"><a href="#funciones">Funciones</a><a href="#divisas">Divisas</a><a href="#como">Cómo funciona</a><a href="#seguridad">Seguridad</a><a href="#instalar">Instalar</a></nav>
-        <a class="btn white sm" href="./app/">Abrir la app</a>
+        <nav aria-label="Secciones"><a href="#funciones">Funciones</a><a href="#divisas">Divisas</a><a href="#como">Cómo funciona</a><a href="#seguridad">Seguridad</a><a href="#faq">Preguntas</a></nav>
+        <a class="btn white sm" href="#descargar">Descargar</a>
       </div>
     </header>
 
@@ -234,9 +278,10 @@
           <h1>Tu dinero, <span class="grad">con claridad.</span></h1>
           <p class="lead">Gastos, presupuestos y metas en bolívares, dólares y euros. Cada pago con su equivalente exacto, y tus datos cifrados en tu dispositivo.</p>
           <div class="ctas">
-            <a class="btn white" href="./app/">Empezar gratis</a>
-            <a class="btn glass" href="#funciones">Ver funciones</a>
+            <a class="store white" id="dl-android" href="./app/" data-state="web"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 8.6l1.4-2.4a.3.3 0 0 0-.5-.3l-1.4 2.5a8.2 8.2 0 0 0-6.6 0L8.9 5.9a.3.3 0 0 0-.5.3l1.4 2.4A7 7 0 0 0 5 14.5h14a7 7 0 0 0-4.8-5.9zM9.5 12.2a.8.8 0 1 1 0-1.6.8.8 0 0 1 0 1.6zm5 0a.8.8 0 1 1 0-1.6.8.8 0 0 1 0 1.6zM5 15.6V19a1 1 0 0 0 1 1h1v2.2a1.1 1.1 0 0 0 2.2 0V20h5.6v2.2a1.1 1.1 0 0 0 2.2 0V20h1a1 1 0 0 0 1-1v-3.4z"/></svg><span><small id="dl-android-sub">Abre la app en tu móvil</small><b id="dl-android-main">Android</b></span></a>
+            <a class="store glass" href="#descargar"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.7c0-2.4 2-3.5 2-3.6a4.3 4.3 0 0 0-3.4-1.8c-1.4-.2-2.8.8-3.5.8s-1.8-.8-3-.8a4.4 4.4 0 0 0-3.7 2.3c-1.6 2.8-.4 6.900 1.100 9.100.8 1.100 1.700 2.300 2.900 2.300 1.100 0 1.600-.7 3-.7s1.800.7 3 .7 2-1.100 2.800-2.200a9.800 9.800 0 0 0 1.200-2.600 3.900 3.900 0 0 1-2.400-3.500zM14.200 6a3.900 3.900 0 0 0 .9-2.800 3.900 3.900 0 0 0-2.600 1.300A3.700 3.700 0 0 0 11.600 6a3.200 3.200 0 0 0 2.600 0z"/></svg><span><small>Añádela a tu inicio</small><b>iPhone y iPad</b></span></a>
           </div>
+          <p class="alt"><a href="./app/">o ábrela ahora en el navegador →</a></p>
           <ul class="assure">
             <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10h12v11H6zM8.5 10V7a3.5 3.5 0 0 1 7 0v3" /></svg>Cifrada de extremo a extremo</li>
             <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0M12 19.5h.01" /></svg>Funciona sin conexión</li>
@@ -260,6 +305,23 @@
           <div class="stat"><b>4 tasas</b>BCV, Euro, Paralelo y la tuya</div>
         </div>
       </div>
+
+      <section id="galeria">
+        <div class="wrap">
+          <div class="head center rv">
+            <span class="kicker">Míralo por dentro</span>
+            <h2>Clara, rápida y bonita.</h2>
+            <p>Cada pantalla pensada para entender tu dinero de un vistazo.</p>
+          </div>
+        </div>
+        <div class="gallery rv" role="list">
+          <figure role="listitem"><div class="mock"><picture><source srcset="./site/shot-home-dark.jpg" media="(prefers-color-scheme: dark)" /><img src="./site/shot-home.jpg" alt="Inicio: patrimonio neto, accesos rápidos y resumen del mes" loading="lazy" /></picture></div><figcaption><b>Inicio</b>Tu patrimonio y el mes de un vistazo</figcaption></figure>
+          <figure role="listitem"><div class="mock"><img src="./site/shot-tx.jpg" alt="Movimientos del mes con ingresos y gastos" loading="lazy" /></div><figcaption><b>Movimientos</b>Todo lo que entra y sale, por categorías</figcaption></figure>
+          <figure role="listitem"><div class="mock"><img src="./site/shot-plan.jpg" alt="Presupuestos con barras de progreso" loading="lazy" /></div><figcaption><b>Presupuestos</b>Topes que avisan antes de pasarte</figcaption></figure>
+          <figure role="listitem"><div class="mock"><img src="./site/shot-fx.jpg" alt="Calculadora de divisas con tasas BCV y paralelo" loading="lazy" /></div><figcaption><b>Divisas</b>Cada cambio y cada tasa, con su pérdida o ganancia</figcaption></figure>
+          <figure role="listitem"><div class="mock"><img src="./site/shot-health.jpg" alt="Salud financiera con puntuación y próximos pasos" loading="lazy" /></div><figcaption><b>Salud financiera</b>Una nota y los pasos para mejorarla</figcaption></figure>
+        </div>
+      </section>
 
       <section id="funciones">
         <div class="wrap">
@@ -361,18 +423,54 @@
         </div>
       </div>
 
-      <section id="instalar">
+      <section id="descargar">
         <div class="wrap">
           <div class="head center rv">
-            <span class="kicker">Instalación</span>
-            <h2>Instálala en diez segundos.</h2>
-            <p>Desde el navegador, sin tiendas de apps. Ocupa muy poco y se actualiza sola.</p>
+            <span class="kicker">Descarga</span>
+            <h2>Llévala en el bolsillo.</h2>
+            <p>Instálala como una app más: icono en tu pantalla, funciona sin conexión y se abre al instante.</p>
           </div>
-          <div class="install">
-            <div class="os rv" data-os="ios"><span class="tag">Tu dispositivo</span><h3>iPhone y iPad</h3><ol><li>Abre la app en <b>Safari</b>.</li><li>Pulsa <b>Compartir</b>.</li><li>Elige <b>Añadir a pantalla de inicio</b>.</li></ol></div>
-            <div class="os rv" data-os="android"><span class="tag">Tu dispositivo</span><h3>Android</h3><ol><li>Abre la app en <b>Chrome</b>.</li><li>Pulsa <b>Instalar</b> en el aviso o en el menú <b>⋮</b>.</li></ol></div>
-            <div class="os rv" data-os="desktop"><span class="tag">Tu dispositivo</span><h3>Windows y Linux</h3><ol><li>Abre la app en <b>Chrome</b> o <b>Edge</b>.</li><li>Pulsa el icono de <b>instalar</b> en la barra de direcciones.</li></ol></div>
-            <div class="os rv" data-os="mac"><span class="tag">Tu dispositivo</span><h3>Mac</h3><ol><li>Abre la app en <b>Safari</b>.</li><li><b>Archivo</b> → <b>Añadir al Dock</b>.</li></ol></div>
+          <div class="dl">
+            <div class="os rv" data-os="android">
+              <span class="tag">Tu dispositivo</span>
+              <div class="oh"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 8.6l1.4-2.4a.3.3 0 0 0-.5-.3l-1.4 2.5a8.2 8.2 0 0 0-6.6 0L8.9 5.9a.3.3 0 0 0-.5.3l1.4 2.4A7 7 0 0 0 5 14.5h14a7 7 0 0 0-4.8-5.9zM9.5 12.2a.8.8 0 1 1 0-1.6.8.8 0 0 1 0 1.6zm5 0a.8.8 0 1 1 0-1.6.8.8 0 0 1 0 1.6zM5 15.6V19a1 1 0 0 0 1 1h1v2.2a1.1 1.1 0 0 0 2.2 0V20h5.6v2.2a1.1 1.1 0 0 0 2.2 0V20h1a1 1 0 0 0 1-1v-3.4z"/></svg><h3>Android</h3></div>
+              <p class="od">Descarga el instalador (APK) y ábrelo.</p>
+              <a class="btn dark" id="dl-android-2" href="./app/">Descargar para Android</a>
+              <ol><li>Toca el botón y abre el archivo descargado.</li><li>Si Android lo pide, permite <b>instalar desde esta fuente</b>.</li><li>Abre <b>Finanzas</b> desde tu pantalla de inicio.</li></ol>
+            </div>
+            <div class="os rv" data-os="ios">
+              <span class="tag">Tu dispositivo</span>
+              <div class="oh"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.7c0-2.4 2-3.5 2-3.6a4.3 4.3 0 0 0-3.4-1.8c-1.4-.2-2.8.8-3.5.8s-1.8-.8-3-.8a4.4 4.4 0 0 0-3.7 2.3c-1.6 2.8-.4 6.900 1.100 9.100.8 1.100 1.700 2.300 2.900 2.300 1.100 0 1.600-.7 3-.7s1.800.7 3 .7 2-1.100 2.800-2.200a9.800 9.800 0 0 0 1.200-2.600 3.900 3.900 0 0 1-2.400-3.500zM14.200 6a3.900 3.900 0 0 0 .9-2.800 3.900 3.900 0 0 0-2.600 1.300A3.700 3.700 0 0 0 11.600 6a3.200 3.200 0 0 0 2.600 0z"/></svg><h3>iPhone y iPad</h3></div>
+              <p class="od">Se instala desde Safari, sin App Store.</p>
+              <a class="btn dark" href="./app/">Abrir en Safari</a>
+              <ol><li>Abre la app en <b>Safari</b>.</li><li>Pulsa <b>Compartir</b>.</li><li>Elige <b>Añadir a pantalla de inicio</b>.</li></ol>
+            </div>
+            <div class="os rv" data-os="desktop">
+              <span class="tag">Tu dispositivo</span>
+              <div class="oh"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18v11H3zM8 20h8M12 16v4"/></svg><h3>Ordenador</h3></div>
+              <p class="od">Windows, Linux y Mac.</p>
+              <a class="btn dark" href="./app/">Abrir la app</a>
+              <ol><li>Ábrela en <b>Chrome</b> o <b>Edge</b>.</li><li>Pulsa el icono de <b>instalar</b> en la barra de direcciones.</li><li>En Mac con Safari: <b>Archivo → Añadir al Dock</b>.</li></ol>
+            </div>
+            <div class="os qr rv">
+              <img src="./site/qr.svg" alt="Código QR para abrir Finanzas en el móvil" width="168" height="168" />
+              <h3>Escanéalo con tu móvil</h3>
+              <p class="od">Apunta la cámara y llévate la app al teléfono.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="faq">
+        <div class="wrap">
+          <div class="head center rv"><span class="kicker">Preguntas frecuentes</span><h2>Antes de instalarla.</h2></div>
+          <div class="faq rv">
+            <details><summary>¿Es gratis?</summary><p>Sí, por ahora es gratis y sin anuncios. Si en el futuro añadimos un plan de pago, lo que ya usas seguirá siendo tuyo y podrás exportarlo.</p></details>
+            <details><summary>¿Mis datos están seguros?</summary><p>Se cifran en tu dispositivo con AES-256 y una clave derivada de tu contraseña. Si sincronizas, al servidor solo llegan datos ya cifrados y cada cuenta accede únicamente a lo suyo.</p></details>
+            <details><summary>¿Necesito crear una cuenta?</summary><p>No. Puedes usarla solo en tu dispositivo, sin conexión. Si quieres tus datos en varios dispositivos, entra con Google o con tu correo.</p></details>
+            <details><summary>¿Cómo funcionan las tasas en bolívares?</summary><p>Tú introduces cada día las tasas BCV, Euro, Paralelo o una acordada. Al registrar un pago eliges la tasa o el monto acordado, y la app lo cuenta en tu moneda principal.</p></details>
+            <details><summary>¿Por qué el APK pide permiso para instalar?</summary><p>Porque lo descargas desde esta web y no desde Google Play. Android lo pide siempre en ese caso; puedes quitar el permiso después de instalar.</p></details>
+            <details><summary>¿Y en iPhone?</summary><p>En iPhone se instala desde Safari con «Añadir a pantalla de inicio»: queda con su icono y se abre a pantalla completa, como una app.</p></details>
           </div>
         </div>
       </section>
@@ -380,10 +478,15 @@
       <div class="wrap final">
         <div class="cta rv">
           <h2>Empieza hoy, con tus propios números.</h2>
-          <a class="btn white" href="./app/">Abrir Finanzas</a>
+          <a class="btn white" href="#descargar">Descargar Finanzas</a>
         </div>
       </div>
     </main>
+
+    <div class="sticky-dl" id="sticky" aria-hidden="true">
+      <img src="./app/icons/icon-192.png" alt="" /><span><b>Finanzas</b><small>Gratis · privada · sin conexión</small></span>
+      <a class="btn dark sm" href="#descargar">Descargar</a>
+    </div>
 
     <footer>
       <div class="wrap">
@@ -399,7 +502,7 @@
       // Resalta las instrucciones del sistema del visitante.
       (function () {
         var ua = navigator.userAgent;
-        var os = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ? 'ios' : /android/i.test(ua) ? 'android' : /mac/i.test(ua) ? 'mac' : 'desktop';
+        var os = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ? 'ios' : /android/i.test(ua) ? 'android' : 'desktop';
         var el = document.querySelector('[data-os="' + os + '"]');
         if (el) el.classList.add('me');
       })();
@@ -438,6 +541,36 @@
         var h = document.querySelector('header');
         var on = function () { h.classList.toggle('solid', scrollY > 8); };
         addEventListener('scroll', on, { passive: true }); on();
+      })();
+
+      // Descarga: si ya hay un APK publicado se ofrece directamente; si no, se abre la app web.
+      (function () {
+        var REPO = 'creative-lestudio/finanzas';
+        var main = document.getElementById('dl-android-main'), sub = document.getElementById('dl-android-sub');
+        var a1 = document.getElementById('dl-android'), a2 = document.getElementById('dl-android-2');
+        var isAndroid = /android/i.test(navigator.userAgent);
+        main.textContent = isAndroid ? 'Descargar para Android' : 'Android';
+        if (!window.fetch) return;
+        fetch('https://api.github.com/repos/' + REPO + '/releases/latest', { headers: { Accept: 'application/vnd.github+json' } })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (rel) {
+            var asset = rel && (rel.assets || []).filter(function (x) { return /\.apk$/i.test(x.name); })[0];
+            if (!asset) return;
+            [a1, a2].forEach(function (a) { if (a) { a.href = asset.browser_download_url; a.setAttribute('download', 'finanzas.apk'); } });
+            main.textContent = 'Descargar para Android';
+            sub.textContent = 'APK · ' + (asset.size / 1048576).toFixed(0) + ' MB · v' + (rel.tag_name || '').replace(/^\D+/, '');
+          })
+          .catch(function () {});
+      })();
+
+      // Barra inferior de descarga en el móvil: aparece al pasar la portada y se oculta en la sección de descarga.
+      (function () {
+        var bar = document.getElementById('sticky'), hero = document.querySelector('.hero'), dl = document.getElementById('descargar');
+        if (!bar || !('IntersectionObserver' in window)) return;
+        var heroOut = false, dlIn = false;
+        var upd = function () { bar.classList.toggle('show', heroOut && !dlIn); };
+        new IntersectionObserver(function (e) { heroOut = !e[0].isIntersecting; upd(); }).observe(hero);
+        new IntersectionObserver(function (e) { dlIn = e[0].isIntersecting; upd(); }, { threshold: 0.2 }).observe(dl);
       })();
     </script>
   </body>

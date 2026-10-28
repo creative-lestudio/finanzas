@@ -53,6 +53,26 @@ Sin estos pasos la app funciona igual en modo local; los usuarios pueden poner s
 
 El workflow `.github/workflows/deploy.yml` compila, pasa los tests y publica `dist/` en cada push. Actívalo una vez en **Settings → Pages → Source: GitHub Actions**. La web queda en `https://<usuario>.github.io/finanzas/` y la app en `/finanzas/app/`.
 
+## App Android (APK)
+
+La app se empaqueta como aplicación nativa con [Capacitor](https://capacitorjs.com): la misma app web dentro de un contenedor Android, con su icono, pantalla de arranque, dictado con el reconocimiento de voz del sistema e inicio de sesión de Google por el navegador del sistema (Google no permite el WebView).
+
+**Generar el APK (lo hace GitHub, no tu ordenador):**
+
+1. En *Settings → Secrets and variables → Actions → Variables* deben existir `SUPABASE_URL` y `SUPABASE_ANON_KEY` (las mismas de la web).
+2. **Clave de firma (una sola vez):** en tu ordenador, con Java instalado, ejecuta `./scripts/crear-clave-android.sh`. Crea el archivo `.jks` (guárdalo en un lugar seguro: sin él no podrás actualizar la app) e imprime los tres secretos para *Settings → Secrets and variables → Actions → Secrets*: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD` y `ANDROID_KEY_ALIAS`.
+3. En la pestaña **Actions → Compilar app Android (APK) → Run workflow**. Al terminar (10–15 min) publica `finanzas.apk` en **Releases** y la web lo ofrece como descarga directa.
+
+Sin la clave propia el flujo firma con una temporal: el APK funciona, pero cada versión tendría otra firma y Android pediría desinstalar la anterior.
+
+**Inicio de sesión con Google en la app:** en Supabase → Authentication → URL Configuration → *Redirect URLs* añade `com.lestudio.finanzas://auth`.
+
+**Probar en local:** `npm run android:sync` copia la web a `android/` y se abre con Android Studio (`npx cap open android`).
+
+**Play Store:** el mismo proyecto sirve (`./gradlew bundleRelease`), con una cuenta de desarrollador de Google Play (pago único de 25 USD).
+
+**iPhone:** instalar una app nativa fuera de la App Store exige una cuenta de Apple Developer (99 USD/año) y un Mac con Xcode. Mientras tanto, en iPhone se instala desde Safari con «Añadir a pantalla de inicio» (queda con icono y a pantalla completa).
+
 ## Seguridad y privacidad
 
 - Datos cifrados en el dispositivo con AES-256-GCM; clave derivada de tu contraseña con PBKDF2-SHA256 (600.000 iteraciones). Bloqueo por inactividad.
