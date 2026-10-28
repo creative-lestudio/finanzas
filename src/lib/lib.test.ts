@@ -357,3 +357,30 @@ describe('ojito', () => {
     expect(r.map((x) => x.family.id)).toEqual(['comida', 'compras', 'otros']);
   });
 });
+
+describe('hoja propia (Tipo, Cuenta, Moneda, Monto)', () => {
+  const csv = `Fecha,Tipo,Cuenta,Moneda,Categoría,Descripción,Monto,Cuenta destino,Monto destino,Vía
+"2026-09-01","Gasto","Efectivo","EUR","Alimentación/Mercado","Mercadona","72.19","","",""
+"2026-09-03","Ingreso","Banco VE","BS","Ingreso Trabajo","Cliente","1250","","",""
+"2026-09-06","Cambio","Banco VE","BS","","Cambio","1090","Chase","1090","Binance P2P"
+"2026-09-07","Ingreso","Chase","USD","Legacy","Aporte","400","","",""
+"2026-09-08","Gasto","Chase","USD","Legacy","Alquiler","240","","",""`;
+  it('reconoce el formato, crea cuentas y categorías y registra los cambios', async () => {
+    const { csvRows, parseLedger, applyLedger } = await import('./importer');
+    const l = parseLedger(csvRows(csv))!;
+    expect(l.rows).toHaveLength(5);
+    const d0 = emptyData();
+    d0.accounts = [];
+    const r = applyLedger(d0, l.rows, { currencyMap: { BS: 'USD' } });
+    expect(r.exchanges).toBe(1);
+    expect(r.transactions).toBe(4);
+    const bal = (n: string) => r.data.accounts.find((a) => a.name === n)!;
+    expect(bal('Efectivo').balance).toBe(-7219);
+    expect(bal('Banco VE')).toMatchObject({ currency: 'USD', balance: 125000 - 109000 });
+    expect(bal('Chase')).toMatchObject({ currency: 'USD', balance: 109000 + 40000 - 24000 });
+    expect(r.data.transactions.find((t) => t.description === 'Mercadona')!.categoryId).toBe('groceries');
+    expect(r.data.transactions.find((t) => t.description === 'Aporte')!.categoryId).not.toBe(r.data.transactions.find((t) => t.description === 'Alquiler')!.categoryId);
+    expect(applyLedger(r.data, l.rows, { currencyMap: { BS: 'USD' } })).toMatchObject({ transactions: 0, exchanges: 0, duplicates: 5 });
+    expect(parseLedger(csvRows('Fecha,Concepto,Importe\n2026-01-01,x,5'))).toBeNull();
+  });
+});

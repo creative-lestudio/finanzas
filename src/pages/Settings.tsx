@@ -6,7 +6,7 @@ import { BankClient, syncAll, type Bank } from '../lib/banking';
 import type { EncryptedBlob } from '../lib/crypto';
 import { applyExcelImport, exportWorkbook, readWorkbook } from '../lib/excel';
 import { CURRENCIES } from '../lib/fx';
-import { mergeMovements, parseBankCSV } from '../lib/importer';
+import { applyLedger, csvRows, mergeMovements, parseBankCSV, parseLedger } from '../lib/importer';
 import { normalize, today, uid } from '../lib/money';
 import { getSupabaseConfig, setSupabaseConfig, supabase } from '../lib/sync';
 import { IS_PREVIEW } from '../lib/preview';
@@ -204,6 +204,8 @@ function DataSection() {
   const { data, update } = useStore();
   const [account, setAccount] = useState(data.accounts.find((a) => a.kind === 'checking')?.id ?? '');
   const [busy, setBusy] = useState(false);
+  // Hoja propia con cuenta "BS": muchos llevan esa cuenta en dólares equivalentes.
+  const [bsAsUsd, setBsAsUsd] = useState(true);
 
   const onExcel = async (file: File) => {
     setBusy(true);
@@ -240,6 +242,15 @@ function DataSection() {
     let text = new TextDecoder('utf-8').decode(buf);
     // Muchos bancos españoles exportan en Windows-1252.
     if (text.includes('�')) text = new TextDecoder('windows-1252').decode(buf);
+    // Hoja propia (Fecha, Tipo, Cuenta, Moneda, Monto…): crea cuentas, categorías y cambios de divisa.
+    const ledger = parseLedger(csvRows(text));
+    if (ledger) {
+      if (!ledger.rows.length) return toast('El archivo no tiene movimientos válidos.');
+      const r = applyLedger(data, ledger.rows, { currencyMap: bsAsUsd ? { BS: 'USD' } : undefined });
+      update(() => r.data);
+      toast(`${r.transactions} movimientos y ${r.exchanges} cambios importados${r.newAccounts.length ? `, ${r.newAccounts.length} cuentas nuevas` : ''}${r.duplicates ? `, ${r.duplicates} duplicados omitidos` : ''}${ledger.errors ? `, ${ledger.errors} filas ignoradas` : ''}. Revisa los saldos en Patrimonio.`);
+      return;
+    }
     const { movements, errors } = parseBankCSV(text);
     if (!movements.length) return toast('No se reconoció el formato. Necesito columnas de fecha, concepto e importe.');
     const r = mergeMovements(base, accountId, movements);
@@ -271,7 +282,11 @@ function DataSection() {
         <Icon name="upload" size={18} /> {busy ? 'Importando…' : 'Elegir Excel (.xlsx) o CSV'}
         <input type="file" accept=".xlsx,.csv,.txt,.tsv" hidden onChange={(e) => onFile(e.target.files?.[0])} />
       </label>
-      <p className="tiny muted" style={{ marginBottom: 0 }}>Vale el extracto de tu banco o un Excel exportado por esta app. Los duplicados se ignoran.</p>
+      <Switch checked={bsAsUsd} onChange={setBsAsUsd}>
+        Tratar la moneda «BS» como dólares equivalentes
+        <div className="tiny muted">Solo para hojas propias con columnas Tipo, Cuenta, Moneda y Monto.</div>
+      </Switch>
+      <p className="tiny muted" style={{ marginBottom: 0 }}>Vale el extracto de tu banco, una hoja propia (Fecha, Tipo, Cuenta, Moneda, Categoría, Descripción, Monto…) o un Excel exportado por esta app. Los duplicados se ignoran.</p>
     </div>
   );
 }
