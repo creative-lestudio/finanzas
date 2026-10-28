@@ -397,3 +397,19 @@ describe('valoración de bolívares', () => {
     expect(rateFor(solo, 'USD', 'VES', '2026-10-06')).toBe(880);
   });
 });
+
+describe('equivalente en moneda principal', () => {
+  it('un cobro en Bs con tasa acordada cuenta por su equivalente, no por la tasa del día', () => {
+    const d = emptyData();
+    d.settings.currency = 'USD';
+    d.accounts = [{ id: 'ves', name: 'Banesco', kind: 'checking', balance: 0, currency: 'VES', source: 'manual' }];
+    d.rates = [{ id: 'r', date: '2026-09-01', base: 'USD', quote: 'VES', rate: 60, source: 'Paralelo' }];
+    const t = { id: 't1', accountId: 'ves', date: '2026-09-10', amount: 5650000, description: 'MDS', categoryId: 'income', categorySource: 'user' as const, fx: { amount: 125000, currency: 'USD', rate: 45.2, source: 'Personalizada' } };
+    const sinFx = { ...t, id: 't2', fx: undefined };
+    d.categories = [{ id: 'income', name: 'Nómina', icon: '', kind: 'income' } as never];
+    d.transactions = [t, sinFx];
+    const sum = monthSummary(d, '2026-09');
+    // 1.250 $ acordados + 56.500 Bs a 60 (paralelo) = 941,67 $
+    expect(sum.income).toBe(125000 + Math.round(5650000 / 60));
+  });
+});

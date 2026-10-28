@@ -1,4 +1,4 @@
-import { toBase, txCurrency } from './fx';
+import { toBase, txBase, txCurrency } from './fx';
 import { daysBetween, merchantKey, monthKey, normalize } from './money';
 import type { AppData, Transaction } from './types';
 
@@ -179,7 +179,7 @@ export function detectAntExpenses(
   { threshold = 1000, days = 30 } = {},
 ): AntExpenses {
   // Importes en moneda principal: 10 € y 10 Bs no son lo mismo.
-  const base = (t: Transaction) => -toBase(data, t.amount, txCurrency(data, t), t.date);
+  const base = (t: Transaction) => -txBase(data, t);
   const small = data.transactions.filter(
     (t) =>
       t.amount < 0 &&
@@ -222,7 +222,7 @@ export function monthSummary(data: Pick<AppData, 'transactions' | 'categories' |
     if (monthKey(t.date) !== month) continue;
     const kind = kinds.get(t.categoryId);
     if (kind === 'transfer') continue;
-    const amount = toBase(data, t.amount, txCurrency(data, t), t.date, s.missingRates);
+    const amount = txBase(data, t, s.missingRates);
     if (t.amount >= 0 && kind !== 'expense') s.income += amount;
     else {
       // Un ingreso en una categoría de gasto (p. ej. devolución) resta del gasto.

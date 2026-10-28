@@ -2,7 +2,7 @@ import 'fake-indexeddb/auto';
 import { describe, expect, it, vi } from 'vitest';
 import { createSession, encryptJSON, unlock } from './crypto';
 import { emptyData } from './defaults';
-import { listBackupStamps, loadVault, wipeVault } from './storage';
+import { listBackupStamps, loadVault, saveVault, wipeVault } from './storage';
 import { backupIfDue, VaultWriter, type SaveState } from './vault';
 import type { AppData } from './types';
 
@@ -72,5 +72,24 @@ describe('copias automáticas', () => {
       await backupIfDue(blob, true);
     }
     expect((await listBackupStamps()).length).toBe(8);
+  });
+});
+
+describe('copia espejo', () => {
+  it('si IndexedDB pierde los datos, se recuperan de la copia espejo', async () => {
+    const mem = new Map<string, string>();
+    (globalThis as { localStorage?: unknown }).localStorage = {
+      getItem: (k: string) => mem.get(k) ?? null,
+      setItem: (k: string, v: string) => void mem.set(k, v),
+      removeItem: (k: string) => void mem.delete(k),
+    };
+    await wipeVault();
+    const session = await createSession('x', 1000);
+    const blob = await encryptJSON(session, withTx(76));
+    await saveVault(blob);
+    await new Promise<void>((res) => { const r = indexedDB.deleteDatabase('finanzas'); r.onsuccess = () => res(); r.onerror = () => res(); r.onblocked = () => res(); });
+    const back = await loadVault();
+    const v = await unlock<AppData>('x', back!);
+    expect(v.value.transactions).toHaveLength(76);
   });
 });

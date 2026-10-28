@@ -149,6 +149,18 @@ export function toBase(data: Pick<AppData, 'rates' | 'settings'>, cents: number,
   return v;
 }
 
+/**
+ * Valor de un movimiento en la moneda principal. Si tiene equivalente registrado (cobro en Bs
+ * a tasa acordada = 1.250 $), cuenta ese equivalente; si no, se convierte con la tasa del día.
+ */
+export function txBase(data: Pick<AppData, 'rates' | 'settings' | 'accounts'>, t: Transaction, missing?: Set<string>): number {
+  if (t.fx && t.fx.amount > 0) {
+    const eq = toBase(data, t.fx.amount, t.fx.currency, t.date, missing);
+    return t.amount < 0 ? -eq : eq;
+  }
+  return toBase(data, t.amount, txCurrency(data, t), t.date, missing);
+}
+
 export function accountCurrency(data: Pick<AppData, 'accounts' | 'settings'>, accountId: string): string {
   return data.accounts.find((a) => a.id === accountId)?.currency ?? data.settings.currency;
 }

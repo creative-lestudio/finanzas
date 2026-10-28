@@ -117,6 +117,19 @@ export function App() {
   );
 
   if (store.status === 'loading') return ambient;
+  if (store.status === 'error') return (
+    <>
+      {ambient}
+      <div className="lock">
+        <div className="card lg" style={{ maxWidth: 400 }}>
+          <div className="app-icon"><Icon name="lock" size={36} /></div>
+          <h1 className="center" style={{ margin: '4px 0 6px', fontSize: 24, fontFamily: 'var(--font-display)' }}>No puedo leer tus datos</h1>
+          <p className="small muted center">El navegador no responde al leer el almacenamiento de este dispositivo. <b>Tus datos no se han borrado</b>: es un fallo temporal. Por seguridad no te dejo crear una cuenta nueva encima.</p>
+          <button className="btn primary block" onClick={() => location.reload()}>Reintentar</button>
+        </div>
+      </div>
+    </>
+  );
   if (store.status !== 'ready') return (
     <>
       {ambient}

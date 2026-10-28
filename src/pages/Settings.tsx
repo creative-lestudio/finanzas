@@ -8,6 +8,7 @@ import { applyExcelImport, exportWorkbook, readWorkbook } from '../lib/excel';
 import { CURRENCIES } from '../lib/fx';
 import { applyLedger, csvRows, mergeMovements, parseBankCSV, parseLedger } from '../lib/importer';
 import { normalize, today, uid } from '../lib/money';
+import { storageReport, type StorageReport } from '../lib/storage';
 import { getSupabaseConfig, setSupabaseConfig, supabase } from '../lib/sync';
 import { IS_PREVIEW } from '../lib/preview';
 import { ACCENTS } from '../lib/theme';
@@ -236,6 +237,29 @@ function BackupList() {
   );
 }
 
+/** Diagnóstico: dónde y cómo se guardan tus datos en este dispositivo. */
+function StorageCheck() {
+  const store = useStore();
+  const [r, setR] = useState<StorageReport | null>(null);
+  const mb = (n: number) => `${(n / 1048576).toFixed(1)} MB`;
+  return (
+    <>
+      <button className="btn block mt" onClick={() => void storageReport().then(setR)}>Comprobar almacenamiento</button>
+      {r && (
+        <div className="tiny muted" style={{ marginTop: 8, lineHeight: 1.6 }}>
+          Base de datos del navegador: <b>{r.idb === 'ok' ? 'funciona' : `falla (${r.idb})`}</b><br />
+          Copia espejo: <b>{r.mirror ? 'sí' : 'no'}</b> · Copias automáticas: <b>{r.backups}</b><br />
+          Almacenamiento protegido: <b>{r.persisted === null ? 'desconocido' : r.persisted ? 'sí' : 'no (el navegador podría borrarlo)'}</b><br />
+          {r.quota && <>Uso: {mb(r.quota.used)} de {mb(r.quota.total)}<br /></>}
+          Modo: <b>{r.standalone ? 'app instalada' : 'navegador'}</b><br />
+          Nube: <b>{store.sync.status === 'off' ? 'no vinculada' : store.sync.status === 'error' ? `error: ${store.sync.error}` : store.sync.lastSync ? `sincronizado ${new Date(store.sync.lastSync).toLocaleString('es')}` : 'vinculada'}</b><br />
+          Dirección: {r.origin}
+        </div>
+      )}
+    </>
+  );
+}
+
 function DataSection() {
   const { data, update } = useStore();
   const [account, setAccount] = useState(data.accounts.find((a) => a.kind === 'checking')?.id ?? '');
@@ -308,6 +332,7 @@ function DataSection() {
       </button>
       <p className="tiny muted">Movimientos, cuentas, presupuestos, metas, cambios de divisa y tasas, cada uno en su hoja.</p>
       <BackupList />
+      <StorageCheck />
       <h2 className="mt">Importar</h2>
       <Field label="Cuenta de destino (si el archivo no indica cuenta)">
         <select value={account} onChange={(e) => setAccount(e.target.value)}>

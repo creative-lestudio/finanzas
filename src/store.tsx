@@ -2,13 +2,13 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState, ty
 import { createSession, decryptJSON, encryptJSON, unlock, type EncryptedBlob, type Session } from './lib/crypto';
 import { migrate } from './lib/defaults';
 import { setDefaultCurrency } from './lib/money';
-import { clearMeta, listBackupStamps, loadBackup, loadBase, loadMeta, loadVault, saveBase, saveMeta, saveVault, wipeVault } from './lib/storage';
+import { clearMeta, listBackupStamps, loadBackup, loadBase, loadMeta, loadVault, saveBase, saveMeta, saveRescue, saveVault, wipeVault } from './lib/storage';
 import { backupIfDue, countTx, requestPersistence, VaultWriter, type SaveState } from './lib/vault';
 import { fetchRemote, PassphraseMismatch, supabase, syncOnce, watchRemote } from './lib/sync';
 import { applyTheme } from './lib/theme';
 import type { AppData } from './lib/types';
 
-type Status = 'loading' | 'new' | 'locked' | 'ready';
+type Status = 'loading' | 'new' | 'locked' | 'ready' | 'error';
 export type SyncStatus = 'off' | 'idle' | 'syncing' | 'error';
 
 interface Store {
@@ -62,9 +62,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [writer] = useState(() => new VaultWriter(() => session.current, setSave));
 
   useEffect(() => {
-    loadVault()
-      .then((b) => setStatus(b ? 'locked' : 'new'))
-      .catch(() => setStatus('new'));
+    // Un fallo al leer NO significa "no hay datos": se reintenta y nunca se ofrece crear una bóveda
+    // nueva encima de la existente.
+    void (async () => {
+      for (let i = 0; i < 4; i++) {
+        try {
+          const b = await loadVault();
+          return setStatus(b ? 'locked' : 'new');
+        } catch {
+          await new Promise((r) => setTimeout(r, 400 * (i + 1)));
+        }
+      }
+      setStatus('error');
+    })();
   }, []);
 
   const adopt = useCallback((d: AppData) => {
@@ -122,10 +132,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         if (changedMeanwhile) syncTimer.current = window.setTimeout(() => void runSync(), 1500);
       } catch (e) {
         if (e instanceof PassphraseMismatch) {
-          // La contraseña cambió en otro dispositivo: se adopta la copia remota y se pide la nueva.
-          await saveVault(e.blob);
-          lock();
-          setSync({ status: 'error', error: 'Tu contraseña cambió en otro dispositivo. Introduce la nueva.' });
+          // La nube está cifrada con otra clave. Se conserva lo local intacto (y una copia de lo remoto)
+          // en lugar de sobrescribir nada.
+          await saveRescue(e.blob, 'nube-otra-clave').catch(() => undefined);
+          setSync({ status: 'error', error: 'La copia de la nube está cifrada con otra contraseña. Tus datos locales están intactos; revisa Ajustes → Sincronización.' });
         } else setSync((x) => ({ ...x, status: 'error', error: (e as Error).message }));
       } finally {
         syncing.current = null;
@@ -230,6 +240,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     sync,
     syncNow: runSync,
     async create(passphrase, initial) {
+      // Nunca se pisa una bóveda existente: si la hay, se conserva una copia sin tocar.
+      const existing = await loadVault().catch(() => { throw new Error('No se puede leer el almacenamiento del dispositivo.'); });
+      if (existing) await saveRescue(existing, 'antes-de-crear').catch(() => undefined);
       session.current = await createSession(passphrase);
       const d = migrate(initial);
       await saveVault(await encryptJSON(session.current, d));
