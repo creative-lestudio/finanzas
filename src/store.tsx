@@ -2,7 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState, ty
 import { createSession, decryptJSON, encryptJSON, unlock, type EncryptedBlob, type Session } from './lib/crypto';
 import { migrate } from './lib/defaults';
 import { setDefaultCurrency } from './lib/money';
-import { clearMeta, loadBase, loadMeta, loadVault, saveBase, saveMeta, saveVault, wipeVault } from './lib/storage';
+import { clearMeta, listBackupStamps, loadBackup, loadBase, loadMeta, loadVault, saveBase, saveMeta, saveVault, wipeVault } from './lib/storage';
+import { backupIfDue, countTx, requestPersistence, VaultWriter, type SaveState } from './lib/vault';
 import { fetchRemote, PassphraseMismatch, supabase, syncOnce, watchRemote } from './lib/sync';
 import { applyTheme } from './lib/theme';
 import type { AppData } from './lib/types';
@@ -28,6 +29,11 @@ interface Store {
   /** Primer arranque en un dispositivo nuevo: descarga y descifra tus datos de la nube. */
   restoreFromCloud: (passphrase: string) => Promise<'ok' | 'empty' | 'wrong-passphrase'>;
   unlinkCloud: () => Promise<void>;
+  /** Estado del guardado en este dispositivo. */
+  save: SaveState;
+  /** Copias automáticas locales (la más reciente primero). */
+  listBackups: () => Promise<{ stamp: string; movements: number }[]>;
+  restoreBackup: (stamp: string) => Promise<boolean>;
 }
 
 const Ctx = createContext<Store | null>(null);
@@ -50,9 +56,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const dataRef = useRef<AppData | null>(null);
   const baseRef = useRef<AppData | null>(null);
   const versionRef = useRef(0);
-  const saveTimer = useRef<number>(undefined);
   const syncTimer = useRef<number>(undefined);
   const syncing = useRef<Promise<void> | null>(null);
+  const [save, setSave] = useState<SaveState>({ status: 'saved' });
+  const [writer] = useState(() => new VaultWriter(() => session.current, setSave));
 
   useEffect(() => {
     loadVault()
@@ -68,12 +75,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const lock = useCallback(() => {
-    session.current = null;
+    // Primero se termina de guardar lo pendiente; la clave se suelta después.
+    const s = session.current;
+    void writer.flush().finally(() => {
+      if (session.current === s) session.current = null;
+      writer.reset();
+    });
     dataRef.current = null;
     baseRef.current = null;
     setData(null as unknown as AppData);
     setStatus('locked');
-  }, []);
+  }, [writer]);
 
   const runSync = useCallback(async () => {
     if (syncing.current) return syncing.current;
@@ -91,15 +103,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setSync((x) => ({ ...x, status: 'syncing', userEmail: auth.session!.user.email }));
     syncing.current = (async () => {
       try {
+        await writer.flush(); // lo local queda a salvo en disco antes de tocar nada
         const r = await syncOnce(sb, s, local, { version: versionRef.current, base: baseRef.current });
         // Si mientras tanto hubo cambios locales, se conservan y se suben en el siguiente ciclo.
         const changedMeanwhile = dataRef.current !== local;
-        if (!changedMeanwhile && r.data !== local) adopt(r.data);
+        if (!changedMeanwhile && r.data !== local) {
+          // Antes de reemplazar lo local por lo fusionado, copia de seguridad.
+          await backupIfDue(await encryptJSON(s, local), true).catch(() => undefined);
+          adopt(r.data);
+          writer.set(r.data);
+        }
         baseRef.current = r.data;
         versionRef.current = r.version;
         const now = new Date().toISOString();
         await saveBase(await encryptJSON(s, r.data));
-        if (!changedMeanwhile) await saveVault(await encryptJSON(s, r.data));
         await saveMeta({ version: r.version, userId: meta.userId, lastSync: now });
         setSync({ status: 'idle', lastSync: now, userEmail: auth.session!.user.email });
         if (changedMeanwhile) syncTimer.current = window.setTimeout(() => void runSync(), 1500);
@@ -115,18 +132,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     })();
     return syncing.current;
-  }, [adopt, lock]);
+  }, [adopt, lock, writer]);
 
   const persist = useCallback(
     (d: AppData) => {
-      window.clearTimeout(saveTimer.current);
-      saveTimer.current = window.setTimeout(async () => {
-        if (session.current) await saveVault(await encryptJSON(session.current, d));
-      }, 300);
+      writer.set(d);
       window.clearTimeout(syncTimer.current);
       syncTimer.current = window.setTimeout(() => void runSync(), 2500);
     },
-    [runSync],
+    [runSync, writer],
   );
 
   const update = useCallback(
@@ -174,6 +188,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     };
   }, [status, linked, runSync]);
 
+  // Al salir o ocultar la app se fuerza el guardado inmediato.
+  useEffect(() => {
+    const flush = () => void writer.flush();
+    const vis = () => document.hidden && flush();
+    window.addEventListener('pagehide', flush);
+    document.addEventListener('visibilitychange', vis);
+    return () => {
+      window.removeEventListener('pagehide', flush);
+      document.removeEventListener('visibilitychange', vis);
+    };
+  }, [writer]);
+
   useEffect(() => {
     if (status !== 'ready') return;
     let idle = window.setTimeout(lock, IDLE_MS);
@@ -207,6 +233,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       session.current = await createSession(passphrase);
       const d = migrate(initial);
       await saveVault(await encryptJSON(session.current, d));
+      void requestPersistence();
       adopt(d);
       setStatus('ready');
     },
@@ -216,6 +243,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       try {
         const r = await unlock<AppData>(passphrase, blob);
         session.current = r.session;
+        void backupIfDue(blob).catch(() => undefined);
+        void requestPersistence();
         adopt(migrate(r.value));
         setStatus('ready');
         void afterUnlock(r.session);
@@ -225,6 +254,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     },
     async changePassphrase(next) {
+      await writer.flush();
+      await backupIfDue(await encryptJSON(session.current!, data), true).catch(() => undefined);
       session.current = await createSession(next);
       await saveVault(await encryptJSON(session.current, data));
       if (baseRef.current) await saveBase(await encryptJSON(session.current, baseRef.current));
@@ -249,6 +280,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     },
     async wipe() {
+      writer.reset();
       await wipeVault();
       await supabase()?.auth.signOut();
       session.current = null;
@@ -268,6 +300,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           const r = await unlock<AppData>(passphrase, remote.blob);
           session.current = r.session;
         } catch {
+          setSync({ status: 'error', error: 'Ya hay datos en tu cuenta cifrados con otra contraseña. Cierra sesión y usa «Ya tengo datos guardados en mi cuenta».' });
           return 'wrong-passphrase';
         }
       } else {
@@ -306,6 +339,37 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return 'ok';
       } catch {
         return 'wrong-passphrase';
+      }
+    },
+    save,
+    async listBackups() {
+      const s = session.current;
+      if (!s) return [];
+      const out: { stamp: string; movements: number }[] = [];
+      for (const stamp of await listBackupStamps()) {
+        const blob = await loadBackup(stamp);
+        if (!blob) continue;
+        try {
+          out.push({ stamp, movements: countTx(migrate(await decryptJSON<AppData>(s, blob))) });
+        } catch {
+          /* copia con otra clave: no se puede leer desde aquí */
+        }
+      }
+      return out;
+    },
+    async restoreBackup(stamp) {
+      const s = session.current;
+      const blob = await loadBackup(stamp);
+      if (!s || !blob || !dataRef.current) return false;
+      try {
+        const d = migrate(await decryptJSON<AppData>(s, blob));
+        await backupIfDue(await encryptJSON(s, dataRef.current), true).catch(() => undefined);
+        const next = { ...d, updatedAt: new Date().toISOString() };
+        adopt(next);
+        persist(next);
+        return true;
+      } catch {
+        return false;
       }
     },
     async unlinkCloud() {

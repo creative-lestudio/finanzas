@@ -7,7 +7,7 @@ import { VoiceSheet } from './components/Voice';
 import { demoData } from './lib/demo';
 import { emptyData } from './lib/defaults';
 import { setMasked, today } from './lib/money';
-import { supabase } from './lib/sync';
+import { fetchRemote, supabase } from './lib/sync';
 import { applySavedTheme } from './lib/theme';
 import { IS_PREVIEW } from './lib/preview';
 import { Assistant } from './pages/Assistant';
@@ -203,6 +203,11 @@ export function App() {
         </div>
       </div>
 
+      {store.save.status === 'error' && (
+        <div role="alert" className="card" style={{ position: 'fixed', top: 'max(8px, env(safe-area-inset-top))', left: 12, right: 12, zIndex: 200, color: 'var(--bad)' }}>
+          No se pudo guardar en este dispositivo: {store.save.error} Reintentando… Descarga un Excel por si acaso.
+        </div>
+      )}
       {sheet === 'add' && <QuickAdd onClose={() => setSheet(null)} onVoice={() => setSheet('voice')} />}
       {sheet === 'voice' && <VoiceSheet onClose={() => setSheet(null)} />}
       <Toaster />
@@ -219,14 +224,28 @@ function Lock() {
   const [error, setError] = useState(store.sync.error ?? '');
   const [busy, setBusy] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
+  const [found, setFound] = useState(false);
 
   useEffect(() => {
     void supabase()?.auth.getSession().then(({ data }) => {
       setSignedIn(Boolean(data.session));
-      // Al volver de Google ya hay sesión: salta directo a la contraseña de cifrado.
-      if (data.session) setMode((m) => (m === 'welcome' ? 'pass' : m));
+      if (data.session) void afterSignIn();
     });
   }, [mode]);
+
+  // Con sesión iniciada: si la cuenta ya tiene datos en la nube se recuperan (nunca se crea
+  // una bóveda vacía encima); si no, se crea la contraseña de cifrado.
+  const afterSignIn = async () => {
+    const sb = supabase();
+    if (!sb || !isNew) return;
+    try {
+      const remote = await fetchRemote(sb);
+      setMode((m) => (m === 'welcome' || m === 'pass' ? (remote ? 'restore' : 'pass') : m));
+      if (remote) setFound(true);
+    } catch {
+      setMode((m) => (m === 'welcome' ? 'pass' : m));
+    }
+  };
 
   useEffect(() => {
     const sb = supabase();
@@ -238,7 +257,7 @@ function Lock() {
     const { data } = sb.auth.onAuthStateChange((ev, session) => {
       if (session && (ev === 'SIGNED_IN' || ev === 'INITIAL_SESSION')) {
         setSignedIn(true);
-        setMode((m) => (m === 'welcome' ? 'pass' : m));
+        void afterSignIn();
       }
     });
     return () => data.subscription.unsubscribe();
@@ -284,7 +303,7 @@ function Lock() {
             <h1 className="center" style={{ margin: '4px 0 6px', fontSize: 30, letterSpacing: '-0.04em', fontFamily: 'var(--font-display)' }}>Finanzas</h1>
             <p className="small muted center" style={{ marginTop: 0 }}>Crea tu cuenta o inicia sesión para guardar tus datos y usarlos en todos tus dispositivos.</p>
             {error && <p className="small" style={{ color: 'var(--bad)' }}>{error}</p>}
-            <AuthForm onDone={() => { setSignedIn(true); setMode('pass'); }} />
+            <AuthForm onDone={() => { setSignedIn(true); void afterSignIn(); }} />
             <button className="btn ghost block mt small" onClick={() => setMode('pass')}>Usar sin cuenta, solo en este dispositivo</button>
           </div>
         </div>
@@ -298,7 +317,7 @@ function Lock() {
         <div className="card lg">
           <div className="app-icon"><Icon name="cloud" size={36} /></div>
           <h1 className="center" style={{ margin: '4px 0 6px', fontSize: 26, letterSpacing: '-0.035em', fontFamily: 'var(--font-display)' }}>Recuperar mis datos</h1>
-          <p className="small muted center" style={{ marginTop: 0 }}>Inicia sesión y escribe la contraseña de cifrado que usas en tu otro dispositivo.</p>
+          <p className="small muted center" style={{ marginTop: 0 }}>{found ? 'Hemos encontrado tus datos en la nube. Escribe tu contraseña de cifrado para abrirlos.' : 'Inicia sesión y escribe la contraseña de cifrado que usas en tu otro dispositivo.'}</p>
           {!signedIn ? (
             <AuthForm onDone={() => setSignedIn(true)} />
           ) : (

@@ -212,6 +212,30 @@ function AISection() {
   );
 }
 
+/** Copias automáticas locales: red de seguridad ante cualquier fallo de guardado o sincronización. */
+function BackupList() {
+  const store = useStore();
+  const [items, setItems] = useState<{ stamp: string; movements: number }[] | null>(null);
+  useEffect(() => {
+    void store.listBackups().then(setItems);
+  }, [store.save.status]);
+  return (
+    <>
+      <h2 className="mt">Copias automáticas</h2>
+      <p className="tiny muted" style={{ marginTop: 0 }}>
+        {store.save.status === 'error' ? `⚠ ${store.save.error}` : store.save.status === 'saving' ? 'Guardando…' : 'Todo guardado en este dispositivo.'} Se hace una copia cifrada cada vez que abres la app y antes de fusionar cambios de la nube.
+      </p>
+      {items?.length === 0 && <p className="tiny muted">Aún no hay copias.</p>}
+      {items?.slice(0, 5).map((b) => (
+        <div key={b.stamp} className="row" style={{ justifyContent: 'space-between', margin: '6px 0' }}>
+          <span className="small">{new Date(b.stamp).toLocaleString('es')} · {b.movements} movimientos</span>
+          <button className="btn sm" onClick={async () => { if (confirm('Se sustituirán tus datos actuales por esta copia (los actuales también quedan guardados como copia). ¿Continuar?')) { toast((await store.restoreBackup(b.stamp)) ? 'Copia restaurada' : 'No se pudo restaurar'); } }}>Restaurar</button>
+        </div>
+      ))}
+    </>
+  );
+}
+
 function DataSection() {
   const { data, update } = useStore();
   const [account, setAccount] = useState(data.accounts.find((a) => a.kind === 'checking')?.id ?? '');
@@ -283,6 +307,7 @@ function DataSection() {
         <Icon name="download" size={18} /> Descargar Excel completo
       </button>
       <p className="tiny muted">Movimientos, cuentas, presupuestos, metas, cambios de divisa y tasas, cada uno en su hoja.</p>
+      <BackupList />
       <h2 className="mt">Importar</h2>
       <Field label="Cuenta de destino (si el archivo no indica cuenta)">
         <select value={account} onChange={(e) => setAccount(e.target.value)}>
