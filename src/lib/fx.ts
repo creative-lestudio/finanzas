@@ -1,4 +1,4 @@
-import { monthKey, uid } from './money';
+import { daysBetween, monthKey, uid } from './money';
 import type { Account, AppData, Exchange, RateQuote, Transaction } from './types';
 
 // Multimoneda y análisis de cambio de divisa.
@@ -82,10 +82,15 @@ export const currencyInfo = (code: string): CurrencyInfo =>
 
 const sameDayOrBefore = (q: RateQuote, date: string) => q.date <= date;
 
+interface Found {
+  rate: number;
+  date: string;
+}
+
 /** Busca la cotización directa más reciente (en la fecha o antes) entre dos monedas. */
-function direct(rates: RateQuote[], from: string, to: string, date: string, source?: string): number | null {
-  let best: { date: string; rate: number } | null = null;
-  let fallback: { date: string; rate: number } | null = null;
+function directQ(rates: RateQuote[], from: string, to: string, date: string, source?: string): Found | null {
+  let best: Found | null = null;
+  let fallback: Found | null = null;
   for (const q of rates) {
     if (source && q.source !== source) continue;
     let r: number | null = null;
@@ -96,9 +101,11 @@ function direct(rates: RateQuote[], from: string, to: string, date: string, sour
       if (!best || q.date > best.date) best = { date: q.date, rate: r };
     } else if (!fallback || q.date < fallback.date) fallback = { date: q.date, rate: r };
   }
-  return (best ?? fallback)?.rate ?? null;
+  return best ?? fallback;
 }
 
+/** Días máximos de antigüedad que se perdonan a la fuente preferida frente a la tasa más reciente de otra fuente. */
+const PREF_STALE_DAYS = 3;
 
 /**
  * Tasa para convertir 1 `from` en `to` en una fecha. Usa la fuente preferida
@@ -119,7 +126,15 @@ export function rateFor(
   // Los bolívares se valoran por defecto a tasa paralelo (lo que cuesta de verdad comprar divisa);
   // si ese día solo hay otra tasa guardada, se usa esa.
   const pref = source ?? data.settings.rateSource?.[f === data.settings.currency ? t : f] ?? data.settings.rateSource?.[t] ?? (f === 'VES' || t === 'VES' ? 'Paralelo' : undefined);
-  const tryPair = (a: string, b: string) => (pref ? direct(data.rates, a, b, date, pref) : null) ?? direct(data.rates, a, b, date);
+  const tryPair = (a: string, b: string): number | null => {
+    const any = directQ(data.rates, a, b, date);
+    if (!pref) return any?.rate ?? null;
+    const p = directQ(data.rates, a, b, date, pref);
+    // Fuente pedida explícitamente: se respeta. Fuente por defecto: solo si no está muy desfasada
+    // frente a la tasa más reciente de otra fuente (p. ej. un «Paralelo» antiguo no debe ganarle a la BCV de hoy).
+    if (p && (source || !any || daysBetween(p.date, any.date) <= PREF_STALE_DAYS)) return p.rate;
+    return any?.rate ?? p?.rate ?? null;
+  };
   const d = tryPair(f, t);
   if (d !== null) return d;
   for (const via of ['USD', 'EUR']) {

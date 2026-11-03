@@ -14,7 +14,7 @@ import { formatMoney, merchantKey, parseAmount, setMasked } from './money';
 import { spendByFamily } from './families';
 import { distribute, roundUpAmount, savingProposals } from './savings';
 import { balances, settleUp, splitByWeights, splitEqual } from './shared';
-import { accountBase, addRate, displayPair, referenceTypesFor, analyzeExchange, analyzeIncomeFx, deleteExchange, fxSummary, rateFor, recordExchange, simulateChain } from './fx';
+import { accountBase, addRate, convert, displayPair, referenceTypesFor, analyzeExchange, analyzeIncomeFx, deleteExchange, fxSummary, rateFor, recordExchange, simulateChain } from './fx';
 import { futureValue, goalProgress } from './goals';
 import { merge3 } from './merge';
 import { toSharedExpenses, type CloudEntry } from './cloudShared';
@@ -390,10 +390,10 @@ describe('hoja propia (Tipo, Cuenta, Moneda, Monto)', () => {
 });
 
 describe('valoración de bolívares', () => {
-  it('usa Paralelo por defecto aunque haya una BCV más reciente', () => {
+  it('usa Paralelo por defecto si está al día (hasta 3 días de diferencia con la BCV)', () => {
     let d = emptyData();
     d.settings = { ...d.settings, currency: 'EUR', rateSource: {} };
-    d = addRate(d, { date: '2026-10-01', base: 'USD', quote: 'VES', rate: 1100, source: 'Paralelo' });
+    d = addRate(d, { date: '2026-10-03', base: 'USD', quote: 'VES', rate: 1100, source: 'Paralelo' });
     d = addRate(d, { date: '2026-10-05', base: 'USD', quote: 'VES', rate: 880, source: 'BCV' });
     expect(rateFor(d, 'USD', 'VES', '2026-10-06')).toBe(1100);
     expect(rateFor(d, 'USD', 'VES', '2026-10-06', 'BCV')).toBe(880);
@@ -519,5 +519,35 @@ describe('gastos y deudas compartidos entre usuarios', () => {
     const bal = balances(toSharedExpenses(entries), [M, N]);
     expect(bal).toEqual({ [M]: 0, [N]: 0 });
     expect(toSharedExpenses(entries)[1].settlement).toBe(true);
+  });
+});
+
+describe('valoración de bolívares con tasas de distinta antigüedad', () => {
+  const T = '2026-11-03';
+  const base = (rates: object[]) => {
+    const d = emptyData();
+    d.settings.currency = 'EUR';
+    d.rates = rates.map((r, i) => ({ id: 'r' + i, ...r })) as never;
+    return d;
+  };
+  const hoy = [
+    { date: T, base: 'USD', quote: 'VES', rate: 891.11, source: 'BCV' },
+    { date: T, base: 'EUR', quote: 'VES', rate: 997.92, source: 'Euro' },
+  ];
+  it('163.823,83 Bs valen 164,17 € a la tasa Euro BCV de hoy', () => {
+    expect(convert(base(hoy), 16382383, 'VES', 'EUR', T)).toBe(16417);
+  });
+  it('un «Paralelo» antiguo (28 Bs/€) no le gana a la tasa BCV/Euro de hoy', () => {
+    const d = base([{ date: '2025-06-01', base: 'USD', quote: 'VES', rate: 28, source: 'Paralelo' }, { date: '2025-06-01', base: 'EUR', quote: 'VES', rate: 28, source: 'Paralelo' }, ...hoy]);
+    expect(convert(d, 16382383, 'VES', 'EUR', T)).toBe(16417);
+    expect(convert(d, 16382383, 'VES', 'USD', T)).toBe(18384); // 183,84 $ a BCV 891,11
+  });
+  it('la fuente preferida (Paralelo) se respeta si está al día', () => {
+    const d = base([{ date: T, base: 'USD', quote: 'VES', rate: 1100, source: 'Paralelo' }, ...hoy]);
+    expect(convert(d, 16382383, 'VES', 'USD', T)).toBe(14893); // 163.823,83 / 1100
+  });
+  it('si se pide una fuente concreta, se usa esa aunque sea antigua', () => {
+    const d = base([{ date: '2025-06-01', base: 'USD', quote: 'VES', rate: 28, source: 'Paralelo' }, ...hoy]);
+    expect(rateFor(d, 'USD', 'VES', T, 'Paralelo')).toBe(28);
   });
 });
