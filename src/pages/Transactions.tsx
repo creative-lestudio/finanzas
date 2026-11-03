@@ -4,6 +4,7 @@ import { CatBadge, CatIcon, Icon } from '../components/icons';
 import { Empty, Money, Sheet, toast } from '../components/ui';
 import { aiAvailability } from '../lib/ai';
 import { categorizeWithAI, learnFromCorrection } from '../lib/categorize';
+import { CategorySheet } from '../components/CategorySheet';
 import { Equivalent, type EquivResult } from '../components/Equivalent';
 import { addRate, convert, deleteExchange, txCurrency } from '../lib/fx';
 import { monthSummary } from '../lib/insights';
@@ -23,6 +24,7 @@ export function Transactions() {
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [busy, setBusy] = useState(false);
   const [equiv, setEquiv] = useState<EquivResult | null>(null);
+  const [newCat, setNewCat] = useState(false);
 
   const catOf = (id: string) => data.categories.find((c) => c.id === id);
   const accOf = (id: string) => data.accounts.find((a) => a.id === id);
@@ -160,7 +162,9 @@ export function Transactions() {
                     <span className="ellipsis" style={{ maxWidth: '100%' }}>{c.name}</span>
                   </button>
                 ))}
+                <button type="button" onClick={() => setNewCat(true)}><Icon name="plus" size={22} /><span>Nueva</span></button>
               </div>
+              {newCat && <CategorySheet onClose={() => setNewCat(false)} onSaved={(c) => { update((d) => learnFromCorrection(d, editing, c.id)); setEditing(null); }} />}
             </>
           )}
           {!editing.exchangeId && txCurrency(data, editing) !== 'USD' && (

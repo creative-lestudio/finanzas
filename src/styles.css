@@ -31,6 +31,7 @@
   --fam-compras: #eda100;
   --fam-ocio: #6250d6;
   --fam-salud: #e87ba4;
+  --fam-negocio: #0e8f9c;
   --fam-otros: #8a94a6;
   --hairline: rgb(10 25 60 / 0.08);
   --fill: rgb(10 30 80 / 0.05);
@@ -71,6 +72,7 @@
     --fam-compras: #c98500;
     --fam-ocio: #9085e9;
     --fam-salud: #d55181;
+    --fam-negocio: #22b4c2;
     --fam-otros: #7c8698;
     --accent-soft: color-mix(in oklab, var(--accent) 40%, transparent);
     --accent-soft-2: color-mix(in oklab, var(--accent) 60%, transparent);
@@ -109,6 +111,7 @@
   --fam-compras: #c98500;
   --fam-ocio: #9085e9;
   --fam-salud: #d55181;
+  --fam-negocio: #22b4c2;
   --fam-otros: #7c8698;
   --accent-soft: color-mix(in oklab, var(--accent) 40%, transparent);
   --accent-soft-2: color-mix(in oklab, var(--accent) 60%, transparent);
@@ -590,3 +593,6 @@ table.simple td.r, table.simple th.r { text-align: right; }
 .ios-step { display: grid; gap: 10px; }
 .ios-step img { width: 100%; max-width: 300px; justify-self: center; border-radius: 22px; box-shadow: 0 0 0 0.5px var(--hairline), 0 16px 34px -22px rgb(5 20 50 / 0.5); }
 .ios-step > div { text-align: center; }
+
+.chip-pick { display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px; border-radius: 999px; border: 0; background: var(--fill); color: var(--text); font-size: 13.5px; font-weight: 550; cursor: pointer; }
+.chip-pick i { width: 10px; height: 10px; border-radius: 50%; }

@@ -22,6 +22,8 @@ export interface Category {
   name: string;
   icon: string;
   kind: 'expense' | 'income' | 'transfer';
+  /** Grupo de color (id de familia). Solo en categorías creadas por el usuario. */
+  family?: string;
 }
 
 export interface Transaction {
