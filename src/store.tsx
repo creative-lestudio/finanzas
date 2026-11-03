@@ -233,7 +233,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   // Tasas oficiales del día (BCV, Euro, Paralelo): se descargan solas al abrir; no pisan las que escribas tú.
   useEffect(() => {
-    if (status !== 'ready' || !navigator.onLine) return;
+    if (status !== 'ready' || !navigator.onLine || dataRef.current?.settings.offlineOnly) return;
     void fetchLiveRates(today()).then((live) => {
       const cur = dataRef.current;
       if (!live || !cur || !applyLiveRates(cur, live)) return;

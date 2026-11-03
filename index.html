@@ -8,7 +8,18 @@
     <meta name="theme-color" content="#04132e" />
     <meta property="og:title" content="Finanzas — tu dinero, con claridad" />
     <meta property="og:description" content="Gastos, presupuestos y metas en varias monedas, con cada pago en su equivalente. Privada y cifrada." />
-    <meta property="og:image" content="./app/icons/icon-512.png" />
+    <link rel="canonical" href="https://creative-lestudio.github.io/finanzas/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:url" content="https://creative-lestudio.github.io/finanzas/" />
+    <meta property="og:site_name" content="Finanzas" />
+    <meta property="og:image" content="https://creative-lestudio.github.io/finanzas/site/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Finanzas — tu dinero, con claridad" />
+    <meta name="twitter:image" content="https://creative-lestudio.github.io/finanzas/site/og.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Finanzas","applicationCategory":"FinanceApplication","operatingSystem":"Android, iOS, Web","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"inLanguage":"es","description":"Finanzas personales privadas y cifradas en bolívares, dólares y euros."}</script>
     <link rel="icon" href="./app/icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./app/icons/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -18,7 +29,7 @@
     <style>
       :root {
         --brand: #032a67; --navy: #04132e; --blue: #3d7bff; --glow: #5b9bff;
-        --bg: #f6f8fc; --surface: #ffffff; --ink: #0a1324; --ink-2: rgb(10 19 36 / 0.66); --muted: rgb(10 19 36 / 0.46);
+        --bg: #f6f8fc; --surface: #ffffff; --ink: #0a1324; --ink-2: rgb(10 19 36 / 0.66); --muted: rgb(10 19 36 / 0.62);
         --line: rgb(10 25 60 / 0.09); --soft: rgb(61 123 255 / 0.08); --brand-ink: #0b3a8a;
         --good: #12a150; --warn: #d98a00; --bad: #d93025;
         --btn: #04132e; --btn-ink: #fff;
@@ -30,7 +41,7 @@
       }
       @media (prefers-color-scheme: dark) {
         :root:not([data-theme='light']) {
-          --bg: #050913; --surface: #0c1322; --ink: #eef2fa; --ink-2: rgb(238 242 250 / 0.7); --muted: rgb(238 242 250 / 0.46);
+          --bg: #050913; --surface: #0c1322; --ink: #eef2fa; --ink-2: rgb(238 242 250 / 0.7); --muted: rgb(238 242 250 / 0.64);
           --line: rgb(255 255 255 / 0.09); --soft: rgb(91 155 255 / 0.12); --brand-ink: #9cc0ff;
           --good: #3ddc84; --warn: #f5b942; --bad: #ff7b73; --btn: #fff; --btn-ink: #04132e;
           --card-shadow: 0 1px 2px rgb(0 0 0 / 0.5), 0 20px 50px -24px rgb(0 0 0 / 0.8);
@@ -38,7 +49,7 @@
         }
       }
       :root[data-theme='dark'] {
-          --bg: #050913; --surface: #0c1322; --ink: #eef2fa; --ink-2: rgb(238 242 250 / 0.7); --muted: rgb(238 242 250 / 0.46);
+          --bg: #050913; --surface: #0c1322; --ink: #eef2fa; --ink-2: rgb(238 242 250 / 0.7); --muted: rgb(238 242 250 / 0.64);
           --line: rgb(255 255 255 / 0.09); --soft: rgb(91 155 255 / 0.12); --brand-ink: #9cc0ff;
           --good: #3ddc84; --warn: #f5b942; --bad: #ff7b73; --btn: #fff; --btn-ink: #04132e;
           --card-shadow: 0 1px 2px rgb(0 0 0 / 0.5), 0 20px 50px -24px rgb(0 0 0 / 0.8);
@@ -431,7 +442,7 @@
               <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6zM12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" /></svg>Sin anuncios ni venta de datos</li>
             </ul>
           </div>
-          <div class="hero-visual" id="hv" aria-hidden="true">
+          <div class="hero-visual" id="hv" aria-hidden="true" inert>
             <span class="cross" style="right: 2%; top: 4%"></span><span class="cross" style="left: 8%; bottom: 2%; opacity: .6"></span>
             <div class="scene"><div class="iph"><span class="b act"></span><span class="b vu"></span><span class="b vd"></span><span class="b pw"></span><span class="b cc"></span>
               <div class="iph-in" id="hero-screen"><i class="isl"></i><div class="sb" aria-hidden="true"><span>9:41</span><span class="sbi"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.7" y="5" width="3" height="6" rx="1"/><rect x="9.4" y="2.5" width="3" height="8.5" rx="1"/><rect x="14" y="0" width="3" height="11" rx="1"/></svg><svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M1 4a10 10 0 0 1 14 0M3.5 6.6a6.4 6.4 0 0 1 9 0M6 9.2a2.8 2.8 0 0 1 4 0"/></svg><svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x="0.5" y="0.5" width="22" height="11" rx="3.5" stroke="currentColor" opacity="0.4"/><rect x="2" y="2" width="19" height="8" rx="2.2" fill="currentColor"/><path d="M24 4v4c.8-.3 1.5-1.1 1.5-2S24.800 4.300 24 4z" fill="currentColor" opacity="0.45"/></svg></span></div><div class="slides"><img class="sl on" data-dark="0" src="./site/s-home.webp" alt="Inicio con patrimonio neto y resumen del mes" width="390" height="844" /><img class="sl" data-dark="0" src="./site/s-equiv.webp" alt="Registro de un cobro en bolívares con su equivalente en dólares" width="390" height="844" loading="lazy" /><img class="sl" data-dark="1" src="./site/s-plan-dark.webp" alt="Presupuestos por categoría en modo oscuro" width="390" height="844" loading="lazy" /><img class="sl" data-dark="0" src="./site/s-tx.webp" alt="Movimientos del mes" width="390" height="844" loading="lazy" /></div><i class="hbar"></i><i class="glare"></i></div></div></div>
@@ -720,7 +731,7 @@
     </main>
 
 
-    <div class="sticky-dl" id="sticky" aria-hidden="true">
+    <div class="sticky-dl" id="sticky">
       <img src="./app/icons/icon-192.png" alt="" /><span><b>Finanzas</b><small>Gratis · sin conexión</small></span>
       <a class="btn dark sm" href="./app/">Abrir app</a>
     </div>

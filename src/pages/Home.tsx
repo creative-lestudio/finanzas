@@ -99,7 +99,7 @@ export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void
       {!needsSetup && !guideActive(data) && <SyncBanner go={go} />}
       {!needsSetup && !guideActive(data) && <BiometricPrompt />}
       {/* Tarjetas deslizables: patrimonio, posición global y inversiones */}
-      <div className="carousel" ref={carousel} onScroll={onScroll} aria-label="Tus saldos">
+      <div className="carousel" tabIndex={0} role="region" ref={carousel} onScroll={onScroll} aria-label="Tus saldos">
         <section className="balance b1" onClick={() => go('wealth')} aria-label="Patrimonio neto">
           <div className="label"><Icon name="chart" size={16} /> Patrimonio neto</div>
           <div className="amount">{formatMoney(view.nw.net, base)}</div>

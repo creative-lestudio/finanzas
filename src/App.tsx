@@ -92,7 +92,7 @@ export function App() {
     setTour(false);
     if (!store.data) return;
     if (!store.data.settings.tourDone || store.data.settings.guide?.step === 'tour') {
-      store.update((d) => ({ ...d, settings: { ...d.settings, tourDone: true, guide: d.settings.guide?.step === 'done' ? d.settings.guide : { ...(d.settings.guide ?? newGuide()), step: 'tasks' } } }));
+      store.update((d) => ({ ...d, settings: { ...d.settings, tourDone: true, guide: d.settings.guide?.step === 'done' ? d.settings.guide : { ...(d.settings.guide ?? newGuide()), step: d.transactions.length > 0 ? 'done' : 'tasks' } } }));
     }
   };
   // Al completar las tres tareas se cierra la guía y se eliminan los datos de prueba.

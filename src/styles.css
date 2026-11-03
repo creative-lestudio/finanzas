@@ -22,7 +22,7 @@
   --surface-2: #f2f4f8;
   --text: #0f172a;
   --text-2: rgb(15 23 42 / 0.68);
-  --muted: rgb(15 23 42 / 0.47);
+  --muted: rgb(15 23 42 / 0.62);
 
   /* Grupos de categorías (paleta validada para daltonismo en este orden) */
   --fam-comida: #eb6834;
@@ -46,7 +46,7 @@
   --lg-shadow: 0 12px 32px rgb(5 20 50 / 0.12), 0 2px 6px rgb(5 20 50 / 0.06);
   --lg-sheen: rgb(255 255 255 / 0.55);
 
-  --good: #16a34a;
+  --good: #15803d;
   --warn: #a35a00;
   --bad: #dc2626;
   --good-bg: rgb(26 127 67 / 0.09);
@@ -81,7 +81,7 @@
     --surface-2: #121926;
     --text: #eef2f8;
     --text-2: rgb(238 242 248 / 0.7);
-    --muted: rgb(238 242 248 / 0.46);
+    --muted: rgb(238 242 248 / 0.64);
     --hairline: rgb(255 255 255 / 0.07);
     --fill: rgb(255 255 255 / 0.06);
     --fill-2: rgb(255 255 255 / 0.11);
@@ -120,7 +120,7 @@
   --surface-2: #121926;
   --text: #eef2f8;
   --text-2: rgb(238 242 248 / 0.7);
-  --muted: rgb(238 242 248 / 0.46);
+  --muted: rgb(238 242 248 / 0.64);
   --hairline: rgb(255 255 255 / 0.07);
   --fill: rgb(255 255 255 / 0.06);
   --fill-2: rgb(255 255 255 / 0.11);

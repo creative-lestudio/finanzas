@@ -388,7 +388,7 @@ function Rates() {
         {bcv > 0 && par > 0 && (
           <p className="small secondary" style={{ margin: '10px 0 14px' }}>Brecha BCV–paralelo: <b>{(((par - bcv) / bcv) * 100).toFixed(1)} %</b></p>
         )}
-        <button className="btn ghost block" style={{ marginBottom: 8 }} disabled={busy} onClick={() => void refresh()}>{busy ? 'Descargando…' : 'Traer tasas oficiales de hoy (BCV)'}</button>
+        <button className="btn ghost block" style={{ marginBottom: 8 }} disabled={busy || data.settings.offlineOnly} title={data.settings.offlineOnly ? 'Desactiva el modo sin terceros para descargar tasas' : undefined} onClick={() => void refresh()}>{busy ? 'Descargando…' : 'Traer tasas oficiales de hoy (BCV)'}</button>
         <button className="btn primary block" disabled={!filled.length || (num(vals.Personalizada, isBs('Personalizada')) > 0 && cBase === cQuote)} onClick={save}>Guardar tasas</button>
         <p className="tiny muted" style={{ marginBottom: 0 }}>Las tasas oficiales se descargan solas al abrir la app; puedes sobrescribirlas o escribir las tuyas (acuerdos, Binance, casa de cambio). Los campos vacíos mantienen la última guardada.</p>
       </div>
