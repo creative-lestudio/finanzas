@@ -390,15 +390,17 @@ describe('hoja propia (Tipo, Cuenta, Moneda, Monto)', () => {
 });
 
 describe('valoración de bolívares', () => {
-  it('usa Paralelo por defecto si está al día (hasta 3 días de diferencia con la BCV)', () => {
+  it('con Paralelo elegido lo usa si está al día (hasta 3 días de diferencia con la BCV)', () => {
     let d = emptyData();
-    d.settings = { ...d.settings, currency: 'EUR', rateSource: {} };
+    d.settings = { ...d.settings, currency: 'EUR', rateSource: { VES: 'Paralelo' } };
     d = addRate(d, { date: '2026-10-03', base: 'USD', quote: 'VES', rate: 1100, source: 'Paralelo' });
     d = addRate(d, { date: '2026-10-05', base: 'USD', quote: 'VES', rate: 880, source: 'BCV' });
     expect(rateFor(d, 'USD', 'VES', '2026-10-06')).toBe(1100);
     expect(rateFor(d, 'USD', 'VES', '2026-10-06', 'BCV')).toBe(880);
     const solo = addRate(emptyData(), { date: '2026-10-05', base: 'USD', quote: 'VES', rate: 880, source: 'BCV' });
     expect(rateFor(solo, 'USD', 'VES', '2026-10-06')).toBe(880);
+    d.settings = { ...d.settings, rateSource: {} };
+    expect(rateFor(d, 'USD', 'VES', '2026-10-06')).toBe(880); // oficial por defecto
   });
 });
 
@@ -542,8 +544,10 @@ describe('valoración de bolívares con tasas de distinta antigüedad', () => {
     expect(convert(d, 16382383, 'VES', 'EUR', T)).toBe(16417);
     expect(convert(d, 16382383, 'VES', 'USD', T)).toBe(18384); // 183,84 $ a BCV 891,11
   });
-  it('la fuente preferida (Paralelo) se respeta si está al día', () => {
+  it('por defecto se usa la tasa oficial aunque haya un Paralelo al día; si eliges Paralelo, se respeta', () => {
     const d = base([{ date: T, base: 'USD', quote: 'VES', rate: 1100, source: 'Paralelo' }, ...hoy]);
+    expect(convert(d, 16382383, 'VES', 'USD', T)).toBe(18384);
+    d.settings = { ...d.settings, rateSource: { VES: 'Paralelo' } };
     expect(convert(d, 16382383, 'VES', 'USD', T)).toBe(14893); // 163.823,83 / 1100
   });
   it('si se pide una fuente concreta, se usa esa aunque sea antigua', () => {

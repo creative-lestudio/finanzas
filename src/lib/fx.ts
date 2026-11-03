@@ -123,13 +123,15 @@ export function rateFor(
   const f = PEGGED[from] ?? from;
   const t = PEGGED[to] ?? to;
   if (f === t) return 1;
-  // Los bolívares se valoran por defecto a tasa paralelo (lo que cuesta de verdad comprar divisa);
-  // si ese día solo hay otra tasa guardada, se usa esa.
-  const pref = source ?? data.settings.rateSource?.[f === data.settings.currency ? t : f] ?? data.settings.rateSource?.[t] ?? (f === 'VES' || t === 'VES' ? 'Paralelo' : undefined);
+  // Los bolívares se valoran por defecto a tasa oficial (BCV dólar / euro); se puede cambiar a Paralelo.
+  // Si ese día solo hay otra tasa guardada, se usa esa.
+  const pref = source ?? data.settings.rateSource?.[f === data.settings.currency ? t : f] ?? data.settings.rateSource?.[t] ?? (f === 'VES' || t === 'VES' ? 'BCV' : undefined);
   const tryPair = (a: string, b: string): number | null => {
     const any = directQ(data.rates, a, b, date);
     if (!pref) return any?.rate ?? null;
-    const p = directQ(data.rates, a, b, date, pref);
+    // «BCV» significa tasa oficial: contra el euro se usa la tasa oficial del euro.
+    const want = pref === 'BCV' && (a === 'EUR' || b === 'EUR') ? 'Euro' : pref;
+    const p = directQ(data.rates, a, b, date, want);
     // Fuente pedida explícitamente: se respeta. Fuente por defecto: solo si no está muy desfasada
     // frente a la tasa más reciente de otra fuente (p. ej. un «Paralelo» antiguo no debe ganarle a la BCV de hoy).
     if (p && (source || !any || daysBetween(p.date, any.date) <= PREF_STALE_DAYS)) return p.rate;

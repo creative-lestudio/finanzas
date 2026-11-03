@@ -2,7 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState, ty
 import { createSession, decryptJSON, encryptJSON, unlock, type EncryptedBlob, type Session } from './lib/crypto';
 import { migrate } from './lib/defaults';
 import { registerCategories } from './lib/categories';
-import { setDefaultCurrency } from './lib/money';
+import { setDefaultCurrency, today } from './lib/money';
+import { applyLiveRates, fetchLiveRates } from './lib/liverates';
 import { bioAvailable, bioDisable, bioEnabled, bioEnroll, bioVerify } from './lib/biometric';
 import { clearDeviceKey, clearMeta, listBackupStamps, loadDeviceKey, saveDeviceKey, loadBackup, loadBase, loadMeta, loadVault, saveBase, saveMeta, saveRescue, saveVault, wipeVault } from './lib/storage';
 import { backupIfDue, countTx, requestPersistence, VaultWriter, type SaveState } from './lib/vault';
@@ -229,6 +230,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       window.clearInterval(poll);
     };
   }, [status, linked, runSync]);
+
+  // Tasas oficiales del día (BCV, Euro, Paralelo): se descargan solas al abrir; no pisan las que escribas tú.
+  useEffect(() => {
+    if (status !== 'ready' || !navigator.onLine) return;
+    void fetchLiveRates(today()).then((live) => {
+      const cur = dataRef.current;
+      if (!live || !cur || !applyLiveRates(cur, live)) return;
+      update((d) => applyLiveRates(d, live) ?? d);
+    });
+  }, [status, update]);
 
   // Al salir o ocultar la app se fuerza el guardado inmediato.
   useEffect(() => {

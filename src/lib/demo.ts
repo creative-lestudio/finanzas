@@ -86,7 +86,7 @@ export function demoData(asOf: string): AppData {
     const sent = usd - 2000;
     data = recordExchange(data, { date: day(7), fromAccountId: 'usd', fromAmount: sent, toAccountId: 'main', toAmount: Math.round((sent - 450) / 1.092), fee: 450, platform: 'Wise', referenceRate: 1 / 1.085, referenceSource: 'Personalizada' });
   }
-  data.settings = { ...data.settings, rateSource: { VES: 'Paralelo' } };
+  data.settings = { ...data.settings, rateSource: { VES: 'BCV' } };
 
   data.budgets = [
     { id: 'b1', categoryId: 'groceries', limit: 35000, warnAt: 0.8, rollover: false },

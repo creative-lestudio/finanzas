@@ -20,6 +20,7 @@ import {
   type RateType,
 } from '../lib/fx';
 import { addMonths, formatMoney, formatRate, parseAmount, today } from '../lib/money';
+import { applyLiveRates, fetchLiveRates } from '../lib/liverates';
 import type { AppData } from '../lib/types';
 import { useStore } from '../store';
 
@@ -331,6 +332,16 @@ function Rates() {
   const par = num(vals.Paralelo, true) || lastRate(data, 'Paralelo') || 0;
   const mini = { padding: '4px 22px 4px 8px', fontSize: 12, width: 'auto', backgroundPosition: 'calc(100% - 11px) 55%, calc(100% - 7px) 55%' };
 
+  const [busy, setBusy] = useState(false);
+  const refresh = async () => {
+    setBusy(true);
+    const live = await fetchLiveRates(today());
+    setBusy(false);
+    if (!live) return toast('No se pudieron descargar las tasas. Revisa tu conexión.');
+    update((d) => applyLiveRates(d, live, true) ?? d);
+    toast(`Tasas de hoy: BCV ${live.BCV ? formatRate(live.BCV) : '—'} · Euro ${live.Euro ? formatRate(live.Euro) : '—'}`);
+  };
+
   const save = () => {
     update((d) => {
       let next = d;
@@ -377,8 +388,9 @@ function Rates() {
         {bcv > 0 && par > 0 && (
           <p className="small secondary" style={{ margin: '10px 0 14px' }}>Brecha BCV–paralelo: <b>{(((par - bcv) / bcv) * 100).toFixed(1)} %</b></p>
         )}
+        <button className="btn ghost block" style={{ marginBottom: 8 }} disabled={busy} onClick={() => void refresh()}>{busy ? 'Descargando…' : 'Traer tasas oficiales de hoy (BCV)'}</button>
         <button className="btn primary block" disabled={!filled.length || (num(vals.Personalizada, isBs('Personalizada')) > 0 && cBase === cQuote)} onClick={save}>Guardar tasas</button>
-        <p className="tiny muted" style={{ marginBottom: 0 }}>Las tasas cambian cada día: escríbelas cuando cambies dinero o cobres. Los campos vacíos mantienen la última guardada.</p>
+        <p className="tiny muted" style={{ marginBottom: 0 }}>Las tasas oficiales se descargan solas al abrir la app; puedes sobrescribirlas o escribir las tuyas (acuerdos, Binance, casa de cambio). Los campos vacíos mantienen la última guardada.</p>
       </div>
 
       {data.accounts.some((a) => a.currency === 'VES') && (
@@ -386,8 +398,8 @@ function Rates() {
           <h2>Para valorar tus bolívares usa</h2>
           <p className="small muted" style={{ marginTop: 0 }}>Convierte saldos y movimientos en Bs a {data.settings.currency} y mide lo que pierdes al cobrar a tasa oficial.</p>
           <div className="seg" style={{ marginBottom: 0 }}>
-            {(['Paralelo', 'BCV'] as RateType[]).map((t) => (
-              <button key={t} className={(data.settings.rateSource?.VES ?? 'Paralelo') === t ? 'on' : ''} onClick={() => update((d) => ({ ...d, settings: { ...d.settings, rateSource: { ...d.settings.rateSource, VES: t } } }))}>{t}</button>
+            {(['BCV', 'Paralelo'] as RateType[]).map((t) => (
+              <button key={t} className={(data.settings.rateSource?.VES ?? 'BCV') === t ? 'on' : ''} onClick={() => update((d) => ({ ...d, settings: { ...d.settings, rateSource: { ...d.settings.rateSource, VES: t } } }))}>{t === 'BCV' ? 'Oficial (BCV)' : 'Paralelo'}</button>
             ))}
           </div>
         </div>
