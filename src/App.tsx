@@ -29,11 +29,11 @@ import { useStore } from './store';
 export type Page = 'home' | 'transactions' | 'plan' | 'assistant' | 'more' | 'accounts' | 'fx' | 'groups' | 'wealth' | 'health' | 'subs' | 'settings';
 
 const TITLES: Record<Page, string> = {
-  home: 'Inicio',
+  home: 'Posición global',
   transactions: 'Movimientos',
-  plan: 'Plan',
-  assistant: 'Asesor',
-  more: 'Más',
+  plan: 'Presupuesto',
+  assistant: 'Asesor IA',
+  more: 'Herramientas',
   accounts: 'Cuentas',
   fx: 'Divisas',
   groups: 'Compartir',
@@ -44,24 +44,23 @@ const TITLES: Record<Page, string> = {
 };
 
 const TABS: [Page, string, string][] = [
-  ['home', 'home', 'Inicio'],
+  ['home', 'home', 'Global'],
+  ['accounts', 'bank', 'Cuentas'],
   ['transactions', 'list', 'Movimientos'],
-  ['plan', 'target', 'Plan'],
-  ['assistant', 'sparkles', 'Asesor'],
-  ['more', 'grid', 'Más'],
+  ['plan', 'target', 'Planea'],
+  ['assistant', 'sparkles', 'Asesoría'],
+  ['settings', 'gear', 'Ajustes'],
 ];
 
 const MORE: [Page, string, string, string][] = [
-  ['accounts', 'bank', 'Cuentas', 'Saldos, logos y estado de cada cuenta'],
   ['fx', 'swap', 'Divisas y cambios', 'Tasas BCV/paralelo, Wise, pérdidas por cambio'],
   ['groups', 'users', 'Gastos compartidos', 'Divide cuentas con amigos y familia'],
   ['wealth', 'chart', 'Patrimonio', 'Cuentas, inversiones, cripto y deudas'],
   ['health', 'heart', 'Salud financiera', 'Tu puntuación y consejos'],
   ['subs', 'repeat', 'Suscripciones y comisiones', 'Cobros recurrentes y fugas'],
-  ['settings', 'gear', 'Ajustes', 'Apariencia, cuenta, datos y seguridad'],
 ];
 
-const PARENT: Partial<Record<Page, Page>> = { accounts: 'more', fx: 'more', groups: 'more', wealth: 'more', health: 'more', subs: 'more', settings: 'more' };
+const PARENT: Partial<Record<Page, Page>> = { fx: 'more', groups: 'more', wealth: 'more', health: 'more', subs: 'more' };
 
 applySavedTheme();
 
@@ -165,7 +164,7 @@ export function App() {
   );
 
   const parent = PARENT[page];
-  const tab = parent ?? page;
+  const tab = page === 'more' || parent ? 'settings' : page;
   return (
     <>
       {ambient}
@@ -174,6 +173,10 @@ export function App() {
           {parent ? (
             <button className="back lg" onClick={() => setPage(parent)}>
               <Icon name="back" size={22} stroke={2.4} /> {TITLES[parent]}
+            </button>
+          ) : page === 'more' ? (
+            <button className="back lg" onClick={() => setPage('settings')}>
+              <Icon name="back" size={22} stroke={2.4} /> {TITLES.settings}
             </button>
           ) : (
             <span />
@@ -207,7 +210,7 @@ export function App() {
           {page === 'wealth' && <Wealth />}
           {page === 'health' && <Health />}
           {page === 'subs' && <Subscriptions />}
-          {page === 'settings' && <Settings />}
+          {page === 'settings' && <Settings go={setPage} />}
           {page === 'more' && (
             <div className="card glass flush">
               <ul className="list">

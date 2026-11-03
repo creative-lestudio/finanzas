@@ -364,7 +364,7 @@ input[type='color']::-webkit-color-swatch { border: none; border-radius: 50%; }
 .dock { position: fixed; left: 0; right: 0; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 20; display: flex; justify-content: center; pointer-events: none; padding: 0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)); }
 .dock-inner { width: 100%; max-width: 560px; display: flex; gap: 10px; align-items: center; pointer-events: auto; }
 .tabbar { flex: 1; display: flex; border-radius: 999px; padding: 6px; }
-.tabbar button { flex: 1; background: none; border: none; padding: 7px 0 6px; display: grid; justify-items: center; gap: 2px; font-size: 10.5px; font-weight: 600; letter-spacing: -0.01em; color: var(--text-2); cursor: pointer; border-radius: 999px; transition: background 0.4s var(--spring), color 0.25s, transform 0.3s var(--spring); min-width: 0; }
+.tabbar button { flex: 1; background: none; border: none; padding: 7px 0 6px; display: grid; justify-items: center; gap: 2px; font-size: 10px; font-weight: 600; letter-spacing: -0.01em; color: var(--text-2); cursor: pointer; border-radius: 999px; transition: background 0.4s var(--spring), color 0.25s, transform 0.3s var(--spring); min-width: 0; }
 .tabbar button:active { transform: scale(0.92); }
 .tabbar button.on { color: var(--accent-ink); background: var(--accent-soft); }
 .fab { width: 60px; height: 60px; border-radius: 50%; border: none; display: grid; place-items: center; cursor: pointer; flex: none; transition: transform 0.35s var(--spring); }
@@ -614,3 +614,19 @@ table.simple td.r, table.simple th.r { text-align: right; }
 .acc-card { padding: 16px 16px 14px; }
 .acc-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
 .acc-dot.good { background: var(--good); } .acc-dot.warn { background: var(--warn); }
+
+/* Barra con seis secciones: más compacta en móviles estrechos */
+.tabbar { padding: 5px; }
+.tabbar button span { max-width: 100%; overflow: hidden; text-overflow: clip; white-space: nowrap; }
+@media (max-width: 430px) { .tabbar { padding: 4px; } .tabbar button { font-size: 9px; letter-spacing: -0.02em; padding: 7px 0 5px; } .tabbar button svg { width: 21px; height: 21px; } .dock-inner { gap: 8px; } .fab { width: 54px; height: 54px; } }
+
+/* Gráficos y tablas de resumen */
+.chart-wrap { padding: 4px 0 2px; }
+.mtable { margin-top: 12px; border-top: 0.5px solid var(--hairline); }
+.mrow { display: grid; grid-template-columns: 1fr auto auto auto; gap: 4px 14px; align-items: baseline; padding: 11px 0; font-size: 13px; border-bottom: 0.5px solid var(--hairline); }
+.mrow:last-child { border-bottom: 0; padding-bottom: 0; }
+.mrow .mname { text-transform: capitalize; color: var(--text-2); }
+.mrow b { min-width: 74px; text-align: right; }
+@media (max-width: 430px) { .mrow { grid-template-columns: 1fr auto auto; } .mrow .mname { grid-column: 1 / -1; font-weight: 600; color: var(--text); } .mrow b { text-align: right; } }
+.card .list > li:first-child { padding-top: 6px; }
+@media (max-width: 400px) { .tabbar button { font-size: 8.4px; letter-spacing: -0.04em; } .tabbar { padding: 4px 2px; } .dock-inner { padding: 0 2px; } }

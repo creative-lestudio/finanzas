@@ -4,26 +4,37 @@ import type { MonthTotals } from '../lib/reports';
 const MONTH_SHORT = new Intl.DateTimeFormat('es-ES', { month: 'short' });
 const monthLabel = (m: string) => MONTH_SHORT.format(new Date(`${m}-15`)).replace('.', '');
 
-/** Barras de ingresos (verde) y gastos (rojo) por mes. */
+/** Barras de ingresos (verde) y gastos (rojo) por mes, con ejes y etiquetas legibles. */
 export function MonthBars({ rows, base }: { rows: MonthTotals[]; base: string }) {
   const max = Math.max(1, ...rows.flatMap((r) => [r.income, r.expenses]));
-  const H = 130;
-  const W = Math.max(rows.length * 44, 280);
-  const bw = Math.min(14, (W / rows.length - 10) / 2);
+  const compact = (c: number) => new Intl.NumberFormat('es-ES', { notation: 'compact', maximumFractionDigits: 1 }).format(c / 100);
+  const H = 150, L = 38, T = 8;
+  const step = 64;
+  const W = Math.max(L + rows.length * step + 8, 340);
+  const bw = 18;
+  const x0 = L + (W - L - rows.length * step) / 2;
   return (
-    <div style={{ overflowX: 'auto' }}>
-      <svg viewBox={`0 0 ${W} ${H + 26}`} width="100%" style={{ minWidth: Math.min(W, rows.length * 44), display: 'block' }} role="img" aria-label="Ingresos y gastos por mes">
-        {[0.5, 1].map((g) => <line key={g} x1="0" x2={W} y1={H - g * H} y2={H - g * H} stroke="var(--hairline)" strokeWidth="1" />)}
+    <div className="chart-wrap">
+      <svg viewBox={`0 0 ${W} ${H + T + 24}`} width="100%" style={{ display: 'block', maxHeight: 230 }} role="img" aria-label="Ingresos y gastos por mes" preserveAspectRatio="xMidYMid meet">
+        {[0, 0.5, 1].map((g) => {
+          const y = T + H - g * H;
+          return (
+            <g key={g}>
+              <line x1={L} x2={W} y1={y} y2={y} stroke="var(--hairline)" strokeWidth="1" strokeDasharray={g ? '3 4' : undefined} />
+              <text x={L - 6} y={y + 3.5} textAnchor="end" fontSize="9.5" fill="var(--text-3, var(--muted))">{g === 0 ? '0' : compact(max * g)}</text>
+            </g>
+          );
+        })}
         {rows.map((r, i) => {
-          const cx = (i + 0.5) * (W / rows.length);
+          const cx = x0 + (i + 0.5) * step;
           const hi = (r.income / max) * H;
           const he = (r.expenses / max) * H;
           return (
             <g key={r.month}>
               <title>{`${monthLabel(r.month)}: ingresos ${formatMoney(r.income, base)}, gastos ${formatMoney(r.expenses, base)}`}</title>
-              <rect x={cx - bw - 1} y={H - hi} width={bw} height={Math.max(hi, 1)} rx="3" fill="var(--good)" />
-              <rect x={cx + 1} y={H - he} width={bw} height={Math.max(he, 1)} rx="3" fill="var(--bad)" />
-              <text x={cx} y={H + 16} textAnchor="middle" fontSize="11" fill="var(--muted)">{monthLabel(r.month)}</text>
+              <rect x={cx - bw - 2} y={T + H - Math.max(hi, 2)} width={bw} height={Math.max(hi, 2)} rx="5" fill="var(--good)" opacity="0.92" />
+              <rect x={cx + 2} y={T + H - Math.max(he, 2)} width={bw} height={Math.max(he, 2)} rx="5" fill="var(--bad)" opacity="0.92" />
+              <text x={cx} y={T + H + 17} textAnchor="middle" fontSize="11" fontWeight="550" fill="var(--text-2)">{monthLabel(r.month)}</text>
             </g>
           );
         })}

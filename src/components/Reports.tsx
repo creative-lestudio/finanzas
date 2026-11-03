@@ -47,16 +47,16 @@ export function Reports() {
         <div className="card glass">
           <div className="card-head"><h2>Por mes</h2><span className="tiny muted"><b style={{ color: 'var(--good)' }}>■</b> Ingresos <b style={{ color: 'var(--bad)' }}>■</b> Gastos</span></div>
           <MonthBars rows={r.perMonth} base={base} />
-          <ul className="list plain" style={{ margin: '8px -18px 0' }}>
+          <div className="mtable">
             {[...r.perMonth].reverse().slice(0, 12).map((m) => (
-              <li key={m.month} style={{ minHeight: 44 }}>
-                <div className="grow small">{new Date(`${m.month}-15`).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</div>
-                <div className="small pos">+{formatMoney(m.income, base)}</div>
-                <div className="small neg">−{formatMoney(m.expenses, base)}</div>
-                <b className={`small ${m.income - m.expenses >= 0 ? 'pos' : 'neg'}`} style={{ minWidth: 76, textAlign: 'right' }}>{formatMoney(m.income - m.expenses, base)}</b>
-              </li>
+              <div key={m.month} className="mrow">
+                <span className="mname">{new Date(`${m.month}-15`).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</span>
+                <span className="pos num">+{formatMoney(m.income, base)}</span>
+                <span className="neg num">−{formatMoney(m.expenses, base)}</span>
+                <b className={`num ${m.income - m.expenses >= 0 ? 'pos' : 'neg'}`}>{formatMoney(m.income - m.expenses, base)}</b>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       )}
 
@@ -67,7 +67,7 @@ export function Reports() {
             <div className="row" style={{ justifyContent: 'center', margin: '4px 0 10px' }}>
               <Donut parts={exp.map((e) => ({ id: e.id, value: e.value, color: categoryColor(e.id) }))} center={formatMoney(r.expenses, base)} />
             </div>
-            <ul className="list plain" style={{ margin: '0 -18px' }}>
+            <ul className="list plain" >
               {exp.map((e) => {
                 const subs = childrenOf(data.categories, e.id).map((c) => ({ id: c.id, value: r.expenseByCategory[c.id] ?? 0 })).filter((x) => x.value > 0).sort((a, b) => b.value - a.value);
                 const own = r.expenseByCategory[e.id] ?? 0;
@@ -96,7 +96,7 @@ export function Reports() {
       {inc.length > 0 && (
         <div className="card glass">
           <h2>Ingresos por categoría</h2>
-          <ul className="list plain" style={{ margin: '0 -18px' }}>
+          <ul className="list plain" >
             {inc.map((e) => (
               <li key={e.id}><CatBadge id={e.id} /><div className="grow"><div className="ellipsis">{name(e.id)}</div><div className="tiny muted">{Math.round(e.pct * 100)} %</div></div><b className="num pos">{formatMoney(e.value, base)}</b></li>
             ))}

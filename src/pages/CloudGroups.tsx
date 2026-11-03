@@ -121,7 +121,7 @@ export function CloudGroups({ go }: { go: (page: 'settings') => void }) {
             <div className="card-head"><h2>{group.name} · {formatMoney(total, cur)} en gastos</h2><button className="btn ghost sm" onClick={() => setSheet('invite')}><Icon name="plus" size={14} /> Invitar</button></div>
             <p className="small muted" style={{ margin: '0 0 8px' }}>Miembros: {group.members.map((m) => m.displayName).join(', ')}</p>
             <div className={`mid ${mine > 0 ? 'pos' : mine < 0 ? 'neg' : ''}`}>{mine > 0 ? `Te deben ${formatMoney(mine, cur)}` : mine < 0 ? `Debes ${formatMoney(-mine, cur)}` : 'Estáis en paz'}</div>
-            <ul className="list plain" style={{ margin: '8px -18px 0' }}>
+            <ul className="list plain" style={{ marginTop: 8 }}>
               {transfers.map((t) => (
                 <li key={`${t.from}-${t.to}`} style={{ minHeight: 48 }}>
                   <span className="grow small"><b>{t.from === me.id ? 'Tú' : nameOf(t.from)}</b> {t.from === me.id ? 'debes' : 'debe'} <b>{formatMoney(t.amount, cur)}</b> a <b>{t.to === me.id ? 'ti' : nameOf(t.to)}</b></span>

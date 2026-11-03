@@ -34,7 +34,7 @@ async function download(name: string, blob: Blob) {
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
 
-export function Settings() {
+export function Settings({ go }: { go?: (p: 'more') => void } = {}) {
   const store = useStore();
   const { data, update } = store;
   const s = data.settings;
@@ -43,6 +43,17 @@ export function Settings() {
 
   return (
     <>
+      {go && (
+        <div className="card glass flush">
+          <ul className="list">
+            <li className="tap" onClick={() => go('more')}>
+              <span className="icon"><Icon name="grid" size={19} /></span>
+              <div className="grow"><div>Más herramientas</div><div className="small muted ellipsis">Divisas, compartir, patrimonio, salud y suscripciones</div></div>
+              <Icon name="chevron" size={18} className="chev" />
+            </li>
+          </ul>
+        </div>
+      )}
       <div className="section-title">Apariencia</div>
       <div className="card glass">
         <h2>Color principal</h2>
