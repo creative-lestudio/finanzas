@@ -441,10 +441,22 @@ describe('cobro en bolívares a tasa acordada (caso real)', () => {
     const { d, usd } = montar();
     expect(monthSummary(d, '2026-09').income).toBe(usd);
   });
-  it('la cuenta en Bs vale su equivalente acordado en la posición global, no la tasa de hoy', () => {
-    const { d, usd } = montar();
-    expect(accountBase(d, d.accounts[0], '2026-11-03')).toBe(usd);
-    expect(netWorth(d).net).toBe(usd);
+  it('la cuenta en Bs vale su saldo a la tasa de hoy (coherente con lo que se ve junto al saldo)', () => {
+    const { d } = montar();
+    const hoy = Math.round(114183038 / 1100);
+    expect(accountBase(d, d.accounts[0], '2026-11-03')).toBe(hoy);
+    expect(netWorth(d).net).toBe(hoy);
+  });
+  it('aunque haya movimientos con equivalente y tasas antiguas, 163.823,83 Bs ≈ 183,84 $ a BCV 891,11', () => {
+    const d = emptyData();
+    d.settings.currency = 'USD';
+    d.accounts = [{ id: 'ves', name: 'BBVA VE', kind: 'checking', balance: 16382383, currency: 'VES', source: 'manual' }];
+    d.rates = [
+      { id: 'a', date: '2025-01-05', base: 'USD', quote: 'VES', rate: 28, source: 'Paralelo' },
+      { id: 'b', date: '2026-11-03', base: 'USD', quote: 'VES', rate: 891.11, source: 'BCV' },
+    ];
+    d.transactions = [{ id: 't', accountId: 'ves', date: '2026-09-15', amount: 114183038, description: 'x', categoryId: 'income', categorySource: 'user', fx: { amount: 121471, currency: 'USD', rate: 940, source: 'Personalizada' } }];
+    expect(accountBase(d, d.accounts[0], '2026-11-03')).toBe(18384);
   });
 });
 
