@@ -8,7 +8,7 @@ import { Money } from '../components/ui';
 import { budgetStatus } from '../lib/budgets';
 import { coachTip } from '../lib/coach';
 import { spendByFamily } from '../lib/families';
-import { fxSummary, toBase } from '../lib/fx';
+import { accountBase, fxSummary } from '../lib/fx';
 import { goalProgress, GOAL_STATUS_LABEL } from '../lib/goals';
 import { healthReport, netWorth } from '../lib/health';
 import { detectAntExpenses, detectFees, detectSubscriptions, isActive, monthSummary } from '../lib/insights';
@@ -36,7 +36,7 @@ export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void
   const view = useMemo(() => {
     const sum = monthSummary(data, month);
     const subs = detectSubscriptions(data).filter((s) => s.kind === 'subscription' && isActive(s, now));
-    const inBase = (a: Account) => toBase(data, a.balance, a.currency, now);
+    const inBase = (a: Account) => accountBase(data, a, now);
     const liquidAccounts = data.accounts.filter((a) => ['checking', 'savings', 'cash'].includes(a.kind)).sort((a, b) => inBase(b) - inBase(a));
     const investAccounts = data.accounts.filter((a) => a.kind === 'investment' || a.kind === 'crypto').sort((a, b) => inBase(b) - inBase(a));
     return {
@@ -82,7 +82,7 @@ export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void
     <div key={a.id}>
       <span className="pill">{a.currency}</span>
       <span className="ellipsis">{a.name}</span>
-      <span className="v">{formatMoney(a.balance, a.currency)}</span>
+      <span className="v">{formatMoney(accountBase(data, a, now), base)}</span>
     </div>
   );
 
@@ -118,7 +118,7 @@ export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void
           </div>
           <div className="rows">
             {view.investAccounts.length ? view.investAccounts.slice(0, 4).map((a) => (
-              <div key={a.id}><span className="pill">{KIND_NAME[a.kind]}</span><span className="ellipsis">{a.name}</span><span className="v">{formatMoney(a.balance, a.currency)}</span></div>
+              <div key={a.id}><span className="pill">{KIND_NAME[a.kind]}</span><span className="ellipsis">{a.name}</span><span className="v">{formatMoney(accountBase(data, a, now), base)}</span></div>
             )) : <div><span>Añade fondos, acciones o cripto en Patrimonio</span></div>}
           </div>
         </section>

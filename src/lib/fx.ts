@@ -1,5 +1,5 @@
 import { monthKey, uid } from './money';
-import type { AppData, Exchange, RateQuote, Transaction } from './types';
+import type { Account, AppData, Exchange, RateQuote, Transaction } from './types';
 
 // Multimoneda y análisis de cambio de divisa.
 //
@@ -159,6 +159,20 @@ export function txBase(data: Pick<AppData, 'rates' | 'settings' | 'accounts'>, t
     return t.amount < 0 ? -eq : eq;
   }
   return toBase(data, t.amount, txCurrency(data, t), t.date, missing);
+}
+
+/**
+ * Valor de una cuenta en la moneda principal. Si la cuenta es de otra moneda y alguno de sus
+ * movimientos tiene equivalente registrado (cobro en Bs a tasa acordada = 1.214,71 $), la cuenta
+ * vale: lo que tenía al abrirla (a la tasa de hoy) + el equivalente de cada movimiento. Así lo
+ * cobrado cuenta por lo que acordaste y no por lo que marque el mercado hoy.
+ */
+export function accountBase(data: Pick<AppData, 'rates' | 'settings' | 'accounts' | 'transactions'>, a: Account, date: string, missing?: Set<string>): number {
+  if (a.currency === data.settings.currency) return a.balance;
+  const txs = data.transactions.filter((t) => t.accountId === a.id);
+  if (!txs.some((t) => t.fx && t.fx.amount > 0)) return toBase(data, a.balance, a.currency, date, missing);
+  const opening = a.balance - txs.reduce((sum, t) => sum + t.amount, 0);
+  return toBase(data, opening, a.currency, date, missing) + txs.reduce((sum, t) => sum + txBase(data, t, missing), 0);
 }
 
 export function accountCurrency(data: Pick<AppData, 'accounts' | 'settings'>, accountId: string): string {

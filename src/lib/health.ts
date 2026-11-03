@@ -1,4 +1,4 @@
-import { toBase } from './fx';
+import { accountBase, toBase } from './fx';
 import { addMonths, today } from './money';
 import { budgetStatus } from './budgets';
 import { detectAntExpenses, detectFees, detectSubscriptions, isActive, monthSummary } from './insights';
@@ -20,7 +20,7 @@ export function netWorth(data: AppData): NetWorth {
   let liabilities = 0;
   const date = today();
   for (const a of data.accounts) {
-    const v = toBase(data, a.balance, a.currency, date);
+    const v = accountBase(data, a, date);
     byKind[a.kind] += v;
     if (v >= 0) assets += v;
     else liabilities -= v;

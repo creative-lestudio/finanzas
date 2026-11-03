@@ -26,7 +26,7 @@ export function saveTransaction(data: AppData, t: Omit<Transaction, 'id'>): { ne
     ? alert.state === 'over'
       ? `Has superado el presupuesto de ${name}: ${formatMoney(alert.spent)} de ${formatMoney(alert.limit)}`
       : `Llevas el ${Math.round(alert.ratio * 100)} % del presupuesto de ${name}`
-    : `Guardado: ${formatMoney(t.amount, data.accounts.find((a) => a.id === t.accountId)?.currency)} · ${name}`;
+    : `Guardado: ${t.fx && t.fx.amount > 0 ? `${t.amount < 0 ? '−' : '+'}${formatMoney(t.fx.amount, t.fx.currency)} (${formatMoney(Math.abs(t.amount), data.accounts.find((a) => a.id === t.accountId)?.currency)})` : formatMoney(t.amount, data.accounts.find((a) => a.id === t.accountId)?.currency)} · ${name}`;
   return { next, message };
 }
 

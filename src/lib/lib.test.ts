@@ -11,7 +11,7 @@ import { formatMoney, merchantKey, parseAmount, setMasked } from './money';
 import { spendByFamily } from './families';
 import { distribute, roundUpAmount, savingProposals } from './savings';
 import { balances, settleUp, splitByWeights, splitEqual } from './shared';
-import { addRate, displayPair, referenceTypesFor, analyzeExchange, analyzeIncomeFx, deleteExchange, fxSummary, rateFor, recordExchange, simulateChain } from './fx';
+import { accountBase, addRate, displayPair, referenceTypesFor, analyzeExchange, analyzeIncomeFx, deleteExchange, fxSummary, rateFor, recordExchange, simulateChain } from './fx';
 import { futureValue, goalProgress } from './goals';
 import { merge3 } from './merge';
 import { parseVoiceLocal } from './voice';
@@ -411,5 +411,33 @@ describe('equivalente en moneda principal', () => {
     const sum = monthSummary(d, '2026-09');
     // 1.250 $ acordados + 56.500 Bs a 60 (paralelo) = 941,67 $
     expect(sum.income).toBe(125000 + Math.round(5650000 / 60));
+  });
+});
+
+describe('cobro en bolívares a tasa acordada (caso real)', () => {
+  const montar = () => {
+    const d = emptyData();
+    d.settings.currency = 'USD';
+    d.accounts = [{ id: 'ves', name: 'Banesco', kind: 'checking', balance: 114183038, currency: 'VES', source: 'manual' }];
+    d.rates = [{ id: 'r', date: '2026-10-20', base: 'USD', quote: 'VES', rate: 1100, source: 'Paralelo' }];
+    d.categories = [{ id: 'income', name: 'Nómina', icon: '', kind: 'income' } as never];
+    const bs = parseAmount('1.141.830,38')!;
+    const usd = Math.round(bs / 940);
+    d.transactions = [{ id: 't1', accountId: 'ves', date: '2026-09-15', amount: bs, description: 'MDS', categoryId: 'income', categorySource: 'user', fx: { amount: usd, currency: 'USD', rate: 940, source: 'Personalizada' } }];
+    return { d, bs, usd };
+  };
+  it('el monto en bolívares se interpreta bien y su equivalente es 1.214,71 $', () => {
+    const { bs, usd } = montar();
+    expect(bs).toBe(114183038);
+    expect(usd).toBe(121471);
+  });
+  it('el ingreso del mes suma el equivalente en dólares, no los bolívares', () => {
+    const { d, usd } = montar();
+    expect(monthSummary(d, '2026-09').income).toBe(usd);
+  });
+  it('la cuenta en Bs vale su equivalente acordado en la posición global, no la tasa de hoy', () => {
+    const { d, usd } = montar();
+    expect(accountBase(d, d.accounts[0], '2026-11-03')).toBe(usd);
+    expect(netWorth(d).net).toBe(usd);
   });
 });

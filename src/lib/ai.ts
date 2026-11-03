@@ -1,6 +1,6 @@
 import type Anthropic from '@anthropic-ai/sdk';
 import { budgetStatus } from './budgets';
-import { fxSummary, toBase } from './fx';
+import { accountBase, fxSummary } from './fx';
 import { goalProgress } from './goals';
 import { healthReport, netWorth } from './health';
 import { detectSubscriptions, isActive, monthSummary } from './insights';
@@ -127,7 +127,7 @@ export function financialSnapshot(data: AppData): Record<string, unknown> {
     fecha: now,
     monedaPrincipal: data.settings.currency,
     patrimonio: { neto: n(nw.net), activos: n(nw.assets), deudas: n(nw.liabilities), liquidez: n(nw.liquid) },
-    cuentas: data.accounts.map((a) => ({ nombre: a.name, tipo: a.kind, moneda: a.currency, saldo: n(a.balance), saldoEnPrincipal: n(toBase(data, a.balance, a.currency, now)) })),
+    cuentas: data.accounts.map((a) => ({ nombre: a.name, tipo: a.kind, moneda: a.currency, saldo: n(a.balance), saldoEnPrincipal: n(accountBase(data, a, now)) })),
     meses: months,
     presupuestos: budgetStatus(data, month, day).map((b) => ({ categoria: cat(b.budget.categoryId), categoriaId: b.budget.categoryId, tope: n(b.limit), gastado: n(b.spent), estado: b.state })),
     metas: data.goals.map((g) => {

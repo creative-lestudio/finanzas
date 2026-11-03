@@ -120,12 +120,14 @@ export function Transactions() {
                     <div className="small muted ellipsis">
                       {catOf(t.categoryId)?.name} · {accOf(t.accountId)?.name}
                       {t.channel === 'bizum' && ' · Bizum'}
-                      {t.fx && ` · ${formatMoney(t.fx.amount, t.fx.currency)} a ${formatRate(t.fx.rate)}`}
+                      {t.fx && ` · ${formatMoney(t.amount, txCurrency(data, t))} a ${formatRate(t.fx.rate)}`}
                       {!t.fx && txCurrency(data, t) === 'VES' && (() => { const e = convert(data, Math.abs(t.amount), 'VES', 'USD', t.date); return e ? ` · ≈ ${formatMoney(e, 'USD')} (est.)` : ''; })()}
                       {t.categorySource === 'ai' && ' · IA'}
                     </div>
                   </div>
-                  <Money cents={t.amount} currency={txCurrency(data, t)} sign />
+                  {t.fx && t.fx.amount > 0
+                    ? <Money cents={t.amount < 0 ? -t.fx.amount : t.fx.amount} currency={t.fx.currency} sign />
+                    : <Money cents={t.amount} currency={txCurrency(data, t)} sign />}
                 </li>
               ))}
             </ul>
@@ -136,7 +138,12 @@ export function Transactions() {
       {editing && (
         <Sheet title="Movimiento" onClose={() => setEditing(null)}>
           <div className="center mb">
-            <div className="big"><Money cents={editing.amount} currency={txCurrency(data, editing)} sign /></div>
+            <div className="big">
+              {editing.fx && editing.fx.amount > 0
+                ? <Money cents={editing.amount < 0 ? -editing.fx.amount : editing.fx.amount} currency={editing.fx.currency} sign />
+                : <Money cents={editing.amount} currency={txCurrency(data, editing)} sign />}
+            </div>
+            {editing.fx && <div className="small muted">{formatMoney(Math.abs(editing.amount), txCurrency(data, editing))} a {formatRate(editing.fx.rate)} · {editing.fx.source === 'Personalizada' ? 'tasa acordada' : `tasa ${editing.fx.source}`}</div>}
             <div className="secondary">{prettyDescription(editing.description)}</div>
             <div className="small muted">{editing.date} · {accOf(editing.accountId)?.name}</div>
             {editing.note && <div className="tiny muted mt">{editing.note}</div>}

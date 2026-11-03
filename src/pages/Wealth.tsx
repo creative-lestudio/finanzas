@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Icon } from '../components/icons';
 import { Bars, Field, Money, Sheet } from '../components/ui';
-import { CURRENCIES, toBase } from '../lib/fx';
+import { accountBase, CURRENCIES } from '../lib/fx';
 import { netWorth } from '../lib/health';
 import { formatMoney, parseAmount, today, uid } from '../lib/money';
 import type { Account, AccountKind } from '../lib/types';
@@ -62,7 +62,7 @@ export function Wealth() {
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <Money cents={a.balance} currency={a.currency} />
-                      {a.currency !== base && <div className="tiny muted">≈ {formatMoney(toBase(data, a.balance, a.currency, date), base)}</div>}
+                      {a.currency !== base && <div className="tiny muted">≈ {formatMoney(accountBase(data, a, date), base)}</div>}
                     </div>
                   </li>
                 ))}

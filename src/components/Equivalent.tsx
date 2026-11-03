@@ -56,6 +56,8 @@ export function Equivalent({ currency, date, cents, initial, defaultOpen, onChan
   const eqCents = mode === 'rate' ? (rate && abs ? Math.round(abs / rate) : 0) : Math.abs(parseAmount(eqStr) ?? 0);
   const valid = open && abs > 0 && rate > 0 && eqCents > 0;
   const market = rateFor(data, eq, currency, date);
+  const main = data.settings.currency;
+  const toMain = eq === main ? 1 : rateFor(data, eq, main, date);
 
   const result = useMemo<EquivResult | null>(() => {
     if (!valid) return null;
@@ -109,6 +111,11 @@ export function Equivalent({ currency, date, cents, initial, defaultOpen, onChan
             <p className="small" style={{ margin: '8px 0 0' }}>
               {formatMoney(abs, currency)} <span className="muted">≈</span> <b>{formatMoney(eqCents, eq)}</b> a <b>{formatRate(rate)}</b> {currency}/{eq} · {label(activeSource)}
               {result?.saveRate && <span className="tiny muted"> · se guardará como tasa {activeSource} del día</span>}
+            </p>
+          )}
+          {valid && toMain === null && (
+            <p className="tiny" style={{ margin: '8px 0 0', color: 'var(--warn)' }}>
+              Tu moneda principal es {main}: para que este importe sume en tus totales, anota la tasa {eq}/{main} en Divisas o cambia tu moneda principal a {eq} en Ajustes.
             </p>
           )}
           {valid && gain !== null && market && Math.abs(market - rate) / market > 0.005 && (
