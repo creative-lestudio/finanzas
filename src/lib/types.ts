@@ -182,6 +182,8 @@ export interface Settings {
   onboarded?: boolean;
   /** Ya vio (u omitió) el recorrido de la app. */
   tourDone?: boolean;
+  /** Guía de primer uso: recorrido del asistente y tres tareas iniciales. */
+  guide?: import('./guide').Guide;
   /** Ocultó la lista de primeros pasos de Inicio. */
   checklistHidden?: boolean;
   monthlyIncomeHint?: number;

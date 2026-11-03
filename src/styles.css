@@ -501,7 +501,7 @@ table.simple td.r, table.simple th.r { text-align: right; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .coach-hero { background: linear-gradient(160deg, #10234a, #0d121b); } }
 .coach-hero img { width: 104px; height: 104px; border-radius: 50%; object-fit: cover; display: block; box-shadow: 0 8px 24px rgb(3 42 103 / 0.3), 0 0 0 3px var(--surface); }
 .coach-hero .bubble { background: var(--surface); border-radius: 20px 20px 20px 6px; padding: 12px 14px; margin: 0; font-size: 15px; box-shadow: 0 4px 16px rgb(5 20 50 / 0.08); }
-.coach-hero .bubble b { display: block; font-family: var(--font-display); font-size: 19px; letter-spacing: -0.02em; color: var(--accent-ink); }
+.coach-hero .bubble > b:first-child { display: block; font-family: var(--font-display); font-size: 19px; letter-spacing: -0.02em; color: var(--accent-ink); }
 .suggest { display: grid; gap: 8px; margin-top: 14px; }
 .suggest button { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px; border: none; cursor: pointer; text-align: left; background: var(--surface); box-shadow: inset 0 0 0 0.5px var(--hairline); color: var(--text); font-size: 15px; font-weight: 500; transition: transform 0.25s var(--spring); }
 .suggest button:active { transform: scale(0.98); }
@@ -630,3 +630,10 @@ table.simple td.r, table.simple th.r { text-align: right; }
 @media (max-width: 430px) { .mrow { grid-template-columns: 1fr auto auto; } .mrow .mname { grid-column: 1 / -1; font-weight: 600; color: var(--text); } .mrow b { text-align: right; } }
 .card .list > li:first-child { padding-top: 6px; }
 @media (max-width: 400px) { .tabbar button { font-size: 8.4px; letter-spacing: -0.04em; } .tabbar { padding: 4px 2px; } .dock-inner { padding: 0 2px; } }
+
+/* Recorrido presentado por el asistente */
+.tour-coach { display: grid; grid-template-columns: 56px 1fr; gap: 12px; align-items: start; margin: 4px 0 14px; text-align: left; }
+.tour-coach img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; box-shadow: 0 6px 18px rgb(3 42 103 / 0.28), 0 0 0 3px var(--surface); }
+.tour-coach .bubble { background: var(--fill, rgb(120 130 150 / 0.12)); border-radius: 20px 20px 20px 6px; padding: 12px 14px; font-size: 14.5px; line-height: 1.45; color: var(--text-2); }
+.tour-coach .bubble > b:first-child { display: block; color: var(--text); font-size: 16px; margin-bottom: 3px; letter-spacing: -0.01em; }
+.coach-hero .bubble b:not(:first-child), .tour-coach .bubble b:not(:first-child) { display: inline; font-size: inherit; color: var(--text); font-family: inherit; letter-spacing: 0; }

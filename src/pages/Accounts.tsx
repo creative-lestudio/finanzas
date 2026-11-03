@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AccountForm } from '../components/AccountForm';
 import { AccountLogo, KIND_LABEL } from '../components/AccountLogo';
+import { GuideTip } from '../components/GuideCard';
 import { Icon } from '../components/icons';
 import { Sheet } from '../components/ui';
 import { accountBase, accountStatus } from '../lib/fx';
@@ -68,6 +69,7 @@ export function Accounts({ onView, onAdd }: { onView: (accountId: string) => voi
 
   return (
     <>
+      <GuideTip task="accounts" />
       <div className="hero glass">
         <div className="small secondary">Total en cuentas · {base}</div>
         <div className="big" style={{ fontSize: 38 }}>{formatMoney(nw.liquid, base)}</div>

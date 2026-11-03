@@ -2,7 +2,8 @@ import { useMemo, useRef, useState } from 'react';
 import type { Page } from '../App';
 import { COACH } from '../components/Coach';
 import { AccountLogo } from '../components/AccountLogo';
-import { FirstSteps } from '../components/FirstSteps';
+import { GuideCard } from '../components/GuideCard';
+import { guideActive } from '../lib/guide';
 import { BiometricPrompt, SyncBanner } from '../components/SyncBanner';
 import { Setup } from '../components/Setup';
 import { CatBadge, GoalIcon, Icon } from '../components/icons';
@@ -93,9 +94,10 @@ export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void
   return (
     <>
       {needsSetup && <Setup />}
-      {!needsSetup && <SyncBanner go={go} />}
-      {!needsSetup && <BiometricPrompt />}
-      {!needsSetup && <FirstSteps go={go} openAdd={openAdd} />}
+      <GuideCard go={go} openAdd={openAdd} setupPending={needsSetup} />
+      {/* Face ID, instalar y sincronizar solo se ofrecen cuando ya conoces la app */}
+      {!needsSetup && !guideActive(data) && <SyncBanner go={go} />}
+      {!needsSetup && !guideActive(data) && <BiometricPrompt />}
       {/* Tarjetas deslizables: patrimonio, posición global y inversiones */}
       <div className="carousel" ref={carousel} onScroll={onScroll} aria-label="Tus saldos">
         <section className="balance b1" onClick={() => go('wealth')} aria-label="Patrimonio neto">

@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { Icon } from './components/icons';
 import { InstallBanner } from './components/Install';
 import { Tour } from './components/Tour';
+import { finishGuide, guideActive, guideComplete, newGuide } from './lib/guide';
 import { Accounts } from './pages/Accounts';
 import { bioLabel } from './lib/biometric';
 import { QuickAdd } from './components/QuickAdd';
-import { Toaster } from './components/ui';
+import { Toaster, toast } from './components/ui';
 import { VoiceSheet } from './components/Voice';
 import { demoData } from './lib/demo';
 import { emptyData } from './lib/defaults';
@@ -79,10 +80,9 @@ export function App() {
     if (page !== 'transactions') setTxAccount(undefined);
   }, [page]);
   const d0 = store.data as typeof store.data | null;
-  const needsSetup = !d0 || (!d0.settings.onboarded && d0.transactions.length === 0 && d0.accounts.length <= 1);
   useEffect(() => {
-    if (d0 && !d0.settings.tourDone && !needsSetup && !IS_PREVIEW) setTour(true);
-  }, [d0?.settings.tourDone, needsSetup]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (d0 && !d0.settings.tourDone && !d0.settings.guide && !IS_PREVIEW) setTour(true);
+  }, [!!d0, d0?.settings.tourDone, d0?.settings.guide?.step]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     const open = () => setTour(true);
     window.addEventListener('finanzas:tour', open);
@@ -90,8 +90,19 @@ export function App() {
   }, []);
   const closeTour = () => {
     setTour(false);
-    if (store.data && !store.data.settings.tourDone) store.update((d) => ({ ...d, settings: { ...d.settings, tourDone: true } }));
+    if (!store.data) return;
+    if (!store.data.settings.tourDone || store.data.settings.guide?.step === 'tour') {
+      store.update((d) => ({ ...d, settings: { ...d.settings, tourDone: true, guide: d.settings.guide?.step === 'done' ? d.settings.guide : { ...(d.settings.guide ?? newGuide()), step: 'tasks' } } }));
+    }
   };
+  // Al completar las tres tareas se cierra la guía y se eliminan los datos de prueba.
+  useEffect(() => {
+    const g = d0?.settings.guide;
+    if (!d0 || !guideComplete(g)) return;
+    const hadTests = (g?.testTx.length ?? 0) + (g?.testBudgets.length ?? 0) > 0;
+    store.update((d) => finishGuide(d));
+    toast(hadTests ? '¡Listo! Ya conoces lo básico. Eliminé lo que hiciste de prueba.' : '¡Listo! Ya conoces lo básico de Finanzas.');
+  }, [d0?.settings.guide]); // eslint-disable-line react-hooks/exhaustive-deps
   // "Ojito": oculta los importes en toda la app (se recuerda en este dispositivo).
   const [hidden, setHidden] = useState(() => {
     try {
@@ -197,7 +208,7 @@ export function App() {
           </div>
         </header>
         <h1 className="large-title">{TITLES[page]}</h1>
-        {page === 'home' && <InstallBanner />}
+        {page === 'home' && !(store.data && guideActive(store.data)) && <InstallBanner />}
 
         <main>
           {page === 'home' && <Home go={setPage} openVoice={() => setSheet('voice')} openAdd={() => setSheet('add')} hidden={hidden} />}

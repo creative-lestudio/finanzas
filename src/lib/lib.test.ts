@@ -567,3 +567,24 @@ describe('valoración de bolívares con tasas de distinta antigüedad', () => {
     expect(rateFor(d, 'USD', 'VES', T, 'Paralelo')).toBe(28);
   });
 });
+
+describe('guía de primer uso', () => {
+  it('al terminar elimina lo creado como prueba y devuelve el saldo, y deja lo real', async () => {
+    const { finishGuide, newGuide, patchGuide, guideActive, guideComplete } = await import('./guide');
+    let d = emptyData();
+    d.accounts = [{ id: 'a', name: 'Efectivo', kind: 'cash', balance: 10000, currency: 'EUR', source: 'manual' }];
+    d = patchGuide(d, { ...newGuide('tasks') });
+    expect(guideActive(d)).toBe(true);
+    d = { ...d, accounts: [{ ...d.accounts[0], balance: 10000 - 500 + 300 }], transactions: [
+      { id: 'tp', accountId: 'a', date: '2026-11-03', amount: -500, description: 'Prueba · café', categoryId: 'x', categorySource: 'user' },
+      { id: 'tr', accountId: 'a', date: '2026-11-03', amount: 300, description: 'real', categoryId: 'x', categorySource: 'user' },
+    ], budgets: [{ id: 'bp', categoryId: 'x', limit: 100, warnAt: 0.8, rollover: false }, { id: 'br', categoryId: 'y', limit: 100, warnAt: 0.8, rollover: false }] };
+    d = patchGuide(d, { accounts: true, movement: true, budget: true, testTx: ['tp'], testBudgets: ['bp'] });
+    expect(guideComplete(d.settings.guide)).toBe(true);
+    const f = finishGuide(d);
+    expect(f.transactions.map((t) => t.id)).toEqual(['tr']);
+    expect(f.budgets.map((b) => b.id)).toEqual(['br']);
+    expect(f.accounts[0].balance).toBe(10300);
+    expect(guideActive(f)).toBe(false);
+  });
+});

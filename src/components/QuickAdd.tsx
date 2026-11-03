@@ -3,7 +3,9 @@ import { budgetAlertFor } from '../lib/budgets';
 import { categorize, detectChannel } from '../lib/categorize';
 import { addRate } from '../lib/fx';
 import { formatMoney, merchantKey, monthKey, parseAmount, today, uid } from '../lib/money';
+import { guideTasks, patchGuide } from '../lib/guide';
 import type { AppData, Transaction } from '../lib/types';
+import { COACH } from './Coach';
 import { useStore } from '../store';
 import { CategoryPicker } from './CategoryPicker';
 import { Equivalent, type EquivResult } from './Equivalent';
@@ -42,6 +44,10 @@ export function QuickAdd({ onClose, onVoice }: { onClose: () => void; onVoice: (
   const [date, setDate] = useState(today());
   // Equivalente en otra moneda (cobros y pagos en bolívares, p. ej.).
   const [equiv, setEquiv] = useState<EquivResult | null>(null);
+  // Guía de primer uso: el primer movimiento puede ser de prueba (se borra al terminar la guía) o real.
+  const guide = guideTasks(data);
+  const asking = !!guide && !guide.movement;
+  const [asTest, setAsTest] = useState(true);
 
   const account = data.accounts.find((a) => a.id === accountId);
   const currency = account?.currency ?? data.settings.currency;
@@ -54,8 +60,10 @@ export function QuickAdd({ onClose, onVoice }: { onClose: () => void; onVoice: (
 
   const save = () => {
     if (!signed || !chosen || !accountId) return;
-    const desc = description.trim() || data.categories.find((c) => c.id === chosen)!.name;
-    const { next, message } = saveTransaction(equiv?.saveRate ? addRate(data, equiv.saveRate) : data, {
+    const base = description.trim() || data.categories.find((c) => c.id === chosen)!.name;
+    const test = asking && asTest;
+    const desc = test ? `Prueba · ${base}` : base;
+    let { next, message } = saveTransaction(equiv?.saveRate ? addRate(data, equiv.saveRate) : data, {
       accountId,
       date,
       amount: signed,
@@ -65,6 +73,11 @@ export function QuickAdd({ onClose, onVoice }: { onClose: () => void; onVoice: (
       channel: account?.kind === 'cash' ? 'cash' : detectChannel(desc),
       fx: equiv?.fx,
     });
+    if (asking) {
+      const id = next.transactions[next.transactions.length - 1].id;
+      next = patchGuide(next, { movement: true, testTx: test ? [...(guide?.testTx ?? []), id] : guide?.testTx ?? [] });
+      message = test ? 'Movimiento de prueba guardado: lo eliminaré al terminar la guía.' : message;
+    }
     update(() => next);
     toast(message);
     onClose();
@@ -72,6 +85,15 @@ export function QuickAdd({ onClose, onVoice }: { onClose: () => void; onVoice: (
 
   return (
     <Sheet title="Nuevo movimiento" onClose={onClose}>
+      {asking && (
+        <div className="coach-hero" style={{ borderRadius: 22, marginBottom: 12, padding: 12, gridTemplateColumns: '64px 1fr' }}>
+          <img src={COACH.hola} alt="" style={{ width: 64, height: 64 }} />
+          <div className="bubble" style={{ fontSize: 14 }}>
+            <b>Tu primer movimiento</b>
+            Pon el importe, elige la categoría y guarda. Abajo decide si lo registras <b>como prueba</b> (lo borro al terminar) o <b>como real</b>.
+          </div>
+        </div>
+      )}
       <button className="pill-mic lg" onClick={onVoice}>
         <span className="dot"><Icon name="mic" size={18} /></span>
         <span className="grow">
@@ -110,6 +132,12 @@ export function QuickAdd({ onClose, onVoice }: { onClose: () => void; onVoice: (
         </div>
       </div>
       <Equivalent key={currency} currency={currency} date={date} cents={signed ? Math.abs(signed) : null} defaultOpen={currency === 'VES'} onChange={setEquiv} />
+      {asking && (
+        <div className="seg mt" role="group" aria-label="Tipo de registro">
+          <button className={asTest ? 'on' : ''} onClick={() => setAsTest(true)}>Registrar como prueba</button>
+          <button className={!asTest ? 'on' : ''} onClick={() => setAsTest(false)}>Registro real</button>
+        </div>
+      )}
       <button className="btn primary block mt" disabled={!signed || !chosen} onClick={save}>
         Guardar {signed ? formatMoney(signed, currency) : ''}
       </button>

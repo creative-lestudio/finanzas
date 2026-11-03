@@ -15,6 +15,7 @@ import { getSupabaseConfig, setSupabaseConfig, supabase } from '../lib/sync';
 import { IS_PREVIEW } from '../lib/preview';
 import { ACCENTS } from '../lib/theme';
 import type { Settings as SettingsT } from '../lib/types';
+import { newGuide } from '../lib/guide';
 import { useStore } from '../store';
 
 async function download(name: string, blob: Blob) {
@@ -80,7 +81,7 @@ export function Settings({ go }: { go?: (p: 'more') => void } = {}) {
         <button className="btn tinted block" onClick={() => window.dispatchEvent(new Event('finanzas:tour'))}>
           <Icon name="info" size={18} /> Ver el recorrido de la app
         </button>
-        <button className="btn ghost block mt small" onClick={() => setSettings({ checklistHidden: false })}>Mostrar los primeros pasos en Inicio</button>
+        <button className="btn ghost block mt small" onClick={() => { setSettings({ checklistHidden: false, guide: newGuide('tasks') }); toast('Tareas iniciales restauradas en Global'); }}>Repetir las tareas iniciales</button>
       </div>
       <SyncSection />
 

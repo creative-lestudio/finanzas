@@ -1,7 +1,9 @@
 import { categoryLabel } from '../lib/categories';
 import { useState } from 'react';
 import { CatBadge, GOAL_ICONS, GoalIcon, Icon } from '../components/icons';
-import { Empty, Field, Meter, Money, Segmented, Sheet, StateBadge, Switch } from '../components/ui';
+import { GuideTip } from '../components/GuideCard';
+import { Empty, Field, Meter, Money, Segmented, Sheet, StateBadge, Switch, toast } from '../components/ui';
+import { guideTasks, patchGuide } from '../lib/guide';
 import { budgetStatus, suggestBudgets } from '../lib/budgets';
 import { CURRENCIES } from '../lib/fx';
 import { futureValue, goalProgress, GOAL_KIND_LABEL, GOAL_STATUS_LABEL } from '../lib/goals';
@@ -18,6 +20,9 @@ export function Plan() {
   const [editBudget, setEditBudget] = useState<Partial<Budget> | null>(null);
   const [editGoal, setEditGoal] = useState<Partial<Goal> | null>(null);
   const [moveGoal, setMoveGoal] = useState<Goal | null>(null);
+  const guide = guideTasks(data);
+  const askBudget = !!guide && !guide.budget;
+  const [budgetTest, setBudgetTest] = useState(true);
 
   const statuses = budgetStatus(data, month, Number(now.slice(8)));
   const suggestions = suggestBudgets(data, month);
@@ -28,6 +33,7 @@ export function Plan() {
 
   return (
     <>
+      {tab === 'budgets' && <GuideTip task="budget" />}
       <Segmented value={tab} onChange={setTab} options={[['budgets', 'Presupuestos'], ['goals', 'Metas'], ['auto', 'Automático']]} />
 
       {tab === 'budgets' && (
@@ -62,7 +68,7 @@ export function Plan() {
                   <li key={s.categoryId}>
                     <CatBadge id={s.categoryId} emoji={cat(s.categoryId)?.icon} /><span className="grow">{cat(s.categoryId)?.name}</span>
                     <Money cents={s.limit} />
-                    <button className="btn sm tinted" onClick={() => update((d) => ({ ...d, budgets: [...d.budgets, { id: uid(), categoryId: s.categoryId, limit: s.limit, warnAt: 0.8, rollover: false }] }))}>Añadir</button>
+                    <button className="btn sm tinted" onClick={() => (askBudget ? setEditBudget({ categoryId: s.categoryId, limit: s.limit, warnAt: 0.8, rollover: false }) : update((d) => ({ ...d, budgets: [...d.budgets, { id: uid(), categoryId: s.categoryId, limit: s.limit, warnAt: 0.8, rollover: false }] })))}>Añadir</button>
                   </li>
                 ))}
               </ul>
@@ -132,9 +138,17 @@ export function Plan() {
           <BudgetForm
             value={editBudget}
             onSave={(b) => {
-              update((d) => ({ ...d, budgets: b.id && d.budgets.some((x) => x.id === b.id) ? d.budgets.map((x) => (x.id === b.id ? b : x)) : [...d.budgets, { ...b, id: uid() }] }));
+              const newId = uid();
+              const isNew = !(b.id && data.budgets.some((x) => x.id === b.id));
+              update((d) => {
+                let next: typeof d = { ...d, budgets: !isNew ? d.budgets.map((x) => (x.id === b.id ? b : x)) : [...d.budgets, { ...b, id: newId }] };
+                if (isNew && askBudget) next = patchGuide(next, { budget: true, testBudgets: budgetTest ? [...(guide?.testBudgets ?? []), newId] : guide?.testBudgets ?? [] });
+                return next;
+              });
+              if (isNew && askBudget) toast(budgetTest ? 'Presupuesto de prueba creado: lo eliminaré al terminar la guía.' : 'Presupuesto creado.');
               setEditBudget(null);
             }}
+            guideChoice={askBudget && !editBudget.id ? { test: budgetTest, set: setBudgetTest } : undefined}
             onDelete={editBudget.id ? () => { update((d) => ({ ...d, budgets: d.budgets.filter((x) => x.id !== editBudget.id) })); setEditBudget(null); } : undefined}
           />
         </Sheet>
@@ -160,7 +174,7 @@ export function Plan() {
   );
 }
 
-function BudgetForm({ value, onSave, onDelete }: { value: Partial<Budget>; onSave: (b: Budget) => void; onDelete?: () => void }) {
+function BudgetForm({ value, onSave, onDelete, guideChoice }: { value: Partial<Budget>; onSave: (b: Budget) => void; onDelete?: () => void; guideChoice?: { test: boolean; set: (v: boolean) => void } }) {
   const { data } = useStore();
   const [categoryId, setCategoryId] = useState(value.categoryId ?? data.categories.find((c) => c.kind === 'expense')!.id);
   const [limit, setLimit] = useState(value.limit ? String(value.limit / 100) : '');
@@ -177,6 +191,12 @@ function BudgetForm({ value, onSave, onDelete }: { value: Partial<Budget>; onSav
       <Field label={`Tope mensual (${data.settings.currency})`}><input inputMode="decimal" value={limit} onChange={(e) => setLimit(e.target.value)} /></Field>
       <Field label={`Avisarme al llegar al ${warnAt} %`}><input type="range" min={50} max={100} step={5} value={warnAt} onChange={(e) => setWarnAt(Number(e.target.value))} /></Field>
       <Switch checked={rollover} onChange={setRollover}>Lo que sobre pasa al mes siguiente</Switch>
+      {guideChoice && (
+        <div className="seg mt" role="group" aria-label="Tipo de presupuesto">
+          <button className={guideChoice.test ? 'on' : ''} onClick={() => guideChoice.set(true)}>Presupuesto de prueba</button>
+          <button className={!guideChoice.test ? 'on' : ''} onClick={() => guideChoice.set(false)}>Presupuesto real</button>
+        </div>
+      )}
       <button className="btn primary block mt" disabled={!cents || cents <= 0} onClick={() => onSave({ id: value.id ?? '', categoryId, limit: Math.abs(cents!), warnAt: warnAt / 100, rollover })}>Guardar</button>
       {onDelete && <button className="btn danger block mt" onClick={onDelete}>Eliminar</button>}
     </>
