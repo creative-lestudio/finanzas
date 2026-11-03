@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import type { Page } from '../App';
 import { COACH } from '../components/Coach';
+import { AccountLogo } from '../components/AccountLogo';
 import { FirstSteps } from '../components/FirstSteps';
 import { BiometricPrompt, SyncBanner } from '../components/SyncBanner';
 import { Setup } from '../components/Setup';
@@ -81,7 +82,7 @@ export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void
 
   const accountRow = (a: Account) => (
     <div key={a.id}>
-      <span className="pill">{a.currency}</span>
+      <AccountLogo account={a} size={22} />
       <span className="ellipsis">{a.name}</span>
       <span className="v">{formatMoney(accountBase(data, a, now), base)}</span>
     </div>

@@ -400,3 +400,23 @@ export function simulateChain(start: { amount: number; currency: string }, steps
   }
   return out;
 }
+
+export interface AccountStatus {
+  /** Fecha (YYYY-MM-DD) de la última actividad conocida: movimiento o sincronización bancaria. */
+  lastActivity?: string;
+  movements: number;
+}
+
+/** Estado de una cuenta: cuándo se movió por última vez y cuántos movimientos tiene. */
+export function accountStatus(data: Pick<AppData, 'transactions'>, a: Account): AccountStatus {
+  let last = '';
+  let n = 0;
+  for (const t of data.transactions) {
+    if (t.accountId !== a.id) continue;
+    n++;
+    if (t.date > last) last = t.date;
+  }
+  const sync = a.lastSync && a.lastSync.length >= 10 ? a.lastSync.slice(0, 10) : '';
+  const best = sync > last ? sync : last;
+  return { lastActivity: best || undefined, movements: n };
+}

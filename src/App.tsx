@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Icon } from './components/icons';
 import { InstallBanner } from './components/Install';
 import { Tour } from './components/Tour';
+import { Accounts } from './pages/Accounts';
 import { bioLabel } from './lib/biometric';
 import { QuickAdd } from './components/QuickAdd';
 import { Toaster } from './components/ui';
@@ -25,7 +26,7 @@ import { Wealth } from './pages/Wealth';
 import { AuthForm, RecoveryNotice } from './components/AuthForm';
 import { useStore } from './store';
 
-export type Page = 'home' | 'transactions' | 'plan' | 'assistant' | 'more' | 'fx' | 'groups' | 'wealth' | 'health' | 'subs' | 'settings';
+export type Page = 'home' | 'transactions' | 'plan' | 'assistant' | 'more' | 'accounts' | 'fx' | 'groups' | 'wealth' | 'health' | 'subs' | 'settings';
 
 const TITLES: Record<Page, string> = {
   home: 'Inicio',
@@ -33,6 +34,7 @@ const TITLES: Record<Page, string> = {
   plan: 'Plan',
   assistant: 'Asesor',
   more: 'Más',
+  accounts: 'Cuentas',
   fx: 'Divisas',
   groups: 'Compartir',
   wealth: 'Patrimonio',
@@ -50,6 +52,7 @@ const TABS: [Page, string, string][] = [
 ];
 
 const MORE: [Page, string, string, string][] = [
+  ['accounts', 'bank', 'Cuentas', 'Saldos, logos y estado de cada cuenta'],
   ['fx', 'swap', 'Divisas y cambios', 'Tasas BCV/paralelo, Wise, pérdidas por cambio'],
   ['groups', 'users', 'Gastos compartidos', 'Divide cuentas con amigos y familia'],
   ['wealth', 'chart', 'Patrimonio', 'Cuentas, inversiones, cripto y deudas'],
@@ -58,7 +61,7 @@ const MORE: [Page, string, string, string][] = [
   ['settings', 'gear', 'Ajustes', 'Apariencia, cuenta, datos y seguridad'],
 ];
 
-const PARENT: Partial<Record<Page, Page>> = { fx: 'more', groups: 'more', wealth: 'more', health: 'more', subs: 'more', settings: 'more' };
+const PARENT: Partial<Record<Page, Page>> = { accounts: 'more', fx: 'more', groups: 'more', wealth: 'more', health: 'more', subs: 'more', settings: 'more' };
 
 applySavedTheme();
 
@@ -71,6 +74,11 @@ export function App() {
   const [sheet, setSheet] = useState<'add' | 'voice' | null>(null);
   // Recorrido de primer uso: se muestra una vez (tras el asistente inicial) y se puede repetir desde Ajustes.
   const [tour, setTour] = useState(false);
+  // Cuenta a mostrar en Movimientos cuando se llega desde la página de Cuentas.
+  const [txAccount, setTxAccount] = useState<string | undefined>();
+  useEffect(() => {
+    if (page !== 'transactions') setTxAccount(undefined);
+  }, [page]);
   const d0 = store.data as typeof store.data | null;
   const needsSetup = !d0 || (!d0.settings.onboarded && d0.transactions.length === 0 && d0.accounts.length <= 1);
   useEffect(() => {
@@ -190,7 +198,8 @@ export function App() {
 
         <main>
           {page === 'home' && <Home go={setPage} openVoice={() => setSheet('voice')} openAdd={() => setSheet('add')} hidden={hidden} />}
-          {page === 'transactions' && <Transactions />}
+          {page === 'transactions' && <Transactions account={txAccount} />}
+          {page === 'accounts' && <Accounts onView={(id) => { setTxAccount(id); setPage('transactions'); }} onAdd={() => setSheet('add')} />}
           {page === 'plan' && <Plan />}
           {page === 'assistant' && <Assistant />}
           {page === 'fx' && <Currency />}

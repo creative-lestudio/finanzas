@@ -1,23 +1,13 @@
 import { useState } from 'react';
+import { AccountForm } from '../components/AccountForm';
+import { AccountLogo, KIND_LABEL } from '../components/AccountLogo';
 import { Icon } from '../components/icons';
-import { Bars, Field, Money, Sheet } from '../components/ui';
-import { accountBase, CURRENCIES } from '../lib/fx';
+import { Bars, Money, Sheet } from '../components/ui';
+import { accountBase } from '../lib/fx';
 import { netWorth } from '../lib/health';
-import { formatMoney, parseAmount, today, uid } from '../lib/money';
+import { formatMoney, today } from '../lib/money';
 import type { Account, AccountKind } from '../lib/types';
 import { useStore } from '../store';
-
-export const KIND_LABEL: Record<AccountKind, string> = {
-  checking: 'Cuentas corrientes',
-  savings: 'Ahorro',
-  cash: 'Efectivo',
-  investment: 'Inversiones',
-  crypto: 'Criptomonedas',
-  card: 'Tarjetas de crédito',
-  loan: 'Préstamos e hipotecas',
-};
-
-const KIND_ICON: Record<AccountKind, string> = { checking: 'bank', savings: 'piggy', cash: 'banknote', investment: 'trend', crypto: 'coins', card: 'card', loan: 'receipt' };
 
 /** Visión global del patrimonio: todo lo que tienes y lo que debes, en tu moneda principal. */
 export function Wealth() {
@@ -53,7 +43,7 @@ export function Wealth() {
               <ul className="list">
                 {accs.map((a) => (
                   <li key={a.id} className="tap" onClick={() => setEdit(a)}>
-                    <span className="icon"><Icon name={KIND_ICON[a.kind]} size={19} /></span>
+                    <AccountLogo account={a} size={40} />
                     <div className="grow">
                       <div className="ellipsis">{a.name}</div>
                       <div className="small muted">
@@ -97,38 +87,3 @@ export function Wealth() {
   );
 }
 
-function AccountForm({ value, onSave, onDelete }: { value: Partial<Account>; onSave: (a: Account) => void; onDelete?: () => void }) {
-  const [name, setName] = useState(value.name ?? '');
-  const [kind, setKind] = useState<AccountKind>(value.kind ?? 'checking');
-  const [currency, setCurrency] = useState(value.currency ?? 'EUR');
-  const [balance, setBalance] = useState(value.balance !== undefined ? String(Math.abs(value.balance) / 100).replace('.', ',') : '');
-  const debt = kind === 'loan' || kind === 'card';
-  const cents = parseAmount(balance) ?? 0;
-  return (
-    <>
-      <Field label="Tipo">
-        <select value={kind} onChange={(e) => setKind(e.target.value as AccountKind)}>
-          {(Object.keys(KIND_LABEL) as AccountKind[]).map((k) => <option key={k} value={k}>{KIND_LABEL[k]}</option>)}
-        </select>
-      </Field>
-      <Field label="Nombre"><input value={name} placeholder="BBVA, Banesco, Wise USD, Binance, Hipoteca…" onChange={(e) => setName(e.target.value)} /></Field>
-      <div className="grid2">
-        <Field label={debt ? 'Deuda pendiente' : 'Saldo / valor actual'}><input inputMode="decimal" value={balance} onChange={(e) => setBalance(e.target.value)} /></Field>
-        <Field label="Moneda">
-          <select value={currency} onChange={(e) => setCurrency(e.target.value)} disabled={Boolean(value.id && value.source !== 'manual')}>
-            {CURRENCIES.map((c) => <option key={c.code} value={c.code}>{c.flag} {c.code}</option>)}
-          </select>
-        </Field>
-      </div>
-      {value.source && value.source !== 'manual' && value.source !== 'import' && <p className="small muted">El saldo de esta cuenta lo actualiza el banco al sincronizar.</p>}
-      <button
-        className="btn primary block mt"
-        disabled={!name}
-        onClick={() => onSave({ id: value.id ?? uid(), name, kind, balance: debt ? -Math.abs(cents) : cents, currency, source: value.source ?? 'manual', externalId: value.externalId, lastSync: value.source === 'manual' ? today() : value.lastSync })}
-      >
-        Guardar
-      </button>
-      {onDelete && <button className="btn danger block mt" onClick={onDelete}>Eliminar cuenta</button>}
-    </>
-  );
-}

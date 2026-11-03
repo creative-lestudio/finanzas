@@ -608,3 +608,7 @@ table.simple td.r, table.simple th.r { text-align: right; }
 .cat-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
 .cat-row.sub { padding-left: 34px; position: relative; }
 .cat-row.sub::before { content: ''; position: absolute; left: 16px; top: 0; bottom: 50%; width: 12px; border-left: 1.5px solid var(--fill-2); border-bottom: 1.5px solid var(--fill-2); border-radius: 0 0 0 8px; }
+
+.acc-card { padding: 16px 16px 14px; }
+.acc-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+.acc-dot.good { background: var(--good); } .acc-dot.warn { background: var(--warn); }

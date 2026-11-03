@@ -15,6 +15,10 @@ export interface Account {
   /** Identificador externo (IBAN enmascarado, id del proveedor...). */
   externalId?: string;
   lastSync?: string;
+  /** Logo o imagen identificativa (data URL reducida), p. ej. el logo del banco. */
+  image?: string;
+  /** Icono si no hay imagen: 'ic:nombre' o emoji. */
+  icon?: string;
 }
 
 export interface Category {

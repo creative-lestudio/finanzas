@@ -16,12 +16,12 @@ import { useStore } from '../store';
 const DAY_FMT = new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
 const MONTH_FMT = new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' });
 
-export function Transactions() {
+export function Transactions({ account }: { account?: string }) {
   const { data, update } = useStore();
   const [month, setMonth] = useState(today().slice(0, 7));
   const [q, setQ] = useState('');
   const [cat, setCat] = useState<string>('');
-  const [acc, setAcc] = useState<string>('');
+  const [acc, setAcc] = useState<string>(account ?? '');
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [busy, setBusy] = useState(false);
   const [view, setView] = useState<'list' | 'cats' | 'summary'>('list');
