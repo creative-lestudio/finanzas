@@ -386,6 +386,7 @@
         .coachc { flex-direction: column; align-items: flex-start; }
       }
       @media (max-width: 560px) {
+        header .btn.white.sm { display: none; } header .btn.op-app { background: var(--btn); color: var(--btn-ink); border-color: transparent; }
         .sc-cols { grid-template-columns: 1fr; } .pills i { display: none; } .devices { height: 380px; } .iph.pad { --w: 250px; --r: 30px; transform: translateX(-40px); } .iph.sm { --w: 150px; --r: 32px; }
         .shift .col2 { padding: 26px; }
         section { padding-top: 76px; } .secure { margin-top: 76px; padding: 76px 0; } .final { margin-top: 76px; }
@@ -404,7 +405,7 @@
         <nav aria-label="Secciones"><a href="#funciones">Funciones</a><a href="#divisas">Divisas</a><a href="#como">Cómo funciona</a><a href="#seguridad">Seguridad</a><a href="#faq">Preguntas</a></nav>
         <div class="end">
           <button class="tgl" id="theme" type="button" aria-label="Cambiar entre tema claro y oscuro"><span class="sun"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4V2M12 22v-2M4.9 4.9 3.5 3.5M20.5 20.5l-1.4-1.4M4 12H2M22 12h-2M4.9 19.1l-1.4 1.4M20.5 3.5l-1.4 1.4M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z" /></svg></span><span class="moon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" /></svg></span></button>
-          <a class="btn glass sm hide-s" href="./app/">Abrir la app</a>
+          <a class="btn glass sm op-app" href="./app/">Abrir app</a>
           <a class="btn white sm" href="#descargar">Descargar</a>
         </div>
       </div></div>
@@ -542,7 +543,7 @@
               </form>
               <div class="out" aria-live="polite"><span class="k">Pierdes</span><span class="v" id="loss">—</span><span class="s" id="detail"></span></div>
             </div>
-            <div class="card w3 coachc rv" id="asistente" style="grid-column: span 4;">
+            <div class="card w4 coachc rv" id="asistente">
               <img src="./site/coach-avatar.webp" alt="El asistente de Finanzas: un robot blanco con visor azul que saluda" loading="lazy" />
               <div>
                 <h3>Un asistente que conoce tus números</h3>
@@ -720,8 +721,8 @@
 
 
     <div class="sticky-dl" id="sticky" aria-hidden="true">
-      <img src="./app/icons/icon-192.png" alt="" /><span><b>Finanzas</b><small>Gratis · privada · sin conexión</small></span>
-      <a class="btn dark sm" href="#descargar">Descargar</a>
+      <img src="./app/icons/icon-192.png" alt="" /><span><b>Finanzas</b><small>Gratis · sin conexión</small></span>
+      <a class="btn dark sm" href="./app/">Abrir app</a>
     </div>
 
     <footer>
