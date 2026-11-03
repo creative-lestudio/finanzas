@@ -4,11 +4,13 @@ import { formatMoney, parseAmount, today, uid } from '../lib/money';
 import { balances, settleUp, splitByWeights, splitEqual } from '../lib/shared';
 import type { Group } from '../lib/types';
 import { useStore } from '../store';
-import { Empty, Field, Money, Sheet } from '../components/ui';
+import { Empty, Field, Money, Segmented, Sheet } from '../components/ui';
+import { CloudGroups } from './CloudGroups';
 
 /** Gastos compartidos estilo Splitwise / Settle Up. */
-export function Groups() {
+export function Groups({ go }: { go: (p: 'settings') => void }) {
   const { data, update } = useStore();
+  const [scope, setScope] = useState<'cloud' | 'local'>('cloud');
   const [openId, setOpenId] = useState<string | null>(data.groups[0]?.id ?? null);
   const [newGroup, setNewGroup] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -16,6 +18,9 @@ export function Groups() {
 
   return (
     <>
+      <Segmented value={scope} onChange={(v) => setScope(v as 'cloud' | 'local')} options={[['cloud', 'Con otras personas'], ['local', 'Solo en mi móvil']]} />
+      {scope === 'cloud' && <CloudGroups go={go} />}
+      {scope === 'local' && <>
       <div className="chips" style={{ marginBottom: 12 }}>
         {data.groups.map((g) => (
           <button key={g.id} className={`chip ${g.id === openId ? 'on' : ''}`} onClick={() => setOpenId(g.id)}>{g.name}</button>
@@ -41,6 +46,7 @@ export function Groups() {
           <AddShared group={group} onDone={() => setAdding(false)} />
         </Sheet>
       )}
+      </>}
     </>
   );
 }

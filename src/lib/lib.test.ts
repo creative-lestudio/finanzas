@@ -17,6 +17,7 @@ import { balances, settleUp, splitByWeights, splitEqual } from './shared';
 import { accountBase, addRate, displayPair, referenceTypesFor, analyzeExchange, analyzeIncomeFx, deleteExchange, fxSummary, rateFor, recordExchange, simulateChain } from './fx';
 import { futureValue, goalProgress } from './goals';
 import { merge3 } from './merge';
+import { toSharedExpenses, type CloudEntry } from './cloudShared';
 import { parseVoiceLocal } from './voice';
 import { applyExcelImport, exportWorkbook, readWorkbook } from './excel';
 import { monthSummary } from './insights';
@@ -492,5 +493,31 @@ describe('categorías madre y subcategorías', () => {
     expect(e.categories.find((c) => c.id === 'groceries')?.parentId).toBe('fam_comida');
     expect(e.categories.some((c) => c.id === 'fam_comida')).toBe(true);
     expect(applySuggestedStructure(e)).toBe(e);
+  });
+});
+
+describe('gastos y deudas compartidos entre usuarios', () => {
+  const M = 'marcelo';
+  const N = 'nicole';
+  const e = (over: Partial<CloudEntry>): CloudEntry => ({ id: Math.random().toString(36), groupId: 'g', createdBy: M, kind: 'expense', payer: M, amount: 0, description: '', date: '2026-11-01', shares: {}, createdAt: '2026-11-01T10:00:00Z', ...over });
+  it('un gasto pagado por ti y repartido a medias: ella te debe su mitad', () => {
+    const bal = balances(toSharedExpenses([e({ amount: 10000, shares: { [M]: 5000, [N]: 5000 } })]), [M, N]);
+    expect(bal).toEqual({ [M]: 5000, [N]: -5000 });
+    expect(settleUp(bal)).toEqual([{ from: N, to: M, amount: 5000 }]);
+  });
+  it('una deuda tuya con Nicole y otra suya contigo se compensan', () => {
+    const entries = [
+      e({ kind: 'debt', payer: N, amount: 3000, shares: { [M]: 3000 } }), // yo le debo 30 a Nicole
+      e({ kind: 'debt', payer: M, amount: 1200, shares: { [N]: 1200 } }), // Nicole me debe 12
+    ];
+    const bal = balances(toSharedExpenses(entries), [M, N]);
+    expect(bal[M]).toBe(-1800);
+    expect(settleUp(bal)).toEqual([{ from: M, to: N, amount: 1800 }]);
+  });
+  it('liquidar deja a todos en paz', () => {
+    const entries = [e({ amount: 10000, shares: { [M]: 5000, [N]: 5000 } }), e({ kind: 'payment', payer: N, amount: 5000, shares: { [M]: 5000 } })];
+    const bal = balances(toSharedExpenses(entries), [M, N]);
+    expect(bal).toEqual({ [M]: 0, [N]: 0 });
+    expect(toSharedExpenses(entries)[1].settlement).toBe(true);
   });
 });

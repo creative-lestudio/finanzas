@@ -78,6 +78,7 @@ Sin la clave propia el flujo firma con una temporal: el APK funciona, pero cada 
 - **Cuenta:** Google o correo (Supabase Auth). Al iniciar sesión y desbloquear, el dispositivo se vincula solo a tu cuenta y sube/baja los datos, siempre **cifrados en el dispositivo** (la clave nunca sale de él).
 - **Clave de cifrado:** se pide **una vez por dispositivo**. En un dispositivo nuevo, tras entrar con Google, la app encuentra tus datos y pide esa clave para abrirlos.
 - **Face ID / huella / Windows Hello:** tras la primera vez se ofrece activarlo (también en Ajustes → Seguridad). La clave queda guardada solo en el dispositivo (CryptoKey no extraíble) y se libera al verificar la biometría.
+- **Gastos compartidos con otras personas:** ejecuta también `supabase/migrations/20261104000000_compartidos.sql`. Crea grupos con invitación por correo, gastos, deudas y liquidaciones visibles para los miembros (RLS), en vivo. Estos datos no van cifrados de extremo a extremo.
 - **Eliminar la cuenta:** Ajustes → Sincronización. Necesita ejecutar **una vez** `supabase/migrations/20261103000000_cuenta.sql` en Supabase → SQL Editor (crea `delete_my_account()`, que solo borra al propio usuario).
 
 ## Seguridad y privacidad

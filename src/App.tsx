@@ -203,7 +203,7 @@ export function App() {
           {page === 'plan' && <Plan />}
           {page === 'assistant' && <Assistant />}
           {page === 'fx' && <Currency />}
-          {page === 'groups' && <Groups />}
+          {page === 'groups' && <Groups go={setPage} />}
           {page === 'wealth' && <Wealth />}
           {page === 'health' && <Health />}
           {page === 'subs' && <Subscriptions />}
