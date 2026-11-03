@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { budgetStatus } from './budgets';
 import { categorize, learnFromCorrection, matchesPattern } from './categorize';
 import { createSession, decryptJSON, encryptJSON, unlock } from './crypto';
 import { demoData } from './demo';
 import { emptyData, migrate } from './defaults';
+import { canMoveUnder, groupByRoot, registerCategories, rootOf } from './categories';
+import { applySuggestedStructure } from './categoryTree';
+import { buildReport, monthsFor, ranking } from './reports';
+import { budgetStatus } from './budgets';
 import { healthReport, netWorth } from './health';
 import { mergeMovements, parseBankCSV } from './importer';
 import { detectAntExpenses, detectFees, detectSubscriptions } from './insights';
@@ -439,5 +442,55 @@ describe('cobro en bolívares a tasa acordada (caso real)', () => {
     const { d, usd } = montar();
     expect(accountBase(d, d.accounts[0], '2026-11-03')).toBe(usd);
     expect(netWorth(d).net).toBe(usd);
+  });
+});
+
+describe('categorías madre y subcategorías', () => {
+  const montar = () => {
+    const d = emptyData();
+    d.settings.currency = 'EUR';
+    d.accounts = [{ id: 'a', name: 'Cuenta', kind: 'checking', balance: 0, currency: 'EUR', source: 'manual' }];
+    d.categories = [
+      ...d.categories,
+      { id: 'compras', name: 'Compras', icon: 'ic:bag', kind: 'expense', family: 'compras' },
+      { id: 'higiene', name: 'Higiene', icon: '', kind: 'expense', parentId: 'compras' },
+      { id: 'ropa', name: 'Ropa', icon: '', kind: 'expense', parentId: 'compras' },
+    ];
+    const tx = (id: string, cat: string, cents: number, date = '2026-10-10') => ({ id, accountId: 'a', date, amount: cents, description: id, categoryId: cat, categorySource: 'user' as const });
+    d.transactions = [tx('t1', 'higiene', -2000), tx('t2', 'ropa', -5000), tx('t3', 'compras', -1000), tx('t4', 'salary', 300000)];
+    registerCategories(d.categories);
+    return d;
+  };
+  it('las subcategorías se agrupan en su madre', () => {
+    montar();
+    expect(rootOf('ropa')).toBe('compras');
+    expect(groupByRoot({ ropa: 50, higiene: 20, compras: 10, salary: 5 })).toEqual({ compras: 80, salary: 5 });
+  });
+  it('no permite ciclos ni más de un nivel', () => {
+    const d = montar();
+    expect(canMoveUnder(d.categories, 'ropa', 'compras')).toBe(true);
+    expect(canMoveUnder(d.categories, 'compras', 'ropa')).toBe(false); // la madre no cuelga de su hija
+    expect(canMoveUnder(d.categories, 'groceries', 'ropa')).toBe(false); // ropa ya es subcategoría
+    expect(canMoveUnder(d.categories, 'groceries', 'salary')).toBe(false); // distinto tipo
+  });
+  it('un presupuesto de la madre cuenta el gasto de sus subcategorías', () => {
+    const d = montar();
+    d.budgets = [{ id: 'b', categoryId: 'compras', limit: 10000, period: 'monthly', warnAt: 0.8, rollover: false } as never];
+    expect(budgetStatus(d, '2026-10', 15)[0].spent).toBe(8000);
+  });
+  it('el informe agrupa por madre y suma ingresos y gastos', () => {
+    const d = montar();
+    const r = buildReport(d, ['2026-10']);
+    expect(r.income).toBe(300000);
+    expect(r.expenses).toBe(8000);
+    expect(ranking(r.expenseByRoot)[0]).toMatchObject({ id: 'compras', value: 8000 });
+    expect(monthsFor(d, '3', '2026-10-15')).toEqual(['2026-08', '2026-09', '2026-10']);
+  });
+  it('la estructura sugerida agrupa las categorías de serie sin tocar lo ya organizado', () => {
+    const d = emptyData();
+    const e = applySuggestedStructure(d);
+    expect(e.categories.find((c) => c.id === 'groceries')?.parentId).toBe('fam_comida');
+    expect(e.categories.some((c) => c.id === 'fam_comida')).toBe(true);
+    expect(applySuggestedStructure(e)).toBe(e);
   });
 });

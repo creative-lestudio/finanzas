@@ -20,10 +20,13 @@ export interface Account {
 export interface Category {
   id: string;
   name: string;
+  /** Emoji, 'ic:nombre' (icono de línea) o vacío (en subcategorías: hereda el de la madre). */
   icon: string;
   kind: 'expense' | 'income' | 'transfer';
-  /** Grupo de color (id de familia). Solo en categorías creadas por el usuario. */
+  /** Grupo de color (id de familia). Solo en categorías madre creadas o recoloreadas por el usuario. */
   family?: string;
+  /** Categoría madre (esta es una subcategoría). Un solo nivel. */
+  parentId?: string;
 }
 
 export interface Transaction {

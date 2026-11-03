@@ -8,7 +8,7 @@ import { CatBadge, GoalIcon, Icon } from '../components/icons';
 import { Money } from '../components/ui';
 import { budgetStatus } from '../lib/budgets';
 import { coachTip } from '../lib/coach';
-import { spendByFamily } from '../lib/families';
+import { spendByParent } from '../lib/families';
 import { accountBase, fxSummary } from '../lib/fx';
 import { goalProgress, GOAL_STATUS_LABEL } from '../lib/goals';
 import { healthReport, netWorth } from '../lib/health';
@@ -50,7 +50,7 @@ export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void
       investAccounts,
       investTotal: investAccounts.reduce((s, a) => s + inBase(a), 0),
       currencies: [...new Set(liquidAccounts.map((a) => a.currency))],
-      families: spendByFamily(sum.byCategory),
+      families: spendByParent(sum.byCategory).slice(0, 6).map((p) => ({ ...p, label: data.categories.find((c) => c.id === p.id)?.name ?? p.id })),
       budgets: budgetStatus(data, month, day).filter((b) => b.state !== 'ok'),
       subs,
       raised: subs.filter((s) => s.priceIncrease),
@@ -176,13 +176,13 @@ export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void
         {view.families.length > 0 && (
           <>
             <div className="segbar" role="img" aria-label="Gasto del mes por grupo">
-              {view.families.map((f) => <i key={f.family.id} style={{ ['--c' as string]: f.family.color, flexGrow: f.value }} title={`${f.family.label}: ${formatMoney(f.value)}`} />)}
+              {view.families.map((f) => <i key={f.id} style={{ ['--c' as string]: f.color, flexGrow: f.value }} title={`${f.label}: ${formatMoney(f.value)}`} />)}
             </div>
             <div className="legend">
               {view.families.map((f) => (
-                <div key={f.family.id}>
-                  <span className="cat-dot" style={{ ['--c' as string]: f.family.color }} />
-                  <span className="ellipsis">{f.family.label}</span>
+                <div key={f.id}>
+                  <span className="cat-dot" style={{ ['--c' as string]: f.color }} />
+                  <span className="ellipsis">{f.label}</span>
                   <span className="v">{hidden ? '••' : `${Math.round((f.value / famTotal) * 100)} %`}</span>
                 </div>
               ))}

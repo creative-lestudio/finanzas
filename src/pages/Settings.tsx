@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AuthForm } from '../components/AuthForm';
-import { businessCategories, CategorySheet, isDefaultCategory } from '../components/CategorySheet';
-import { CatBadge } from '../components/icons';
-import { familyOf } from '../lib/families';
+import { CategoriesManager } from '../components/CategoriesManager';
 import { Icon } from '../components/icons';
 import { Field, Segmented, Switch, toast } from '../components/ui';
 import { BankClient, syncAll, type Bank } from '../lib/banking';
@@ -16,7 +14,7 @@ import { storageReport, type StorageReport } from '../lib/storage';
 import { getSupabaseConfig, setSupabaseConfig, supabase } from '../lib/sync';
 import { IS_PREVIEW } from '../lib/preview';
 import { ACCENTS } from '../lib/theme';
-import type { Category, Settings as SettingsT } from '../lib/types';
+import type { Settings as SettingsT } from '../lib/types';
 import { useStore } from '../store';
 
 async function download(name: string, blob: Blob) {
@@ -96,7 +94,7 @@ export function Settings() {
       <BankSection />
 
       <div className="section-title">Categorías</div>
-      <CategoriesSection />
+      <CategoriesManager />
 
       <div className="section-title">Categorización</div>
       <RulesSection />
@@ -377,74 +375,6 @@ function DataSection() {
         <div className="tiny muted">Solo para hojas propias con columnas Tipo, Cuenta, Moneda y Monto.</div>
       </Switch>
       <p className="tiny muted" style={{ marginBottom: 0 }}>Vale el extracto de tu banco, una hoja propia (Fecha, Tipo, Cuenta, Moneda, Categoría, Descripción, Monto…) o un Excel exportado por esta app. Los duplicados se ignoran.</p>
-    </div>
-  );
-}
-
-/** Categorías: crear las tuyas (p. ej. las de tu negocio), editarlas y borrarlas. */
-function CategoriesSection() {
-  const { data, update } = useStore();
-  const [sheet, setSheet] = useState<{ cat?: Category; kind: Category['kind'] } | null>(null);
-  const [biz, setBiz] = useState('');
-  const used = (id: string) => data.transactions.filter((t) => t.categoryId === id).length;
-  const customs = data.categories.filter((c) => !isDefaultCategory(c.id));
-
-  const addBusiness = () => {
-    const name = biz.trim();
-    if (!name) return;
-    const existing = new Set(data.categories.map((c) => c.name.toLowerCase()));
-    const fresh = businessCategories(name).filter((c) => !existing.has(c.name.toLowerCase()));
-    if (!fresh.length) return toast('Ya tienes esas categorías.');
-    update((d) => ({ ...d, categories: [...d.categories, ...fresh] }));
-    setBiz('');
-    toast(`${fresh.length} categorías creadas para ${name}`);
-  };
-
-  const remove = (c: Category) => {
-    const n = used(c.id);
-    if (!confirm(n ? `«${c.name}» tiene ${n} movimientos: pasarán a «Otros gastos»/«Otros ingresos». ¿Eliminar?` : `¿Eliminar «${c.name}»?`)) return;
-    update((d) => ({
-      ...d,
-      categories: d.categories.filter((x) => x.id !== c.id),
-      transactions: d.transactions.map((t) => (t.categoryId === c.id ? { ...t, categoryId: c.kind === 'income' ? 'other_income' : 'other', categorySource: 'user' as const } : t)),
-      budgets: d.budgets.filter((b) => b.categoryId !== c.id),
-      rules: d.rules.filter((r) => r.categoryId !== c.id),
-      learned: Object.fromEntries(Object.entries(d.learned).filter(([, v]) => v !== c.id)),
-    }));
-  };
-
-  return (
-    <div className="card glass">
-      <h2>Para tu negocio o emprendimiento</h2>
-      <p className="small secondary" style={{ marginTop: 0 }}>
-        Escribe el nombre de tu negocio y creo las categorías típicas (alquiler, condominio, servicios, compras, publicidad…) con su propio color, para separar sus gastos de los personales.
-      </p>
-      <div className="row">
-        <input value={biz} onChange={(e) => setBiz(e.target.value)} placeholder="Ej.: Legacy World" aria-label="Nombre del negocio" />
-        <button className="btn primary" disabled={!biz.trim()} onClick={addBusiness}>Crear</button>
-      </div>
-      <p className="tiny muted">Consejo: para ver el dinero del negocio por separado, crea también una cuenta con su nombre (Más → Patrimonio) y regístralo ahí; en Movimientos puedes filtrar por cuenta.</p>
-
-      <h2 className="mt">Tus categorías</h2>
-      {customs.length === 0 && <p className="small muted" style={{ marginTop: 0 }}>Aún no has creado ninguna.</p>}
-      <ul className="list plain" style={{ margin: '0 -18px' }}>
-        {customs.map((c) => (
-          <li key={c.id}>
-            <CatBadge id={c.id} emoji={c.icon} />
-            <div className="grow">
-              <div className="ellipsis">{c.name}</div>
-              <div className="small muted">{c.kind === 'income' ? 'Ingreso' : familyOf(c.id).label} · {used(c.id)} movimientos</div>
-            </div>
-            <button className="btn ghost sm" onClick={() => setSheet({ cat: c, kind: c.kind })}>Editar</button>
-            <button className="icon-btn" style={{ width: 34, height: 34 }} aria-label={`Eliminar ${c.name}`} onClick={() => remove(c)}><Icon name="trash" size={16} /></button>
-          </li>
-        ))}
-      </ul>
-      <div className="grid2 mt">
-        <button className="btn tinted" onClick={() => setSheet({ kind: 'expense' })}><Icon name="plus" size={18} /> Categoría de gasto</button>
-        <button className="btn" onClick={() => setSheet({ kind: 'income' })}><Icon name="plus" size={18} /> Categoría de ingreso</button>
-      </div>
-      {sheet && <CategorySheet initial={sheet.cat} defaultKind={sheet.kind} onClose={() => setSheet(null)} />}
     </div>
   );
 }

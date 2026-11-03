@@ -1,3 +1,5 @@
+import { getCategory } from '../lib/categories';
+import { DEFAULT_CATEGORIES } from '../lib/defaults';
 import { categoryColor } from '../lib/families';
 
 // Iconos de trazo fino al estilo SF Symbols (dibujados a mano, sin dependencias).
@@ -97,10 +99,38 @@ export function CatBadge({ id, emoji, size = 20 }: { id: string; emoji?: string;
   );
 }
 
-/** Icono de una categoría: trazo propio para las de serie, el emoji para las personalizadas. */
+/** Iconos de línea que se pueden elegir para una categoría. */
+export const CATEGORY_ICON_CHOICES = ['cart', 'fork', 'cup', 'bus', 'car', 'fuel', 'home', 'bolt', 'wifi', 'repeat', 'pulse', 'dumbbell', 'bag', 'ticket', 'globe', 'plane', 'book', 'cap', 'shield', 'bank', 'receipt', 'banknote', 'coins', 'card', 'briefcase', 'laptop', 'gift', 'gem', 'heart', 'sun', 'piggy', 'box', 'users', 'phoneOut', 'target', 'trend', 'pie', 'gear'];
+
+interface IconSpec {
+  line?: string;
+  emoji?: string;
+}
+
+/**
+ * Icono de una categoría. Si es subcategoría y no tiene icono propio, usa el de su madre
+ * (para mantener la estética); si no, el trazo de serie o el emoji elegido.
+ */
+export function resolveCategoryIcon(id: string, fallbackEmoji?: string, depth = 0): IconSpec {
+  const c = getCategory(id);
+  if (c) {
+    const raw = c.icon ?? '';
+    const def = DEFAULT_CATEGORIES.find((d) => d.id === c.id);
+    const explicit = raw !== '' && !(def && def.icon === raw);
+    if (raw.startsWith('ic:')) return { line: raw.slice(3) };
+    if (explicit) return { emoji: raw };
+    if (c.parentId && depth < 2) return resolveCategoryIcon(c.parentId, undefined, depth + 1);
+    if (CATEGORY_ICON[c.id]) return { line: CATEGORY_ICON[c.id] };
+    return { emoji: def?.icon || fallbackEmoji || '•' };
+  }
+  const n = CATEGORY_ICON[id];
+  return n ? { line: n } : { emoji: fallbackEmoji ?? '•' };
+}
+
+/** Icono de una categoría: trazo propio para las de serie, el elegido por ti en las demás, o el de su madre. */
 export function CatIcon({ id, emoji, size = 20 }: { id: string; emoji?: string; size?: number }) {
-  const name = CATEGORY_ICON[id];
-  return name ? <Icon name={name} size={size} stroke={1.7} /> : <span style={{ fontSize: size * 0.9, lineHeight: 1 }}>{emoji ?? '•'}</span>;
+  const spec = resolveCategoryIcon(id, emoji);
+  return spec.line ? <Icon name={spec.line} size={size} stroke={1.7} /> : <span style={{ fontSize: size * 0.9, lineHeight: 1 }}>{spec.emoji ?? '•'}</span>;
 }
 
 export const GOAL_ICONS = ['shield', 'sun', 'receipt', 'home', 'car', 'cap', 'gem', 'gift', 'trend', 'card', 'plane', 'piggy'];

@@ -1,3 +1,4 @@
+import { categoryLabel } from '../lib/categories';
 import { useState } from 'react';
 import { CatBadge, GOAL_ICONS, GoalIcon, Icon } from '../components/icons';
 import { Empty, Field, Meter, Money, Segmented, Sheet, StateBadge, Switch } from '../components/ui';
@@ -170,7 +171,7 @@ function BudgetForm({ value, onSave, onDelete }: { value: Partial<Budget>; onSav
     <>
       <Field label="Categoría">
         <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-          {data.categories.filter((c) => c.kind === 'expense').map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          {data.categories.filter((c) => c.kind === 'expense').map((c) => ({ c, label: categoryLabel(data.categories, c.id) })).sort((a, b) => a.label.localeCompare(b.label, 'es')).map(({ c, label }) => <option key={c.id} value={c.id}>{label}</option>)}
         </select>
       </Field>
       <Field label={`Tope mensual (${data.settings.currency})`}><input inputMode="decimal" value={limit} onChange={(e) => setLimit(e.target.value)} /></Field>

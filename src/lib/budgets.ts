@@ -1,5 +1,6 @@
 import { addMonths, daysInMonth } from './money';
 import { monthSummary } from './insights';
+import { idsUnder } from './categories';
 import type { AppData, Budget } from './types';
 
 export type BudgetState = 'ok' | 'warning' | 'over';
@@ -24,9 +25,12 @@ export function budgetStatus(data: AppData, month: string, asOfDay: number): Bud
   const dim = daysInMonth(month);
   const day = Math.min(Math.max(asOfDay, 1), dim);
 
+  // Un presupuesto de una categoría madre cuenta también el gasto de sus subcategorías.
+  const spentIn = (by: Record<string, number>, categoryId: string) => idsUnder(data.categories, categoryId).reduce((sum, id) => sum + (by[id] ?? 0), 0);
+
   return data.budgets.map((budget) => {
-    const spent = Math.max(0, summary.byCategory[budget.categoryId] ?? 0);
-    const carry = budget.rollover && prev ? Math.max(0, budget.limit - (prev.byCategory[budget.categoryId] ?? 0)) : 0;
+    const spent = Math.max(0, spentIn(summary.byCategory, budget.categoryId));
+    const carry = budget.rollover && prev ? Math.max(0, budget.limit - spentIn(prev.byCategory, budget.categoryId)) : 0;
     const limit = budget.limit + carry;
     const ratio = limit > 0 ? spent / limit : spent > 0 ? Infinity : 0;
     const state: BudgetState = ratio > 1 ? 'over' : ratio >= budget.warnAt ? 'warning' : 'ok';
@@ -51,7 +55,8 @@ export function budgetAlertFor(
   month: string,
   asOfDay: number,
 ): BudgetStatus | undefined {
-  const s = budgetStatus(data, month, asOfDay).find((b) => b.budget.categoryId === categoryId);
+  const root = data.categories.find((c) => c.id === categoryId)?.parentId ?? categoryId;
+  const s = budgetStatus(data, month, asOfDay).find((b) => b.budget.categoryId === categoryId) ?? budgetStatus(data, month, asOfDay).find((b) => b.budget.categoryId === root);
   return s && s.state !== 'ok' ? s : undefined;
 }
 

@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { createSession, decryptJSON, encryptJSON, unlock, type EncryptedBlob, type Session } from './lib/crypto';
 import { migrate } from './lib/defaults';
-import { registerCategories } from './lib/families';
+import { registerCategories } from './lib/categories';
 import { setDefaultCurrency } from './lib/money';
 import { bioAvailable, bioDisable, bioEnabled, bioEnroll, bioVerify } from './lib/biometric';
 import { clearDeviceKey, clearMeta, listBackupStamps, loadDeviceKey, saveDeviceKey, loadBackup, loadBase, loadMeta, loadVault, saveBase, saveMeta, saveRescue, saveVault, wipeVault } from './lib/storage';

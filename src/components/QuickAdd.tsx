@@ -1,14 +1,13 @@
-import { categoryColor } from '../lib/families';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { budgetAlertFor } from '../lib/budgets';
 import { categorize, detectChannel } from '../lib/categorize';
 import { addRate } from '../lib/fx';
 import { formatMoney, merchantKey, monthKey, parseAmount, today, uid } from '../lib/money';
 import type { AppData, Transaction } from '../lib/types';
 import { useStore } from '../store';
-import { CategorySheet } from './CategorySheet';
+import { CategoryPicker } from './CategoryPicker';
 import { Equivalent, type EquivResult } from './Equivalent';
-import { CatIcon, Icon } from './icons';
+import { Icon } from './icons';
 import { Sheet, toast } from './ui';
 
 /** Guarda un movimiento manual, ajusta el saldo y avisa si se acerca a un presupuesto. */
@@ -43,17 +42,10 @@ export function QuickAdd({ onClose, onVoice }: { onClose: () => void; onVoice: (
   const [date, setDate] = useState(today());
   // Equivalente en otra moneda (cobros y pagos en bolívares, p. ej.).
   const [equiv, setEquiv] = useState<EquivResult | null>(null);
-  const [newCat, setNewCat] = useState(false);
-  const [allCats, setAllCats] = useState(false);
 
   const account = data.accounts.find((a) => a.id === accountId);
   const currency = account?.currency ?? data.settings.currency;
   const cats = data.categories.filter((c) => c.kind === kind);
-  const ordered = useMemo(() => {
-    const freq: Record<string, number> = {};
-    for (const t of data.transactions.slice(-300)) freq[t.categoryId] = (freq[t.categoryId] ?? 0) + 1;
-    return [...cats].sort((a, b) => (freq[b.id] ?? 0) - (freq[a.id] ?? 0));
-  }, [cats, data.transactions]);
 
   const cents = parseAmount(amount);
   const signed = cents ? (kind === 'expense' ? -Math.abs(cents) : Math.abs(cents)) : 0;
@@ -98,19 +90,7 @@ export function QuickAdd({ onClose, onVoice }: { onClose: () => void; onVoice: (
       <div className="field">
         <input placeholder="Concepto (opcional): café, taxi…" value={description} onChange={(e) => setDescription(e.target.value)} aria-label="Concepto" />
       </div>
-      <div className="catgrid mb">
-        {(allCats ? ordered : [...ordered.slice(0, 11), ...(chosen && !ordered.slice(0, 11).some((c) => c.id === chosen) ? ordered.filter((c) => c.id === chosen) : [])]).map((c) => (
-          <button key={c.id} style={{ ['--c' as string]: categoryColor(c.id) }} className={chosen === c.id ? 'on' : ''} onClick={() => setCategoryId(c.id)}>
-            <CatIcon id={c.id} emoji={c.icon} size={22} />
-            <span className="ellipsis" style={{ maxWidth: '100%' }}>{c.name}</span>
-          </button>
-        ))}
-        {!allCats && ordered.length > 11 && (
-          <button type="button" onClick={() => setAllCats(true)}><Icon name="grid" size={22} /><span>Ver todas</span></button>
-        )}
-        <button type="button" onClick={() => setNewCat(true)}><Icon name="plus" size={22} /><span>Nueva</span></button>
-      </div>
-      {newCat && <CategorySheet defaultKind={kind} onClose={() => setNewCat(false)} onSaved={(c) => { setCategoryId(c.id); setAllCats(true); }} />}
+      <CategoryPicker kind={kind} value={chosen} onChange={setCategoryId} />
       <div className="grid2">
         <div className="field">
           <label>

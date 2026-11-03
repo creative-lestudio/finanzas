@@ -1,10 +1,11 @@
-import { categoryColor } from '../lib/families';
 import { useMemo, useState } from 'react';
-import { CatBadge, CatIcon, Icon } from '../components/icons';
-import { Empty, Money, Sheet, toast } from '../components/ui';
+import { CatBadge, Icon } from '../components/icons';
+import { Empty, Money, Segmented, Sheet, toast } from '../components/ui';
+import { categoryLabel, childrenOf, idsUnder, rootOf } from '../lib/categories';
 import { aiAvailability } from '../lib/ai';
 import { categorizeWithAI, learnFromCorrection } from '../lib/categorize';
-import { CategorySheet } from '../components/CategorySheet';
+import { CategoryPicker } from '../components/CategoryPicker';
+import { ByCategory, Reports } from '../components/Reports';
 import { Equivalent, type EquivResult } from '../components/Equivalent';
 import { addRate, convert, deleteExchange, txCurrency } from '../lib/fx';
 import { monthSummary } from '../lib/insights';
@@ -23,8 +24,9 @@ export function Transactions() {
   const [acc, setAcc] = useState<string>('');
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [busy, setBusy] = useState(false);
+  const [view, setView] = useState<'list' | 'cats' | 'summary'>('list');
+  const [catKind, setCatKind] = useState<'expense' | 'income'>('expense');
   const [equiv, setEquiv] = useState<EquivResult | null>(null);
-  const [newCat, setNewCat] = useState(false);
 
   const catOf = (id: string) => data.categories.find((c) => c.id === id);
   const accOf = (id: string) => data.accounts.find((a) => a.id === id);
@@ -32,7 +34,7 @@ export function Transactions() {
   const list = useMemo(() => {
     const needle = q.toLowerCase();
     return data.transactions
-      .filter((t) => t.date.startsWith(month) && (!cat || t.categoryId === cat) && (!acc || t.accountId === acc) && (!needle || t.description.toLowerCase().includes(needle)))
+      .filter((t) => t.date.startsWith(month) && (!cat || idsUnder(data.categories, cat).includes(t.categoryId)) && (!acc || t.accountId === acc) && (!needle || t.description.toLowerCase().includes(needle)))
       .sort((a, b) => b.date.localeCompare(a.date));
   }, [data.transactions, month, q, cat, acc]);
 
@@ -73,11 +75,20 @@ export function Transactions() {
 
   return (
     <>
-      <div className="row between mb">
+      <Segmented value={view} onChange={(v) => setView(v as typeof view)} options={[['list', 'Lista'], ['cats', 'Categorías'], ['summary', 'Resumen']]} />
+      {view === 'summary' && <Reports />}
+      {view !== 'summary' && <div className="row between mb">
         <button className="icon-btn lg" onClick={() => setMonth(addMonths(month, -1))} aria-label="Mes anterior"><Icon name="back" size={18} stroke={2.4} /></button>
         <b style={{ fontSize: 18, letterSpacing: '-0.02em' }}>{capitalize(MONTH_FMT.format(new Date(`${month}-15`)))}</b>
         <button className="icon-btn lg" onClick={() => setMonth(addMonths(month, 1))} aria-label="Mes siguiente"><Icon name="chevron" size={18} stroke={2.4} /></button>
-      </div>
+      </div>}
+      {view === 'cats' && (
+        <>
+          <div className="seg mb"><button className={catKind === 'expense' ? 'on' : ''} onClick={() => setCatKind('expense')}>Gastos</button><button className={catKind === 'income' ? 'on' : ''} onClick={() => setCatKind('income')}>Ingresos</button></div>
+          <ByCategory month={month} kind={catKind} />
+        </>
+      )}
+      {view === 'list' && <>
       <div className="grid2 mb">
         <div className="card glass"><h2>Ingresos</h2><div className="mid pos">{formatMoney(sum.income)}</div></div>
         <div className="card glass"><h2>Gastos</h2><div className="mid neg">{formatMoney(sum.expenses)}</div></div>
@@ -95,10 +106,16 @@ export function Transactions() {
       )}
       <div className="chips mb">
         <button className={`chip ${cat ? '' : 'on'}`} onClick={() => setCat('')}>Todas</button>
-        {data.categories.filter((c) => list.some((t) => t.categoryId === c.id) || cat === c.id).map((c) => (
-          <button key={c.id} className={`chip ${cat === c.id ? 'on' : ''}`} onClick={() => setCat(c.id)}>{c.name}</button>
+        {[...new Set(data.transactions.filter((t) => t.date.startsWith(month)).map((t) => rootOf(t.categoryId)))].map((id) => (
+          <button key={id} className={`chip ${cat && rootOf(cat) === id ? 'on' : ''}`} onClick={() => setCat(id)}>{catOf(id)?.name ?? id}</button>
         ))}
       </div>
+      {cat && childrenOf(data.categories, rootOf(cat)).length > 0 && (
+        <div className="chips mb">
+          <button className={`chip ${cat === rootOf(cat) ? 'on' : ''}`} onClick={() => setCat(rootOf(cat))}>Todas</button>
+          {childrenOf(data.categories, rootOf(cat)).map((c) => <button key={c.id} className={`chip ${cat === c.id ? 'on' : ''}`} onClick={() => setCat(c.id)}>{c.name}</button>)}
+        </div>
+      )}
 
       {uncategorized.length > 0 && ai.ok && data.settings.aiCategorization && (
         <div className="alert">
@@ -120,7 +137,7 @@ export function Transactions() {
                   <div className="grow">
                     <div className="ellipsis">{prettyDescription(t.description)}</div>
                     <div className="small muted ellipsis">
-                      {catOf(t.categoryId)?.name} · {accOf(t.accountId)?.name}
+                      {categoryLabel(data.categories, t.categoryId)} · {accOf(t.accountId)?.name}
                       {t.channel === 'bizum' && ' · Bizum'}
                       {t.fx && ` · ${formatMoney(t.amount, txCurrency(data, t))} a ${formatRate(t.fx.rate)}`}
                       {!t.fx && txCurrency(data, t) === 'VES' && (() => { const e = convert(data, Math.abs(t.amount), 'VES', 'USD', t.date); return e ? ` · ≈ ${formatMoney(e, 'USD')} (est.)` : ''; })()}
@@ -136,6 +153,8 @@ export function Transactions() {
           </div>
         </div>
       ))}
+
+      </>}
 
       {editing && (
         <Sheet title="Movimiento" onClose={() => setEditing(null)}>
@@ -155,16 +174,7 @@ export function Transactions() {
           ) : (
             <>
               <p className="small muted" style={{ marginTop: 0 }}>Cambia la categoría: la app lo recordará para este comercio.</p>
-              <div className="catgrid mb">
-                {data.categories.map((c) => (
-                  <button key={c.id} style={{ ['--c' as string]: categoryColor(c.id) }} className={editing.categoryId === c.id ? 'on' : ''} onClick={() => { update((d) => learnFromCorrection(d, editing, c.id)); setEditing(null); }}>
-                    <CatIcon id={c.id} emoji={c.icon} size={22} />
-                    <span className="ellipsis" style={{ maxWidth: '100%' }}>{c.name}</span>
-                  </button>
-                ))}
-                <button type="button" onClick={() => setNewCat(true)}><Icon name="plus" size={22} /><span>Nueva</span></button>
-              </div>
-              {newCat && <CategorySheet onClose={() => setNewCat(false)} onSaved={(c) => { update((d) => learnFromCorrection(d, editing, c.id)); setEditing(null); }} />}
+              <CategoryPicker kind={editing.amount < 0 ? 'expense' : 'income'} value={editing.categoryId} onChange={(id) => { update((d) => learnFromCorrection(d, editing, id)); setEditing({ ...editing, categoryId: id, categorySource: 'user' }); }} />
             </>
           )}
           {!editing.exchangeId && txCurrency(data, editing) !== 'USD' && (

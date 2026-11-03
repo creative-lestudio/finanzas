@@ -1,3 +1,6 @@
+import { getCategory, groupByRoot, registerCategories as registerAll, rootOf } from './categories';
+import type { Category } from './types';
+
 // Grupos de categorías con color propio. El orden es fijo (el color sigue al
 // grupo, nunca a su posición en un ranking) y la paleta está validada para
 // daltonismo en este orden de vecinos. Verde y rojo quedan reservados para
@@ -25,25 +28,18 @@ export const FAMILIES: Family[] = [
 const INCOME = new Set(['salary', 'bizum_in', 'other_income', 'freelance', 'remittance']);
 const NEUTRAL = new Set(['transfer', 'exchange']);
 
-// Categorías creadas por el usuario: su grupo de color y su tipo se registran al cargar los datos.
-const customFamily = new Map<string, string>();
-const customKind = new Map<string, string>();
-
-export function registerCategories(cats: { id: string; kind: string; family?: string }[]): void {
-  customFamily.clear();
-  customKind.clear();
-  for (const c of cats) {
-    if (c.family) customFamily.set(c.id, c.family);
-    customKind.set(c.id, c.kind);
-  }
+/** Registra las categorías del usuario (grupo de color, tipo y jerarquía) para resolver colores. */
+export function registerCategories(cats: Category[]): void {
+  registerAll(cats);
 }
 
-const isIncome = (id: string) => INCOME.has(id) || customKind.get(id) === 'income';
-const isNeutral = (id: string) => NEUTRAL.has(id) || customKind.get(id) === 'transfer';
+const isIncome = (id: string) => INCOME.has(id) || getCategory(id)?.kind === 'income' || getCategory(rootOf(id))?.kind === 'income';
+const isNeutral = (id: string) => NEUTRAL.has(id) || getCategory(id)?.kind === 'transfer';
 
 export function familyOf(categoryId: string): Family {
-  const chosen = customFamily.get(categoryId);
-  return (chosen && FAMILIES.find((f) => f.id === chosen)) || FAMILIES.find((f) => f.categories.includes(categoryId)) || FAMILIES[FAMILIES.length - 1];
+  const root = rootOf(categoryId);
+  const chosen = getCategory(root)?.family;
+  return (chosen && FAMILIES.find((f) => f.id === chosen)) || FAMILIES.find((f) => f.categories.includes(root)) || FAMILIES.find((f) => f.categories.includes(categoryId)) || FAMILIES[FAMILIES.length - 1];
 }
 
 /** Color de una categoría: verde los ingresos, neutro los traspasos y el de su grupo el resto. */
@@ -62,4 +58,19 @@ export function spendByFamily(byCategory: Record<string, number>): { family: Fam
     totals.set(f.id, (totals.get(f.id) ?? 0) + v);
   }
   return FAMILIES.map((family) => ({ family, value: totals.get(family.id) ?? 0 })).filter((x) => x.value > 0);
+}
+
+export interface ParentSpend {
+  id: string;
+  color: string;
+  value: number;
+}
+
+/** Gasto del mes agrupado por categoría madre, de mayor a menor. */
+export function spendByParent(byCategory: Record<string, number>): ParentSpend[] {
+  const clean: Record<string, number> = {};
+  for (const [cat, v] of Object.entries(byCategory)) if (v > 0 && !isIncome(cat) && !isNeutral(cat)) clean[cat] = v;
+  return Object.entries(groupByRoot(clean))
+    .map(([id, value]) => ({ id, color: categoryColor(id), value }))
+    .sort((a, b) => b.value - a.value);
 }
