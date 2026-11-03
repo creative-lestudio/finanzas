@@ -171,3 +171,14 @@ export async function storageReport(): Promise<StorageReport> {
     backups: (await listBackupStamps().catch(() => [])).length,
   };
 }
+
+// Clave del dispositivo: permite desbloquear con Face ID / huella sin escribir la contraseña de cifrado.
+// Se guarda como CryptoKey NO extraíble (el navegador no deja leer sus bytes), solo en este dispositivo.
+export interface DeviceKey {
+  key: CryptoKey;
+  salt: Uint8Array;
+  iterations: number;
+}
+export const saveDeviceKey = (k: DeviceKey) => tx<void>('readwrite', (s) => s.put(k, 'devkey'));
+export const loadDeviceKey = () => tx<DeviceKey | undefined>('readonly', (s) => s.get('devkey'));
+export const clearDeviceKey = () => tx<void>('readwrite', (s) => s.delete('devkey'));

@@ -2,9 +2,10 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState, ty
 import { createSession, decryptJSON, encryptJSON, unlock, type EncryptedBlob, type Session } from './lib/crypto';
 import { migrate } from './lib/defaults';
 import { setDefaultCurrency } from './lib/money';
-import { clearMeta, listBackupStamps, loadBackup, loadBase, loadMeta, loadVault, saveBase, saveMeta, saveRescue, saveVault, wipeVault } from './lib/storage';
+import { bioAvailable, bioDisable, bioEnabled, bioEnroll, bioVerify } from './lib/biometric';
+import { clearDeviceKey, clearMeta, listBackupStamps, loadDeviceKey, saveDeviceKey, loadBackup, loadBase, loadMeta, loadVault, saveBase, saveMeta, saveRescue, saveVault, wipeVault } from './lib/storage';
 import { backupIfDue, countTx, requestPersistence, VaultWriter, type SaveState } from './lib/vault';
-import { fetchRemote, PassphraseMismatch, supabase, syncOnce, watchRemote } from './lib/sync';
+import { deleteMyAccount, fetchRemote, PassphraseMismatch, remoteInfo, supabase, syncOnce, watchRemote } from './lib/sync';
 import { applyTheme } from './lib/theme';
 import type { AppData } from './lib/types';
 
@@ -33,6 +34,16 @@ interface Store {
   save: SaveState;
   /** Copias automáticas locales (la más reciente primero). */
   listBackups: () => Promise<{ stamp: string; movements: number }[]>;
+  /** Correo con el que se inició sesión (null si no hay sesión). */
+  account: string | null;
+  /** Desbloqueo con Face ID / huella: disponible en este dispositivo y activado. */
+  biometrics: { available: boolean; enabled: boolean };
+  enableBiometrics: () => Promise<boolean>;
+  disableBiometrics: () => Promise<void>;
+  openWithBiometrics: () => Promise<boolean>;
+  /** Elimina la cuenta y la copia en la nube. null = hecho; si no, el motivo. */
+  deleteAccount: () => Promise<string | null>;
+  cloudInfo: () => Promise<{ version: number; updatedAt: string } | null>;
   restoreBackup: (stamp: string) => Promise<boolean>;
 }
 
@@ -60,6 +71,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const syncing = useRef<Promise<void> | null>(null);
   const [save, setSave] = useState<SaveState>({ status: 'saved' });
   const [writer] = useState(() => new VaultWriter(() => session.current, setSave));
+  const [account, setAccount] = useState<string | null>(null);
+  const [bio, setBio] = useState({ available: false, enabled: bioEnabled() });
+
+  useEffect(() => {
+    const sb = supabase();
+    if (!sb) return;
+    void sb.auth.getSession().then(({ data }) => setAccount(data.session?.user.email ?? null));
+    const { data } = sb.auth.onAuthStateChange((_e, sess) => setAccount(sess?.user.email ?? null));
+    return () => data.subscription.unsubscribe();
+  }, []);
+  useEffect(() => {
+    void bioAvailable().then((available) => setBio((b) => ({ ...b, available })));
+  }, []);
+
+  // Si el desbloqueo biométrico está activo, la clave del dispositivo se mantiene al día cuando cambia la sesión.
+  const rememberDevice = () => {
+    const sess = session.current;
+    if (sess && bioEnabled()) void saveDeviceKey({ key: sess.key, salt: sess.salt, iterations: sess.iterations }).catch(() => undefined);
+  };
 
   useEffect(() => {
     // Un fallo al leer NO significa "no hay datos": se reintenta y nunca se ofrece crear una bóveda
@@ -232,6 +262,37 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     };
   }, [status, lock]);
 
+  const linkCloud = async (passphrase: string): Promise<'linked' | 'wrong-passphrase'> => {
+    const sb = supabase();
+    const { data: u } = (await sb?.auth.getUser()) ?? { data: { user: null } };
+    if (!sb || !u.user) throw new Error('Inicia sesión primero.');
+    const remote = await fetchRemote(sb);
+    if (remote) {
+      // Todos los dispositivos comparten la misma sal: así una sola contraseña abre los datos en todos.
+      try {
+        const r = await unlock<AppData>(passphrase, remote.blob);
+        session.current = r.session;
+      } catch {
+        setSync({ status: 'error', error: 'Tu cuenta ya tiene datos cifrados con otra clave. Escribe la clave de tus otros dispositivos.' });
+        return 'wrong-passphrase';
+      }
+    } else {
+      try {
+        await unlock(passphrase, (await loadVault())!);
+      } catch {
+        return 'wrong-passphrase';
+      }
+    }
+    versionRef.current = 0;
+    baseRef.current = null;
+    await saveVault(await encryptJSON(session.current!, dataRef.current));
+    rememberDevice();
+    await saveMeta({ version: 0, userId: u.user.id, lastSync: '' });
+    setSync({ status: 'idle', userEmail: u.user.email });
+    await runSync();
+    return 'linked';
+  };
+
   const store: Store = {
     status,
     data,
@@ -244,6 +305,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const existing = await loadVault().catch(() => { throw new Error('No se puede leer el almacenamiento del dispositivo.'); });
       if (existing) await saveRescue(existing, 'antes-de-crear').catch(() => undefined);
       session.current = await createSession(passphrase);
+      rememberDevice();
       const d = migrate(initial);
       await saveVault(await encryptJSON(session.current, d));
       void requestPersistence();
@@ -261,6 +323,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         adopt(migrate(r.value));
         setStatus('ready');
         void afterUnlock(r.session);
+        // Con sesión iniciada, este dispositivo se vincula solo a la nube (sin pasos extra).
+        void (async () => {
+          if (await loadMeta()) return;
+          const { data: auth } = (await supabase()?.auth.getSession()) ?? { data: { session: null } };
+          if (auth.session) await linkCloud(passphrase).catch(() => undefined);
+        })();
         return true;
       } catch {
         return false;
@@ -270,6 +338,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       await writer.flush();
       await backupIfDue(await encryptJSON(session.current!, data), true).catch(() => undefined);
       session.current = await createSession(next);
+      rememberDevice();
       await saveVault(await encryptJSON(session.current, data));
       if (baseRef.current) await saveBase(await encryptJSON(session.current, baseRef.current));
       // Fuerza a subir la copia con la nueva clave.
@@ -284,6 +353,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       try {
         const r = await unlock<AppData>(passphrase, blob);
         session.current = r.session;
+        rememberDevice();
         await saveVault(blob);
         adopt(migrate(r.value));
         setStatus('ready');
@@ -298,39 +368,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       await supabase()?.auth.signOut();
       session.current = null;
       dataRef.current = null;
+      bioDisable();
+      await clearDeviceKey().catch(() => undefined);
+      setBio((b) => ({ ...b, enabled: false }));
       setData(null as unknown as AppData);
       setSync({ status: 'off' });
       setStatus('new');
     },
-    async linkCloud(passphrase) {
-      const sb = supabase();
-      const { data: u } = (await sb?.auth.getUser()) ?? { data: { user: null } };
-      if (!sb || !u.user) throw new Error('Inicia sesión primero.');
-      const remote = await fetchRemote(sb);
-      if (remote) {
-        // Todos los dispositivos comparten la misma sal: así una sola contraseña abre los datos en todos.
-        try {
-          const r = await unlock<AppData>(passphrase, remote.blob);
-          session.current = r.session;
-        } catch {
-          setSync({ status: 'error', error: 'Ya hay datos en tu cuenta cifrados con otra contraseña. Cierra sesión y usa «Ya tengo datos guardados en mi cuenta».' });
-          return 'wrong-passphrase';
-        }
-      } else {
-        try {
-          await unlock(passphrase, (await loadVault())!);
-        } catch {
-          return 'wrong-passphrase';
-        }
-      }
-      versionRef.current = 0;
-      baseRef.current = null;
-      await saveVault(await encryptJSON(session.current!, dataRef.current));
-      await saveMeta({ version: 0, userId: u.user.id, lastSync: '' });
-      setSync({ status: 'idle', userEmail: u.user.email });
-      await runSync();
-      return 'linked';
-    },
+    linkCloud,
     async restoreFromCloud(passphrase) {
       const sb = supabase();
       const { data: u } = (await sb?.auth.getUser()) ?? { data: { user: null } };
@@ -339,7 +384,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (!remote) return 'empty';
       try {
         const r = await unlock<AppData>(passphrase, remote.blob);
+        // Antes de reemplazar lo de este dispositivo, queda una copia local.
+        if (dataRef.current && session.current) await backupIfDue(await encryptJSON(session.current, dataRef.current), true).catch(() => undefined);
         session.current = r.session;
+        rememberDevice();
         const d = migrate(r.value);
         await saveVault(remote.blob);
         await saveBase(remote.blob);
@@ -355,6 +403,54 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     },
     save,
+    account,
+    biometrics: bio,
+    async enableBiometrics() {
+      const sess = session.current;
+      if (!sess) return false;
+      if (!(await bioEnroll(account ?? 'Finanzas'))) return false;
+      await saveDeviceKey({ key: sess.key, salt: sess.salt, iterations: sess.iterations });
+      setBio((b) => ({ ...b, enabled: true }));
+      return true;
+    },
+    async disableBiometrics() {
+      bioDisable();
+      await clearDeviceKey().catch(() => undefined);
+      setBio((b) => ({ ...b, enabled: false }));
+    },
+    async openWithBiometrics() {
+      if (!bioEnabled()) return false;
+      const [dk, blob] = await Promise.all([loadDeviceKey().catch(() => undefined), loadVault().catch(() => undefined)]);
+      if (!dk || !blob) return false;
+      if (!(await bioVerify('Desbloquear Finanzas'))) return false;
+      const sess: Session = { key: dk.key, salt: dk.salt as Uint8Array<ArrayBuffer>, iterations: dk.iterations };
+      try {
+        const value = await decryptJSON<AppData>(sess, blob);
+        session.current = sess;
+        void backupIfDue(blob).catch(() => undefined);
+        adopt(migrate(value));
+        setStatus('ready');
+        void afterUnlock(sess);
+        return true;
+      } catch {
+        return false; // la clave guardada ya no abre esta copia (cambió la clave): se pedirá la contraseña
+      }
+    },
+    async deleteAccount() {
+      const sb = supabase();
+      if (!sb) return 'La sincronización no está configurada en esta instalación.';
+      const err = await deleteMyAccount(sb);
+      if (err) return err;
+      await clearMeta();
+      await sb.auth.signOut().catch(() => undefined);
+      setSync({ status: 'off' });
+      setAccount(null);
+      return null;
+    },
+    async cloudInfo() {
+      const sb = supabase();
+      return sb ? remoteInfo(sb) : null;
+    },
     async listBackups() {
       const s = session.current;
       if (!s) return [];

@@ -73,6 +73,13 @@ Sin la clave propia el flujo firma con una temporal: el APK funciona, pero cada 
 
 **iPhone:** instalar una app nativa fuera de la App Store exige una cuenta de Apple Developer (99 USD/año) y un Mac con Xcode. Mientras tanto, en iPhone se instala desde Safari con «Añadir a pantalla de inicio» (queda con icono y a pantalla completa).
 
+## Cuenta, sincronización y Face ID
+
+- **Cuenta:** Google o correo (Supabase Auth). Al iniciar sesión y desbloquear, el dispositivo se vincula solo a tu cuenta y sube/baja los datos, siempre **cifrados en el dispositivo** (la clave nunca sale de él).
+- **Clave de cifrado:** se pide **una vez por dispositivo**. En un dispositivo nuevo, tras entrar con Google, la app encuentra tus datos y pide esa clave para abrirlos.
+- **Face ID / huella / Windows Hello:** tras la primera vez se ofrece activarlo (también en Ajustes → Seguridad). La clave queda guardada solo en el dispositivo (CryptoKey no extraíble) y se libera al verificar la biometría.
+- **Eliminar la cuenta:** Ajustes → Sincronización. Necesita ejecutar **una vez** `supabase/migrations/20261103000000_cuenta.sql` en Supabase → SQL Editor (crea `delete_my_account()`, que solo borra al propio usuario).
+
 ## Seguridad y privacidad
 
 - Datos cifrados en el dispositivo con AES-256-GCM; clave derivada de tu contraseña con PBKDF2-SHA256 (600.000 iteraciones). Bloqueo por inactividad.

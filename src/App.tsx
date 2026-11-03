@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Icon } from './components/icons';
 import { InstallBanner } from './components/Install';
 import { Tour } from './components/Tour';
+import { bioLabel } from './lib/biometric';
 import { QuickAdd } from './components/QuickAdd';
 import { Toaster } from './components/ui';
 import { VoiceSheet } from './components/Voice';
@@ -246,6 +247,9 @@ export function App() {
   );
 }
 
+/** El desbloqueo biométrico se ofrece solo en el primer arranque de la sesión. */
+let autoBio = true;
+
 function LockHero({ title, sub }: { title: string; sub: string }) {
   return (
     <div className="lock-hero">
@@ -266,6 +270,20 @@ function Lock() {
   const [busy, setBusy] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const [found, setFound] = useState(false);
+  const bioReady = !isNew && store.biometrics.enabled;
+  const tryBio = async () => {
+    setError('');
+    setBusy(true);
+    const ok = await store.openWithBiometrics();
+    setBusy(false);
+    if (!ok) setError(`No se pudo desbloquear con ${bioLabel()}. Usa tu clave de cifrado.`);
+  };
+  useEffect(() => {
+    // Solo al abrir la app (no tras bloquear a mano o por inactividad): algunos navegadores piden un toque y queda el botón.
+    const first = autoBio;
+    autoBio = false;
+    if (first && bioReady) void store.openWithBiometrics();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     void supabase()?.auth.getSession().then(({ data }) => {
@@ -275,7 +293,7 @@ function Lock() {
   }, [mode]);
 
   // Con sesión iniciada: si la cuenta ya tiene datos en la nube se recuperan (nunca se crea
-  // una bóveda vacía encima); si no, se crea la contraseña de cifrado.
+  // una bóveda vacía encima); si no, se crea la clave de cifrado.
   const afterSignIn = async () => {
     const sb = supabase();
     if (!sb || !isNew) return;
@@ -358,13 +376,13 @@ function Lock() {
         <div className="card lock-card">
           <div className="app-icon"><Icon name="cloud" size={36} /></div>
           <h1 className="center" style={{ margin: '4px 0 6px', fontSize: 26, letterSpacing: '-0.035em', fontFamily: 'var(--font-display)' }}>Recuperar mis datos</h1>
-          <p className="small muted center" style={{ marginTop: 0 }}>{found ? 'Hemos encontrado tus datos en la nube. Escribe tu contraseña de cifrado para abrirlos.' : 'Inicia sesión y escribe la contraseña de cifrado que usas en tu otro dispositivo.'}</p>
+          <p className="small muted center" style={{ marginTop: 0 }}>{found ? 'Hemos encontrado tus datos en la nube. Escribe tu clave de cifrado para abrirlos.' : 'Inicia sesión y escribe la clave de cifrado que usas en tu otro dispositivo.'}</p>
           {!signedIn ? (
             <AuthForm onDone={() => setSignedIn(true)} />
           ) : (
             <form onSubmit={(e) => { e.preventDefault(); void restore(); }}>
               <div className="field">
-                <input type="password" autoFocus placeholder="Contraseña de cifrado" value={pass} onChange={(e) => setPass(e.target.value)} aria-label="Contraseña de cifrado" />
+                <input type="password" autoFocus placeholder="Clave de cifrado" value={pass} onChange={(e) => setPass(e.target.value)} aria-label="Clave de cifrado" />
               </div>
               {error && <p className="small" style={{ color: 'var(--bad)' }}>{error}</p>}
               <button className="btn primary block" disabled={busy || !pass}>{busy ? 'Descifrando…' : 'Recuperar'}</button>
@@ -380,10 +398,18 @@ function Lock() {
   return (
     <div className="lock">
       <div style={{ width: '100%', maxWidth: 400 }}>
-      <LockHero title={isNew ? 'Tu dinero, con claridad.' : 'Hola de nuevo'} sub={isNew ? 'Gastos, presupuestos y metas en bolívares, dólares y euros. Privada y cifrada.' : 'Introduce tu contraseña para abrir tus datos.'} />
+      <LockHero title={isNew ? 'Tu dinero, con claridad.' : 'Hola de nuevo'} sub={isNew ? 'Gastos, presupuestos y metas en bolívares, dólares y euros. Privada y cifrada.' : bioReady ? `Usa ${bioLabel()} o tu clave de cifrado.` : 'Introduce tu clave de cifrado para abrir tus datos.'} />
       <RecoveryNotice><></></RecoveryNotice>
       <form className="card lock-card" onSubmit={(e) => { e.preventDefault(); void submit(); }}>
-        {isNew && <p className="small muted center" style={{ marginTop: 0 }}>Crea una contraseña de cifrado. Protege tus datos y no se puede recuperar: guárdala bien.</p>}
+        {bioReady && (
+          <>
+            <button type="button" className="btn primary block" disabled={busy} onClick={() => void tryBio()}>
+              <Icon name="shield" size={18} /> Desbloquear con {bioLabel()}
+            </button>
+            <div className="row tiny muted" style={{ margin: '14px 0' }}><hr style={{ flex: 1, border: 0, borderTop: '0.5px solid var(--hairline)' }} />o con tu clave<hr style={{ flex: 1, border: 0, borderTop: '0.5px solid var(--hairline)' }} /></div>
+          </>
+        )}
+        {isNew && <p className="small muted center" style={{ marginTop: 0 }}>Crea tu clave de cifrado. Protege tus datos y no se puede recuperar: guárdala bien. Solo se pide una vez en cada dispositivo; después puedes entrar con Face ID o huella.</p>}
         <div className="field">
           <input type="password" autoFocus autoComplete={isNew ? 'new-password' : 'current-password'} placeholder="Contraseña" value={pass} onChange={(e) => setPass(e.target.value)} aria-label="Contraseña" />
         </div>

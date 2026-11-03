@@ -145,3 +145,22 @@ export function watchRemote(sb: SupabaseClient, userId: string, onChange: () => 
     void sb.removeChannel(channel);
   };
 }
+
+/** Borra la cuenta del usuario y su copia en la nube. null = hecho; si no, el motivo para mostrar. */
+export async function deleteMyAccount(sb: SupabaseClient): Promise<string | null> {
+  const { error } = await sb.rpc('delete_my_account');
+  if (!error) return null;
+  const missing = /could not find the function|schema cache|PGRST202|42883/i.test(`${error.message} ${error.code ?? ''}`);
+  if (!missing) return error.message;
+  // Alternativa antigua: función de borde (si está desplegada).
+  const r = await sb.functions.invoke('delete-account');
+  if (!r.error) return null;
+  return 'Falta activar el borrado de cuentas en el servidor: ejecuta supabase/migrations/20261103000000_cuenta.sql en el SQL Editor de Supabase.';
+}
+
+/** Estado de la copia en la nube (versión y fecha), sin descifrar nada. */
+export async function remoteInfo(sb: SupabaseClient): Promise<{ version: number; updatedAt: string } | null> {
+  const { data, error } = await sb.from('vaults').select('version, updated_at').maybeSingle();
+  if (error) throw new Error(error.message);
+  return data ? { version: (data as { version: number }).version, updatedAt: (data as { updated_at: string }).updated_at } : null;
+}

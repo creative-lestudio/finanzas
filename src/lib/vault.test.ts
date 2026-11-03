@@ -1,8 +1,8 @@
 import 'fake-indexeddb/auto';
 import { describe, expect, it, vi } from 'vitest';
-import { createSession, encryptJSON, unlock } from './crypto';
+import { createSession, decryptJSON, encryptJSON, unlock } from './crypto';
 import { emptyData } from './defaults';
-import { listBackupStamps, loadVault, saveVault, wipeVault } from './storage';
+import { clearDeviceKey, listBackupStamps, loadDeviceKey, loadVault, saveDeviceKey, saveVault, wipeVault } from './storage';
 import { backupIfDue, VaultWriter, type SaveState } from './vault';
 import type { AppData } from './types';
 
@@ -91,5 +91,20 @@ describe('copia espejo', () => {
     const back = await loadVault();
     const v = await unlock<AppData>('x', back!);
     expect(v.value.transactions).toHaveLength(76);
+  });
+});
+
+describe('clave del dispositivo (Face ID / huella)', () => {
+  it('la clave guardada abre la bóveda sin la contraseña y se puede borrar', async () => {
+    await wipeVault();
+    const session = await createSession('clave-segura', 1000);
+    await saveVault(await encryptJSON(session, withTx(76)));
+    await saveDeviceKey({ key: session.key, salt: session.salt, iterations: session.iterations });
+    const dk = await loadDeviceKey();
+    expect(dk).toBeTruthy();
+    const value = await decryptJSON<AppData>({ key: dk!.key, salt: dk!.salt as Uint8Array<ArrayBuffer>, iterations: dk!.iterations }, (await loadVault())!);
+    expect(value.transactions).toHaveLength(76);
+    await clearDeviceKey();
+    expect(await loadDeviceKey()).toBeUndefined();
   });
 });

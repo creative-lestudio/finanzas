@@ -8,6 +8,7 @@ import { applyExcelImport, exportWorkbook, readWorkbook } from '../lib/excel';
 import { CURRENCIES } from '../lib/fx';
 import { applyLedger, csvRows, mergeMovements, parseBankCSV, parseLedger } from '../lib/importer';
 import { normalize, today, uid } from '../lib/money';
+import { bioLabel } from '../lib/biometric';
 import { storageReport, type StorageReport } from '../lib/storage';
 import { getSupabaseConfig, setSupabaseConfig, supabase } from '../lib/sync';
 import { IS_PREVIEW } from '../lib/preview';
@@ -116,14 +117,23 @@ function SyncSection() {
     void sb?.auth.getUser().then(({ data }) => setUser(data.user?.email ?? null));
   }, [sb, store.sync.status]);
 
+  const [info, setInfo] = useState<string>('');
   const deleteAccount = async () => {
     if (!sb) return;
     if (!confirm('Se eliminará tu cuenta y la copia cifrada en la nube. No se puede deshacer. Tus datos en este dispositivo se conservan. ¿Continuar?')) return;
-    const { error } = await sb.functions.invoke('delete-account');
-    if (error) return toast('No se pudo eliminar la cuenta. Inténtalo de nuevo.');
-    await store.unlinkCloud();
+    const err = await store.deleteAccount();
+    if (err) return toast(err);
     setUser(null);
     toast('Cuenta eliminada');
+  };
+  const check = async () => {
+    setInfo('Comprobando…');
+    try {
+      const r = await store.cloudInfo();
+      setInfo(r ? `En la nube: versión ${r.version}, actualizada ${new Date(r.updatedAt).toLocaleString('es-ES')}.` : 'Todavía no hay copia en la nube.');
+    } catch (e) {
+      setInfo(`No se pudo consultar la nube: ${(e as Error).message}`);
+    }
   };
 
   const link = async () => {
@@ -152,13 +162,16 @@ function SyncSection() {
         </>
       ) : store.sync.status === 'off' ? (
         <>
-          <p className="small" style={{ marginTop: 0 }}>Sesión iniciada como <b>{user}</b>. Confirma tu contraseña de cifrado para activar la sincronización en este dispositivo.</p>
+          <p className="small" style={{ marginTop: 0 }}>Sesión iniciada como <b>{user}</b>. Escribe tu clave de cifrado una vez para unir este dispositivo a tu cuenta.</p>
           <div className="row">
-            <input type="password" placeholder="Contraseña de cifrado" value={pass} onChange={(e) => setPass(e.target.value)} aria-label="Contraseña de cifrado" />
+            <input type="password" placeholder="Clave de cifrado" value={pass} onChange={(e) => setPass(e.target.value)} aria-label="Clave de cifrado" />
             <button className="btn primary" disabled={!pass || busy} onClick={link}>{busy ? '…' : 'Activar'}</button>
           </div>
-          <p className="tiny muted">Si ya usas la app en otro dispositivo, usa la misma contraseña: se fusionarán los datos de ambos.</p>
-          <button className="btn ghost sm" onClick={() => void sb.auth.signOut().then(() => setUser(null))}>Cerrar sesión</button>
+          <p className="tiny muted">Si ya usas la app en otro dispositivo, usa la misma clave: se unirán los datos de ambos.</p>
+          <div className="grid2">
+            <button className="btn ghost sm" onClick={() => void sb.auth.signOut().then(() => setUser(null))}>Cerrar sesión</button>
+            <button className="btn danger sm" onClick={() => void deleteAccount()}>Eliminar mi cuenta</button>
+          </div>
         </>
       ) : (
         <>
@@ -173,8 +186,10 @@ function SyncSection() {
           </div>
           <div className="grid2 mt">
             <button className="btn tinted" onClick={() => void store.syncNow()}>Sincronizar ahora</button>
-            <button className="btn" onClick={() => void store.unlinkCloud()}>Desactivar</button>
+            <button className="btn" onClick={() => void store.unlinkCloud()}>Cerrar sesión</button>
           </div>
+          <button className="btn ghost block mt small" onClick={() => void check()}>Comprobar la copia en la nube</button>
+          {info && <p className="tiny muted" style={{ margin: '6px 0 0' }}>{info}</p>}
           <button className="btn danger block mt" onClick={() => void deleteAccount()}>Eliminar mi cuenta y mis datos de la nube</button>
           <p className="tiny muted" style={{ marginBottom: 0 }}>Borra tu cuenta y la copia cifrada del servidor. Los datos de este dispositivo no se tocan.</p>
         </>
@@ -399,7 +414,22 @@ function SecuritySection() {
   };
   return (
     <div className="card glass">
-      <h2>Cambiar contraseña de cifrado</h2>
+      {(store.biometrics.available || store.biometrics.enabled) && (
+        <Switch
+          checked={store.biometrics.enabled}
+          onChange={async (on) => {
+            if (on) toast((await store.enableBiometrics()) ? 'Desbloqueo biométrico activado' : 'No se pudo activar');
+            else {
+              await store.disableBiometrics();
+              toast('Desbloqueo biométrico desactivado');
+            }
+          }}
+        >
+          Desbloquear con {bioLabel()}
+          <div className="tiny muted">Entra sin escribir tu clave de cifrado. La clave se guarda solo en este dispositivo.</div>
+        </Switch>
+      )}
+      <h2 className="mt">Cambiar clave de cifrado</h2>
       <div className="row mb">
         <input type="password" placeholder="Nueva contraseña" value={newPass} onChange={(e) => setNewPass(e.target.value)} aria-label="Nueva contraseña" />
         <button className="btn tinted" disabled={newPass.length < 6} onClick={async () => { await store.changePassphrase(newPass); setNewPass(''); toast('Contraseña cambiada'); }}>Cambiar</button>
