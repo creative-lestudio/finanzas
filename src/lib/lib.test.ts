@@ -588,3 +588,15 @@ describe('guía de primer uso', () => {
     expect(guideActive(f)).toBe(false);
   });
 });
+
+describe('atajos con datos prellenados', () => {
+  it('lee monto, comercio, tipo, moneda y cuenta del enlace', async () => {
+    const { prefillFromUrl } = await import('./shortcut');
+    expect(prefillFromUrl('?accion=nuevo&monto=%2425.50&comercio=Mercadona&tipo=ingreso&moneda=eur&cuenta=BBVA&fecha=2026-11-03')).toEqual({ amount: '25.50', merchant: 'Mercadona', kind: 'income', currency: 'EUR', account: 'BBVA', date: '2026-11-03' });
+    expect(prefillFromUrl('?accion=escanear')).toEqual({ scan: true });
+    expect(prefillFromUrl('?accion=voz')).toBeNull();
+    expect(prefillFromUrl('')).toBeNull();
+    expect(parseAmount('25.50')).toBe(2550);
+    expect(parseAmount('25,50')).toBe(2550);
+  });
+});

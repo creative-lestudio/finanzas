@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Icon } from './components/icons';
 import { InstallBanner } from './components/Install';
 import { Tour } from './components/Tour';
+import { prefillFromUrl, type Prefill } from './lib/shortcut';
 import { finishGuide, guideActive, guideComplete, newGuide } from './lib/guide';
 import { Accounts } from './pages/Accounts';
 import { bioLabel } from './lib/biometric';
@@ -72,6 +73,7 @@ export function App() {
     return h in TITLES ? h : 'home';
   });
   const [sheet, setSheet] = useState<'add' | 'voice' | null>(null);
+  const [prefill, setPrefill] = useState<Prefill | undefined>();
   // Recorrido de primer uso: se muestra una vez (tras el asistente inicial) y se puede repetir desde Ajustes.
   const [tour, setTour] = useState(false);
   // Cuenta a mostrar en Movimientos cuando se llega desde la página de Cuentas.
@@ -141,7 +143,12 @@ export function App() {
     if (store.status !== 'ready') return;
     const a = new URLSearchParams(location.search).get('accion');
     if (a === 'voz') setSheet('voice');
-    if (a === 'nuevo') setSheet('add');
+    const pre = prefillFromUrl(location.search);
+    if (pre) {
+      setPrefill(pre);
+      setSheet('add');
+    }
+    if (a) history.replaceState(null, '', location.pathname + location.hash);
   }, [store.status]);
 
   const ambient = (
@@ -262,7 +269,7 @@ export function App() {
           No se pudo guardar en este dispositivo: {store.save.error} Reintentando… Descarga un Excel por si acaso.
         </div>
       )}
-      {sheet === 'add' && <QuickAdd onClose={() => setSheet(null)} onVoice={() => setSheet('voice')} />}
+      {sheet === 'add' && <QuickAdd prefill={prefill} onClose={() => { setSheet(null); setPrefill(undefined); }} onVoice={() => setSheet('voice')} />}
       {sheet === 'voice' && <VoiceSheet onClose={() => setSheet(null)} />}
       {tour && <Tour onClose={closeTour} />}
       <Toaster />

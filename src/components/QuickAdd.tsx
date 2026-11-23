@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { budgetAlertFor } from '../lib/budgets';
 import { categorize, detectChannel } from '../lib/categorize';
 import { addRate } from '../lib/fx';
 import { formatMoney, merchantKey, monthKey, parseAmount, today, uid } from '../lib/money';
+import { aiAvailability } from '../lib/ai';
 import { guideTasks, patchGuide } from '../lib/guide';
+import { scanReceipt } from '../lib/receipt';
+import type { Prefill } from '../lib/shortcut';
 import type { AppData, Transaction } from '../lib/types';
 import { COACH } from './Coach';
 import { useStore } from '../store';
@@ -33,15 +36,49 @@ export function saveTransaction(data: AppData, t: Omit<Transaction, 'id'>): { ne
 }
 
 /** Entrada manual rápida: importe, categoría y listo. Pensada para efectivo y gastos pequeños. */
-export function QuickAdd({ onClose, onVoice }: { onClose: () => void; onVoice: () => void }) {
+export function QuickAdd({ onClose, onVoice, prefill }: { onClose: () => void; onVoice: () => void; prefill?: Prefill }) {
   const { data, update } = useStore();
-  const [kind, setKind] = useState<'expense' | 'income'>('expense');
-  const [amount, setAmount] = useState('');
-  const [description, setDescription] = useState('');
+  const [kind, setKind] = useState<'expense' | 'income'>(prefill?.kind ?? 'expense');
+  const [amount, setAmount] = useState(prefill?.amount ?? '');
+  const [description, setDescription] = useState(prefill?.merchant ?? '');
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const usable = data.accounts.filter((a) => a.kind !== 'investment' && a.kind !== 'crypto' && a.kind !== 'loan');
-  const [accountId, setAccountId] = useState(usable.find((a) => a.kind === 'cash')?.id ?? usable[0]?.id);
-  const [date, setDate] = useState(today());
+  const byHint = (hint?: string, cur?: string) => {
+    const h = hint?.toLowerCase();
+    return (h && usable.find((a) => a.name.toLowerCase().includes(h))) || (cur && usable.find((a) => a.currency === cur)) || undefined;
+  };
+  const [accountId, setAccountId] = useState(byHint(prefill?.account, prefill?.currency)?.id ?? usable.find((a) => a.kind === 'cash')?.id ?? usable[0]?.id);
+  const [date, setDate] = useState(prefill?.date ?? today());
+  // Escanear un recibo con IA: la foto se lee y se descarta.
+  const [scanning, setScanning] = useState(false);
+  const scanRef = useRef<HTMLInputElement>(null);
+  const scan = async (file?: File) => {
+    if (!file) return;
+    setScanning(true);
+    try {
+      const r = await scanReceipt(data, file);
+      if (!r.amount) { toast('No pude leer el importe. Prueba con otra foto más de frente y con buena luz.'); return; }
+      setKind('expense');
+      setAmount(String(r.amount).replace('.', ','));
+      if (r.merchant) setDescription(r.merchant);
+      if (r.date) setDate(r.date);
+      const acc = byHint(undefined, r.currency ?? undefined);
+      if (acc) setAccountId(acc.id);
+      const cat = r.category && data.categories.find((c) => c.kind === 'expense' && c.name.toLowerCase() === r.category!.toLowerCase());
+      if (cat) setCategoryId(cat.id);
+      toast('Leído. Revisa los datos y guarda.');
+    } catch (e) {
+      toast(e instanceof Error && e.message ? e.message : 'No se pudo leer el recibo.');
+    } finally {
+      setScanning(false);
+      if (scanRef.current) scanRef.current.value = '';
+    }
+  };
+  const openScan = () => {
+    const a = aiAvailability(data);
+    if (!a.ok) { toast(a.reason ?? 'La IA no está disponible.'); return; }
+    scanRef.current?.click();
+  };
   // Equivalente en otra moneda (cobros y pagos en bolívares, p. ej.).
   const [equiv, setEquiv] = useState<EquivResult | null>(null);
   // Guía de primer uso: el primer movimiento puede ser de prueba (se borra al terminar la guía) o real.
@@ -99,6 +136,14 @@ export function QuickAdd({ onClose, onVoice }: { onClose: () => void; onVoice: (
         <span className="grow">
           <b>Dictar</b>
           <div className="small muted">"Gasté 50 euros en Mercadona"</div>
+        </span>
+      </button>
+      <input ref={scanRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => void scan(e.target.files?.[0])} />
+      <button className={`pill-mic lg ${prefill?.scan ? 'attn' : ''}`} onClick={openScan} disabled={scanning} style={{ marginTop: 8 }}>
+        <span className="dot"><Icon name="receipt" size={18} /></span>
+        <span className="grow">
+          <b>{scanning ? 'Leyendo el recibo…' : 'Escanear recibo'}</b>
+          <div className="small muted">Una foto y la IA rellena importe, comercio y fecha. La foto no se guarda.</div>
         </span>
       </button>
       <div className="seg">

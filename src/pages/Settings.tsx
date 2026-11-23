@@ -81,6 +81,7 @@ export function Settings({ go }: { go?: (p: 'more') => void } = {}) {
         <button className="btn tinted block" onClick={() => window.dispatchEvent(new Event('finanzas:tour'))}>
           <Icon name="info" size={18} /> Ver el recorrido de la app
         </button>
+        <ShortcutsHelp />
         <button className="btn ghost block mt small" onClick={() => { setSettings({ checklistHidden: false, guide: newGuide('tasks') }); toast('Tareas iniciales restauradas en Global'); }}>Repetir las tareas iniciales</button>
       </div>
       <SyncSection />
@@ -566,4 +567,23 @@ export async function handleBankCallback(store: ReturnType<typeof useStore>): Pr
   } catch (e) {
     toast(`No se pudo vincular el banco: ${(e as Error).message}`);
   }
+}
+
+
+/** Cómo registrar un gasto sin abrir la app: atajos de iPhone (Apple Pay, Back Tap) y enlaces. */
+function ShortcutsHelp() {
+  const url = `${location.origin}${location.pathname}?accion=nuevo&monto=25,50&comercio=Mercadona`;
+  return (
+    <details className="mt" style={{ marginTop: 10 }}>
+      <summary className="small" style={{ cursor: 'pointer', fontWeight: 600 }}>Anotar gastos al instante (atajos de iPhone)</summary>
+      <div className="small muted" style={{ marginTop: 8, display: 'grid', gap: 8 }}>
+        <p style={{ margin: 0 }}>Esta app abre «Nuevo movimiento» ya rellenado desde un enlace. Con la app <b>Atajos</b> del iPhone puedes lanzarlo cuando pagas con Apple Pay o con dos golpecitos en la parte de atrás.</p>
+        <p style={{ margin: 0 }}><b>Dos golpecitos:</b> en Atajos crea uno con la acción «Abrir URL» y pega el enlace de abajo (sin monto ni comercio). Luego, en Ajustes del iPhone → Accesibilidad → Tocar → Tocar atrás → Doble toque, elige ese atajo.</p>
+        <p style={{ margin: 0 }}><b>Apple Pay:</b> en Atajos → Automatización → Transacción, añade «Abrir URL» y usa las variables de importe y comercio en <code>monto=</code> y <code>comercio=</code>.</p>
+        <p style={{ margin: 0 }}>Parámetros: <code>monto</code>, <code>comercio</code>, <code>tipo</code> (gasto/ingreso), <code>moneda</code>, <code>cuenta</code>, <code>fecha</code>. Para escanear un recibo usa <code>?accion=escanear</code>.</p>
+        <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} aria-label="Enlace de ejemplo" style={{ fontSize: 12 }} />
+        <button className="btn tinted block small" onClick={() => { void navigator.clipboard?.writeText(url); toast('Enlace copiado'); }}>Copiar enlace de ejemplo</button>
+      </div>
+    </details>
+  );
 }
