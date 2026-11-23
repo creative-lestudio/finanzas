@@ -55,6 +55,26 @@ export interface Transaction {
   fx?: { amount: number; currency: string; rate: number; source?: string };
   /** Movimiento generado por un cambio de divisa. */
   exchangeId?: string;
+  /** Movimiento creado automáticamente por una regla recurrente. */
+  recurringId?: string;
+}
+
+/** Movimiento que se repite solo (alquiler, nómina, gimnasio…). */
+export interface Recurring {
+  id: string;
+  accountId: string;
+  /** Importe con signo, en céntimos de la moneda de la cuenta. */
+  amount: number;
+  description: string;
+  categoryId: string;
+  freq: 'weekly' | 'monthly' | 'yearly';
+  /** Fecha de la próxima ocurrencia (ISO). */
+  next: string;
+  /** Día del mes de la primera ocurrencia (para meses cortos). */
+  day: number;
+  /** Última fecha en que se repite (opcional). */
+  end?: string;
+  active: boolean;
 }
 
 /** Cotización: 1 unidad de `base` = `rate` unidades de `quote`. */
@@ -199,6 +219,7 @@ export interface AppData {
   accounts: Account[];
   categories: Category[];
   transactions: Transaction[];
+  recurring: Recurring[];
   budgets: Budget[];
   goals: Goal[];
   goalMovements: GoalMovement[];

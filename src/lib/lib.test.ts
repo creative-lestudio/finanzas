@@ -600,3 +600,56 @@ describe('atajos con datos prellenados', () => {
     expect(parseAmount('25,50')).toBe(2550);
   });
 });
+
+describe('movimientos recurrentes', () => {
+  it('calcula la siguiente fecha y respeta los meses cortos', async () => {
+    const { nextOccurrence } = await import('./recurring');
+    expect(nextOccurrence('2026-01-31', 'monthly', 31)).toBe('2026-02-28');
+    expect(nextOccurrence('2026-02-28', 'monthly', 31)).toBe('2026-03-31');
+    expect(nextOccurrence('2026-12-15', 'monthly', 15)).toBe('2027-01-15');
+    expect(nextOccurrence('2026-11-03', 'weekly', 3)).toBe('2026-11-10');
+    expect(nextOccurrence('2028-02-29', 'yearly', 29)).toBe('2029-02-28');
+  });
+  it('crea los movimientos que tocan una sola vez, ajusta el saldo y no duplica', async () => {
+    const { processRecurring } = await import('./recurring');
+    let d = emptyData();
+    d.accounts = [{ id: 'a', name: 'BBVA', kind: 'checking', balance: 100000, currency: 'EUR', source: 'manual' }];
+    d.recurring = [{ id: 'r1', accountId: 'a', amount: -50000, description: 'Alquiler', categoryId: 'x', freq: 'monthly', next: '2026-09-01', day: 1, active: true }];
+    const r = processRecurring(d, '2026-11-03');
+    expect(r.created).toBe(3); // sept, oct, nov
+    expect(r.data.accounts[0].balance).toBe(100000 - 150000);
+    expect(r.data.recurring[0].next).toBe('2026-12-01');
+    expect(r.data.transactions.map((t) => t.date)).toEqual(['2026-09-01', '2026-10-01', '2026-11-01']);
+    const again = processRecurring(r.data, '2026-11-03');
+    expect(again.created).toBe(0);
+    expect(again.data).toBe(r.data);
+  });
+  it('respeta la fecha final y se desactiva', async () => {
+    const { processRecurring } = await import('./recurring');
+    const d = emptyData();
+    d.accounts = [{ id: 'a', name: 'x', kind: 'checking', balance: 0, currency: 'EUR', source: 'manual' }];
+    d.recurring = [{ id: 'r', accountId: 'a', amount: 1000, description: 'Pago', categoryId: 'x', freq: 'monthly', next: '2026-09-10', day: 10, end: '2026-10-10', active: true }];
+    const r = processRecurring(d, '2026-12-01');
+    expect(r.created).toBe(2);
+    expect(r.data.recurring[0].active).toBe(false);
+  });
+  it('al fusionar dos dispositivos que crearon el mismo recurrente, el saldo no se duplica', () => {
+    const acc = (b: number) => [{ id: 'a', name: 'x', kind: 'checking' as const, balance: b, currency: 'EUR', source: 'manual' as const }];
+    const tx = { id: 'rec-r-2026-11-01', accountId: 'a', date: '2026-11-01', amount: -500, description: 'Alquiler', categoryId: 'x', categorySource: 'rule' as const };
+    const base = { ...emptyData(), accounts: acc(10000) };
+    const local = { ...base, accounts: acc(9500), transactions: [tx] };
+    const remote = { ...base, accounts: acc(9500), transactions: [tx] };
+    const m = merge3(base, local, remote);
+    expect(m.transactions).toHaveLength(1);
+    expect(m.accounts[0].balance).toBe(9500);
+  });
+  it('si además un dispositivo anotó otro gasto, el recurrente duplicado solo se resta una vez', () => {
+    const acc = (b: number) => [{ id: 'a', name: 'x', kind: 'checking' as const, balance: b, currency: 'EUR', source: 'manual' as const }];
+    const rec = { id: 'rec-r-2026-11-01', accountId: 'a', date: '2026-11-01', amount: -500, description: 'Alquiler', categoryId: 'x', categorySource: 'rule' as const };
+    const cafe = { id: 'c1', accountId: 'a', date: '2026-11-02', amount: -300, description: 'Café', categoryId: 'x', categorySource: 'user' as const };
+    const base = { ...emptyData(), accounts: acc(10000) };
+    const local = { ...base, accounts: acc(9200), transactions: [rec, cafe] };
+    const remote = { ...base, accounts: acc(9500), transactions: [rec] };
+    expect(merge3(base, local, remote).accounts[0].balance).toBe(9200);
+  });
+});

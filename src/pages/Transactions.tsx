@@ -135,7 +135,7 @@ export function Transactions({ account }: { account?: string }) {
                 <li key={t.id} className="tap" onClick={() => setEditing(t)}>
                   <CatBadge id={t.categoryId} emoji={catOf(t.categoryId)?.icon} />
                   <div className="grow">
-                    <div className="ellipsis">{prettyDescription(t.description)}</div>
+                    <div className="ellipsis">{t.recurringId && <span style={{ marginRight: 5, opacity: 0.6, display: 'inline-flex', verticalAlign: -2 }} title="Recurrente"><Icon name="repeat" size={13} /></span>}{prettyDescription(t.description)}</div>
                     <div className="small muted ellipsis">
                       {categoryLabel(data.categories, t.categoryId)} · {accOf(t.accountId)?.name}
                       {t.channel === 'bizum' && ' · Bizum'}

@@ -4,6 +4,7 @@ import { categorize, detectChannel } from '../lib/categorize';
 import { addRate } from '../lib/fx';
 import { formatMoney, merchantKey, monthKey, parseAmount, today, uid } from '../lib/money';
 import { aiAvailability } from '../lib/ai';
+import { FREQ_LABEL, nextOccurrence } from '../lib/recurring';
 import { guideTasks, patchGuide } from '../lib/guide';
 import { scanReceipt } from '../lib/receipt';
 import type { Prefill } from '../lib/shortcut';
@@ -85,6 +86,8 @@ export function QuickAdd({ onClose, onVoice, prefill }: { onClose: () => void; o
   const guide = guideTasks(data);
   const asking = !!guide && !guide.movement;
   const [asTest, setAsTest] = useState(true);
+  // Repetir: crea una regla recurrente a partir de este movimiento.
+  const [repeat, setRepeat] = useState<'' | 'weekly' | 'monthly' | 'yearly'>('');
 
   const account = data.accounts.find((a) => a.id === accountId);
   const currency = account?.currency ?? data.settings.currency;
@@ -114,6 +117,10 @@ export function QuickAdd({ onClose, onVoice, prefill }: { onClose: () => void; o
       const id = next.transactions[next.transactions.length - 1].id;
       next = patchGuide(next, { movement: true, testTx: test ? [...(guide?.testTx ?? []), id] : guide?.testTx ?? [] });
       message = test ? 'Movimiento de prueba guardado: lo eliminaré al terminar la guía.' : message;
+    }
+    if (repeat && !test) {
+      next = { ...next, recurring: [...(next.recurring ?? []), { id: uid(), accountId, amount: signed, description: base, categoryId: chosen, freq: repeat, next: nextOccurrence(date, repeat, Number(date.slice(8))), day: Number(date.slice(8)), active: true }] };
+      message = `${message} · se repetirá ${FREQ_LABEL[repeat].toLowerCase()}`;
     }
     update(() => next);
     toast(message);
@@ -175,6 +182,16 @@ export function QuickAdd({ onClose, onVoice, prefill }: { onClose: () => void; o
             <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </label>
         </div>
+      </div>
+      <div className="field">
+        <label>Repetir
+          <select value={repeat} onChange={(e) => setRepeat(e.target.value as typeof repeat)} disabled={asking && asTest}>
+            <option value="">No se repite</option>
+            <option value="weekly">Cada semana</option>
+            <option value="monthly">Cada mes</option>
+            <option value="yearly">Cada año</option>
+          </select>
+        </label>
       </div>
       <Equivalent key={currency} currency={currency} date={date} cents={signed ? Math.abs(signed) : null} defaultOpen={currency === 'VES'} onChange={setEquiv} />
       {asking && (

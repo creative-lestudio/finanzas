@@ -2,6 +2,7 @@ import { categoryLabel } from '../lib/categories';
 import { useState } from 'react';
 import { CatBadge, GOAL_ICONS, GoalIcon, Icon } from '../components/icons';
 import { GuideTip } from '../components/GuideCard';
+import { RecurringTab } from '../components/RecurringTab';
 import { Empty, Field, Meter, Money, Segmented, Sheet, StateBadge, Switch, toast } from '../components/ui';
 import { guideTasks, patchGuide } from '../lib/guide';
 import { budgetStatus, suggestBudgets } from '../lib/budgets';
@@ -16,7 +17,7 @@ export function Plan() {
   const { data, update } = useStore();
   const now = today();
   const month = now.slice(0, 7);
-  const [tab, setTab] = useState<'budgets' | 'goals' | 'auto'>('budgets');
+  const [tab, setTab] = useState<'budgets' | 'goals' | 'recurring' | 'auto'>('budgets');
   const [editBudget, setEditBudget] = useState<Partial<Budget> | null>(null);
   const [editGoal, setEditGoal] = useState<Partial<Goal> | null>(null);
   const [moveGoal, setMoveGoal] = useState<Goal | null>(null);
@@ -34,7 +35,8 @@ export function Plan() {
   return (
     <>
       {tab === 'budgets' && <GuideTip task="budget" />}
-      <Segmented value={tab} onChange={setTab} options={[['budgets', 'Presupuestos'], ['goals', 'Metas'], ['auto', 'Automático']]} />
+      <Segmented value={tab} onChange={setTab} options={[['budgets', 'Presupuestos'], ['goals', 'Metas'], ['recurring', 'Fijos'], ['auto', 'Ahorro']]} />
+      {tab === 'recurring' && <RecurringTab />}
 
       {tab === 'budgets' && (
         <>

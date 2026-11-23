@@ -70,9 +70,22 @@ function combineSaved<T extends WithId & { saved: number }>(b: T, l: T, r: T): T
 
 export function merge3(base: AppData, local: AppData, remote: AppData): AppData {
   const preferLocal = (local.updatedAt ?? '') >= (remote.updatedAt ?? '');
+  // Un movimiento nuevo con el mismo id en los dos lados (p. ej. un recurrente generado a la vez en dos
+  // dispositivos) suma su importe dos veces al fusionar los saldos: se descuenta una.
+  const inBase = new Set(base.transactions.map((t) => t.id));
+  const inRemote = new Map(remote.transactions.map((t) => [t.id, t]));
+  const twice = local.transactions.filter((t) => !inBase.has(t.id) && inRemote.has(t.id));
+  const lAcc = new Map(local.accounts.map((a) => [a.id, a]));
+  const rAcc = new Map(remote.accounts.map((a) => [a.id, a]));
+  const accounts = mergeById(base.accounts, local.accounts, remote.accounts, preferLocal, combineBalance).map((a) => {
+    // Solo hay doble suma cuando los saldos de los dos lados se combinaron (eran distintos).
+    if (eq(lAcc.get(a.id), rAcc.get(a.id))) return a;
+    return { ...a, balance: a.balance - twice.filter((t) => t.accountId === a.id).reduce((sum, t) => sum + t.amount, 0) };
+  });
   return {
     ...local,
-    accounts: mergeById(base.accounts, local.accounts, remote.accounts, preferLocal, combineBalance),
+    accounts,
+    recurring: mergeById(base.recurring ?? [], local.recurring ?? [], remote.recurring ?? [], preferLocal),
     categories: mergeById(base.categories, local.categories, remote.categories, preferLocal),
     transactions: mergeById(base.transactions, local.transactions, remote.transactions, preferLocal),
     budgets: mergeById(base.budgets, local.budgets, remote.budgets, preferLocal),

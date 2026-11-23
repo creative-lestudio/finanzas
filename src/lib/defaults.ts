@@ -87,6 +87,7 @@ export function emptyData(): AppData {
     ],
     categories: DEFAULT_CATEGORIES,
     transactions: [],
+    recurring: [],
     budgets: [],
     goals: [],
     goalMovements: [],
@@ -119,6 +120,7 @@ export function migrate(data: AppData | (Omit<AppData, 'version'> & { version: n
     // Desde la v2.1 solo hay cuatro tipos de tasa; las demás fuentes pasan a "Personalizada".
     rates: (d.rates ?? []).map((r) => (['BCV', 'Euro', 'Paralelo', 'Personalizada'].includes(r.source) ? r : { ...r, source: 'Personalizada' })),
     exchanges: d.exchanges ?? [],
+    recurring: d.recurring ?? [],
     settings: {
       ...emptyData().settings,
       ...d.settings,

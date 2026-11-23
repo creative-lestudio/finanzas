@@ -4,6 +4,7 @@ import { migrate } from './lib/defaults';
 import { registerCategories } from './lib/categories';
 import { setDefaultCurrency, today } from './lib/money';
 import { applyLiveRates, fetchLiveRates } from './lib/liverates';
+import { processRecurring } from './lib/recurring';
 import { bioAvailable, bioDisable, bioEnabled, bioEnroll, bioVerify } from './lib/biometric';
 import { clearDeviceKey, clearMeta, listBackupStamps, loadDeviceKey, saveDeviceKey, loadBackup, loadBase, loadMeta, loadVault, saveBase, saveMeta, saveRescue, saveVault, wipeVault } from './lib/storage';
 import { backupIfDue, countTx, requestPersistence, VaultWriter, type SaveState } from './lib/vault';
@@ -230,6 +231,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       window.clearInterval(poll);
     };
   }, [status, linked, runSync]);
+
+  // Movimientos recurrentes: al abrir y al volver a la app se crean los que ya tocan.
+  useEffect(() => {
+    if (status !== 'ready') return;
+    const run = () => {
+      const cur = dataRef.current;
+      if (!cur) return;
+      if (processRecurring(cur, today()).created === 0 && !(cur.recurring ?? []).some((r) => r.active && r.next <= today())) return;
+      update((d) => processRecurring(d, today()).data);
+    };
+    run();
+    const onVis = () => !document.hidden && run();
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
+  }, [status, update, data?.recurring]);
 
   // Tasas oficiales del día (BCV, Euro, Paralelo): se descargan solas al abrir; no pisan las que escribas tú.
   useEffect(() => {
