@@ -1,10 +1,18 @@
-name: Compilar app Android (APK)
+name: Compilar app Android (APK y AAB)
 
 # Genera el APK instalable y lo publica en "Releases". La web enlaza siempre al último:
 #   https://github.com/<usuario>/<repo>/releases/latest/download/finanzas.apk
 # Se lanza a mano (Actions → Compilar app Android → Run workflow) o al subir una etiqueta v*.
+# - APK: instalación directa desde la web.  AAB: el paquete que se sube a Google Play.
+# Al lanzarlo a mano solo compila y deja los archivos en «Artifacts»; para publicar el APK en
+# Releases (y que la web enlace a él) marca «publish» o sube una etiqueta v*.
 on:
   workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publicar el APK en Releases (la web enlazará a él)'
+        type: boolean
+        default: false
   push:
     tags: ['v*']
 
@@ -68,13 +76,13 @@ jobs:
           fi
           echo "ANDROID_KEYSTORE_FILE=$RUNNER_TEMP/finanzas.jks" >> "$GITHUB_ENV"
 
-      - name: Generar APK firmado
+      - name: Generar APK y AAB firmados
         working-directory: android
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD || 'finanzas-temporal' }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS || 'finanzas' }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD || secrets.ANDROID_KEYSTORE_PASSWORD || 'finanzas-temporal' }}
-        run: ./gradlew assembleRelease -PversionCode=${{ github.run_number }} -PversionName=0.1.${{ github.run_number }} --no-daemon
+        run: ./gradlew assembleRelease bundleRelease -PversionCode=${{ github.run_number }} -PversionName=0.1.${{ github.run_number }} --no-daemon
 
       - name: Verificar firma
         run: |
@@ -83,12 +91,25 @@ jobs:
           cp "$APK" finanzas.apk
           ls -lh finanzas.apk
 
+      - name: Preparar AAB para Google Play
+        run: |
+          AAB=android/app/build/outputs/bundle/release/app-release.aab
+          jarsigner -verify "$AAB" | head -2
+          cp "$AAB" finanzas.aab
+          ls -lh finanzas.aab
+
       - uses: actions/upload-artifact@v4
         with:
           name: finanzas-apk
           path: finanzas.apk
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: finanzas-aab
+          path: finanzas.aab
+
       - name: Publicar en Releases
+        if: ${{ inputs.publish == true || startsWith(github.ref, 'refs/tags/') }}
         env:
           GH_TOKEN: ${{ github.token }}
           TEMP: ${{ steps.sign.outputs.temporary }}
@@ -96,4 +117,4 @@ jobs:
           TAG="android-0.1.${{ github.run_number }}"
           NOTE="App Android de Finanzas (versión 0.1.${{ github.run_number }}). Descarga finanzas.apk en el móvil y ábrelo; Android pedirá permitir la instalación desde el navegador."
           if [ "$TEMP" = "true" ]; then NOTE="$NOTE Firmada con clave temporal: para actualizar hay que desinstalar la anterior."; fi
-          gh release create "$TAG" finanzas.apk --title "Finanzas Android 0.1.${{ github.run_number }}" --notes "$NOTE" --latest
+          gh release create "$TAG" finanzas.apk finanzas.aab --title "Finanzas Android 0.1.${{ github.run_number }}" --notes "$NOTE" --latest
