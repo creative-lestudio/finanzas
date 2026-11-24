@@ -653,3 +653,123 @@ describe('movimientos recurrentes', () => {
     expect(merge3(base, local, remote).accounts[0].balance).toBe(9200);
   });
 });
+
+describe('editar movimientos y saldos negativos', () => {
+  const base = () => {
+    const d = emptyData();
+    d.accounts = [
+      { id: 'a', name: 'BBVA', kind: 'checking', balance: 10000, currency: 'EUR', source: 'manual' },
+      { id: 'b', name: 'Efectivo', kind: 'cash', balance: -2500, currency: 'EUR', source: 'manual' },
+      { id: 'v', name: 'Banesco', kind: 'checking', balance: 0, currency: 'VES', source: 'manual' },
+    ];
+    d.categories = [{ id: 'x', name: 'Café', icon: '', kind: 'expense' } as never, { id: 'y', name: 'Súper', icon: '', kind: 'expense' } as never];
+    d.transactions = [{ id: 't', accountId: 'a', date: '2026-11-03', amount: -500, description: 'Cafe', categoryId: 'x', categorySource: 'rule' }];
+    d.accounts[0].balance = 10000 - 500;
+    return d;
+  };
+  it('cambiar el importe ajusta solo la diferencia en el saldo', async () => {
+    const { editTransaction } = await import('./txedit');
+    const e = editTransaction(base(), 't', { amount: -800 });
+    expect(e.accounts[0].balance).toBe(10000 - 800);
+    expect(e.transactions[0].amount).toBe(-800);
+  });
+  it('cambiar de cuenta devuelve el dinero a la anterior y lo cobra en la nueva (también con saldo negativo)', async () => {
+    const { editTransaction } = await import('./txedit');
+    const e = editTransaction(base(), 't', { accountId: 'b' });
+    expect(e.accounts[0].balance).toBe(10000);
+    expect(e.accounts[1].balance).toBe(-2500 - 500);
+  });
+  it('fecha, concepto y nota no tocan los saldos; la categoría cambia y se marca como del usuario', async () => {
+    const { editTransaction } = await import('./txedit');
+    const before = base();
+    const e = editTransaction(before, 't', { date: '2026-10-30', description: 'Café con leche', note: 'n', categoryId: 'y' });
+    expect(e.accounts.map((a) => a.balance)).toEqual(before.accounts.map((a) => a.balance));
+    expect(e.transactions[0]).toMatchObject({ date: '2026-10-30', description: 'Café con leche', note: 'n', categoryId: 'y', categorySource: 'user' });
+  });
+  it('un movimiento inexistente o una cuenta inexistente no cambian nada', async () => {
+    const { editTransaction } = await import('./txedit');
+    const d = base();
+    expect(editTransaction(d, 'nope', { amount: -1 })).toBe(d);
+    expect(editTransaction(d, 't', { accountId: 'zzz' })).toBe(d);
+  });
+  it('el equivalente en otra moneda sigue la proporción al cambiar el importe', async () => {
+    const { editTransaction } = await import('./txedit');
+    const d = base();
+    d.transactions = [{ id: 'f', accountId: 'v', date: '2026-11-03', amount: -94000, description: 'x', categoryId: 'x', categorySource: 'user', fx: { amount: 100, currency: 'USD', rate: 940 } }];
+    const e = editTransaction(d, 'f', { amount: -188000 });
+    expect(e.transactions[0].fx?.amount).toBe(200);
+  });
+  it('una cuenta con saldo negativo cuenta como pasivo en el patrimonio', () => {
+    const d = base();
+    const nw = netWorth(d);
+    expect(nw.liabilities).toBe(2500);
+    expect(nw.assets).toBe(9500);
+  });
+});
+
+describe('deudas', () => {
+  it('calcula pendiente, calendario del plan y próxima cuota', async () => {
+    const { remainingOf, scheduleOf, statusOf } = await import('./debts');
+    const debt = { id: 'd', direction: 'owe' as const, person: 'Banco', title: 'Préstamo', category: 'bank' as const, priority: 'high' as const, amount: 100000, currency: 'EUR', createdAt: '2026-01-01', payments: [{ id: 'p1', date: '2026-02-01', amount: 25000 }], plan: { amount: 25000, freq: 'monthly' as const, start: '2026-01-31' } };
+    expect(remainingOf(debt)).toBe(75000);
+    const s = scheduleOf(debt);
+    expect(s.map((i) => i.date)).toEqual(['2026-01-31', '2026-02-28', '2026-03-31', '2026-04-30']);
+    expect(s.map((i) => i.paid)).toEqual([true, false, false, false]);
+    const st = statusOf(debt, '2026-03-01');
+    expect(st.next?.date).toBe('2026-02-28');
+    expect(st.overdue).toBe(true);
+    expect(st.endsOn).toBe('2026-04-30');
+  });
+  it('la última cuota lleva el resto y una deuda pagada no está vencida', async () => {
+    const { scheduleOf, statusOf, isSettled } = await import('./debts');
+    const d = { id: 'd', direction: 'owed' as const, person: 'Ana', title: 'x', category: 'personal' as const, priority: 'low' as const, amount: 10000, currency: 'EUR', dueDate: '2026-01-01', createdAt: '2026-01-01', payments: [{ id: 'p', date: '2026-01-05', amount: 10000 }], plan: { amount: 4000, freq: 'weekly' as const, start: '2026-01-01' } };
+    expect(scheduleOf({ ...d, payments: [] }).map((i) => i.amount)).toEqual([4000, 4000, 2000]);
+    expect(isSettled(d)).toBe(true);
+    expect(statusOf(d, '2026-12-01').overdue).toBe(false);
+  });
+  it('al fusionar dos dispositivos se unen los pagos de la misma deuda sin perder ninguno', () => {
+    const debt = (payments: { id: string; date: string; amount: number }[]) => ({ id: 'd', direction: 'owe' as const, person: 'P', title: 't', category: 'other' as const, priority: 'medium' as const, amount: 50000, currency: 'EUR', createdAt: '2026-01-01', payments });
+    const base = { ...emptyData(), debts: [debt([{ id: 'p0', date: '2026-01-01', amount: 1000 }])] };
+    const local = { ...base, debts: [debt([{ id: 'p0', date: '2026-01-01', amount: 1000 }, { id: 'pl', date: '2026-02-01', amount: 2000 }])] };
+    const remote = { ...base, debts: [debt([{ id: 'p0', date: '2026-01-01', amount: 1000 }, { id: 'pr', date: '2026-02-02', amount: 3000 }])] };
+    const m = merge3(base, local, remote);
+    expect(m.debts[0].payments.map((p) => p.id).sort()).toEqual(['p0', 'pl', 'pr']);
+  });
+});
+
+describe('actualización de datos: nada se pierde', () => {
+  it('un archivo de datos antiguo (sin deudas ni recurrentes) se abre completo y con sus saldos negativos', () => {
+    const legacy = JSON.parse(JSON.stringify({ ...emptyData(), accounts: [{ id: 'e', name: 'Efectivo', kind: 'cash', balance: -15500, currency: 'EUR', source: 'manual' }], transactions: [{ id: 't1', accountId: 'e', date: '2026-10-01', amount: -15500, description: 'x', categoryId: 'other', categorySource: 'user' }], goals: [{ id: 'g', name: 'Viaje', target: 100000, saved: 5000, kind: 'savings' }] }));
+    delete legacy.debts;
+    delete legacy.recurring;
+    const m = migrate(legacy);
+    expect(m.debts).toEqual([]);
+    expect(m.recurring).toEqual([]);
+    expect(m.accounts[0].balance).toBe(-15500);
+    expect(m.transactions).toHaveLength(1);
+    expect(m.goals).toHaveLength(1);
+  });
+  it('fusionar con un blob antiguo de la nube (sin deudas) conserva las deudas locales', () => {
+    const old = JSON.parse(JSON.stringify(emptyData()));
+    delete old.debts;
+    const local = { ...emptyData(), debts: [{ id: 'd', direction: 'owed' as const, person: 'Ana', title: 'Préstamo', category: 'personal' as const, priority: 'medium' as const, amount: 5000, currency: 'EUR', createdAt: '2026-01-01', payments: [] }] };
+    const m = merge3(migrate(old), local, migrate(old));
+    expect(m.debts).toHaveLength(1);
+  });
+});
+
+describe('gastos compartidos: quien paga 100 a medias', () => {
+  it('al otro le sale que debe 50 y al que pagó que le deben 50', async () => {
+    const { splitEqual, balances, settleUp } = await import('./shared');
+    const shares = splitEqual(10000, ['ana', 'leo']);
+    const bal = balances([{ id: 'e', groupId: 'g', date: '2026-11-03', description: 'Cena', amount: 10000, paidBy: 'ana', shares }], ['ana', 'leo']);
+    expect(bal).toEqual({ ana: 5000, leo: -5000 });
+    expect(settleUp(bal)).toEqual([{ from: 'leo', to: 'ana', amount: 5000 }]);
+  });
+  it('con tres personas y céntimos impares la suma siempre cuadra', async () => {
+    const { splitEqual, balances } = await import('./shared');
+    const shares = splitEqual(10001, ['a', 'b', 'c']);
+    const bal = balances([{ id: 'e', groupId: 'g', date: '2026-11-03', description: 'x', amount: 10001, paidBy: 'a', shares }], ['a', 'b', 'c']);
+    expect(Object.values(bal).reduce((s, v) => s + v, 0)).toBe(0);
+  });
+});

@@ -59,6 +59,41 @@ export interface Transaction {
   recurringId?: string;
 }
 
+/** Deuda con una persona: «me deben» (owed) o «debo» (owe), con pagos y plan de pago opcional. */
+export interface DebtPayment {
+  id: string;
+  date: string;
+  amount: number;
+  note?: string;
+  /** Si se registró también como movimiento de una cuenta. */
+  txId?: string;
+}
+
+export interface DebtPlan {
+  /** Cuota en céntimos de la moneda de la deuda. */
+  amount: number;
+  freq: 'weekly' | 'biweekly' | 'monthly';
+  /** Fecha de la primera cuota (ISO). */
+  start: string;
+}
+
+export interface Debt {
+  id: string;
+  direction: 'owed' | 'owe';
+  person: string;
+  title: string;
+  category: 'personal' | 'family' | 'bank' | 'card' | 'business' | 'services' | 'other';
+  priority: 'high' | 'medium' | 'low';
+  /** Importe original, en céntimos. */
+  amount: number;
+  currency: string;
+  dueDate?: string;
+  note?: string;
+  createdAt: string;
+  payments: DebtPayment[];
+  plan?: DebtPlan;
+}
+
 /** Movimiento que se repite solo (alquiler, nómina, gimnasio…). */
 export interface Recurring {
   id: string;
@@ -220,6 +255,7 @@ export interface AppData {
   categories: Category[];
   transactions: Transaction[];
   recurring: Recurring[];
+  debts: Debt[];
   budgets: Budget[];
   goals: Goal[];
   goalMovements: GoalMovement[];

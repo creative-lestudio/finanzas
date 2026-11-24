@@ -4,6 +4,7 @@ import { COACH } from '../components/Coach';
 import { AccountLogo } from '../components/AccountLogo';
 import { GuideCard } from '../components/GuideCard';
 import { guideActive } from '../lib/guide';
+import { debtTotals, remainingOf } from '../lib/debts';
 import { BiometricPrompt, SyncBanner } from '../components/SyncBanner';
 import { Setup } from '../components/Setup';
 import { CatBadge, GoalIcon, Icon } from '../components/icons';
@@ -98,6 +99,13 @@ export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void
       {/* Face ID, instalar y sincronizar solo se ofrecen cuando ya conoces la app */}
       {!needsSetup && !guideActive(data) && <SyncBanner go={go} />}
       {!needsSetup && !guideActive(data) && <BiometricPrompt />}
+      {(data.debts ?? []).some((d) => remainingOf(d) > 0) && !guideActive(data) && (
+        <div className="card glass row tap" style={{ padding: 14, cursor: 'pointer' }} onClick={() => go('debts')} role="button">
+          <span className="icon accent"><Icon name="scale" size={20} /></span>
+          <div className="grow small"><b>Deudas</b><div className="muted">Debo {formatMoney(debtTotals(data).owe, base)} · Me deben {formatMoney(debtTotals(data).owed, base)}{debtTotals(data).overdue > 0 ? ` · ${debtTotals(data).overdue} vencida(s)` : ''}</div></div>
+          <Icon name="chevron" size={18} className="chev" />
+        </div>
+      )}
       {/* Tarjetas deslizables: patrimonio, posición global y inversiones */}
       <div className="carousel" tabIndex={0} role="region" ref={carousel} onScroll={onScroll} aria-label="Tus saldos">
         <section className="balance b1" onClick={() => go('wealth')} aria-label="Patrimonio neto">

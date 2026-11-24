@@ -7,7 +7,7 @@ import { applyLiveRates, fetchLiveRates } from './lib/liverates';
 import { processRecurring } from './lib/recurring';
 import { bioAvailable, bioDisable, bioEnabled, bioEnroll, bioVerify } from './lib/biometric';
 import { clearDeviceKey, clearMeta, listBackupStamps, loadDeviceKey, saveDeviceKey, loadBackup, loadBase, loadMeta, loadVault, saveBase, saveMeta, saveRescue, saveVault, wipeVault } from './lib/storage';
-import { backupIfDue, countTx, requestPersistence, VaultWriter, type SaveState } from './lib/vault';
+import { backupIfDue, backupOnOpen, countTx, requestPersistence, VaultWriter, type SaveState } from './lib/vault';
 import { deleteMyAccount, fetchRemote, PassphraseMismatch, remoteInfo, supabase, syncOnce, watchRemote } from './lib/sync';
 import { applyTheme } from './lib/theme';
 import type { AppData } from './lib/types';
@@ -347,7 +347,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       try {
         const r = await unlock<AppData>(passphrase, blob);
         session.current = r.session;
-        void backupIfDue(blob).catch(() => undefined);
+        void backupOnOpen(blob).catch(() => undefined);
         void requestPersistence();
         adopt(migrate(r.value));
         setStatus('ready');
@@ -456,7 +456,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       try {
         const value = await decryptJSON<AppData>(sess, blob);
         session.current = sess;
-        void backupIfDue(blob).catch(() => undefined);
+        void backupOnOpen(blob).catch(() => undefined);
         adopt(migrate(value));
         setStatus('ready');
         void afterUnlock(sess);

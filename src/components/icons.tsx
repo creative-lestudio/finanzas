@@ -60,6 +60,7 @@ const PATHS: Record<string, string> = {
   phoneOut: 'M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2ZM11 18h2M9 9l3-3 3 3M12 6v7',
   phoneIn: 'M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2ZM11 18h2M9 10l3 3 3-3M12 13V6',
   box: 'M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10',
+  scale: 'M12 3v18M7 21h10M5 7h14M5 7l-3 7a3 3 0 0 0 6 0L5 7ZM19 7l-3 7a3 3 0 0 0 6 0l-3-7Z',
   briefcase: 'M3 8h18v12H3zM8 8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v3M3 13h18',
   coins: 'M9 13a6 3 0 1 0 0-6 6 3 0 0 0 0 6ZM3 10v4c0 1.7 2.7 3 6 3s6-1.3 6-3v-4M15 7.2c3.4.3 6 1.6 6 2.8v4c0 1.7-2.7 3-6 3',
   laptop: 'M5 5h14v10H5zM2 19h20',

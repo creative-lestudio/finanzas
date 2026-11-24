@@ -50,7 +50,7 @@ export function Accounts({ onView, onAdd }: { onView: (accountId: string) => voi
             <div className="small muted ellipsis">{KIND_LABEL[a.kind]} · {a.currency}</div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div className="mid num" style={{ fontSize: 19 }}>{formatMoney(a.balance, a.currency)}</div>
+            <div className={`mid num ${a.balance < 0 && a.kind !== 'card' && a.kind !== 'loan' ? 'neg' : ''}`} style={{ fontSize: 19 }}>{formatMoney(a.balance, a.currency)}</div>
             {eq !== null && <div className="tiny muted">≈ {formatMoney(eq, base)}</div>}
           </div>
         </div>
@@ -58,6 +58,7 @@ export function Accounts({ onView, onAdd }: { onView: (accountId: string) => voi
           <span className={`acc-dot ${fr.tone}`} />
           <span className={fr.tone === 'good' ? '' : 'muted'}>{fr.text}</span>
           <span className="muted">· {st.movements} mov.</span>
+          {a.balance < 0 && a.kind !== 'card' && a.kind !== 'loan' && <span className="pill" style={{ marginLeft: 'auto', color: 'var(--bad)' }}>En descubierto</span>}
         </div>
         <div className="grid2 mt" style={{ gap: 8 }}>
           <button className="btn sm" onClick={() => onView(a.id)}>Ver movimientos</button>

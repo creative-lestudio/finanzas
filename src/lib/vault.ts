@@ -1,5 +1,5 @@
 import { encryptJSON, type EncryptedBlob, type Session } from './crypto';
-import { listBackupStamps, loadVault, pruneBackups, saveBackup, saveVault } from './storage';
+import { listBackupStamps, loadVault, pruneBackups, saveBackup, saveRescue, saveVault } from './storage';
 import type { AppData } from './types';
 
 export type SaveStatus = 'saved' | 'saving' | 'error';
@@ -89,6 +89,30 @@ export async function backupIfDue(blob: EncryptedBlob | undefined, force = false
   if (!force && last && Date.now() - Date.parse(last) < BACKUP_EVERY_MS) return;
   await saveBackup(blob);
   await pruneBackups(BACKUPS_KEPT);
+}
+
+/** Versión del formato de datos. Si cambia, antes de abrir con el código nuevo se guarda una copia de lo que había. */
+export const DATA_SCHEMA = 4;
+const SCHEMA_KEY = 'finanzas.schema';
+
+/** Copia al abrir; y una copia permanente (nunca se poda) la primera vez que se abre tras una actualización del formato. */
+export async function backupOnOpen(blob: EncryptedBlob | undefined): Promise<void> {
+  if (!blob) return;
+  let seen: string | null = null;
+  try {
+    seen = localStorage.getItem(SCHEMA_KEY);
+  } catch {
+    /* sin almacenamiento */
+  }
+  if (seen !== String(DATA_SCHEMA)) {
+    await saveRescue(blob, `antes-de-v${DATA_SCHEMA}`);
+    try {
+      localStorage.setItem(SCHEMA_KEY, String(DATA_SCHEMA));
+    } catch {
+      /* ignorado */
+    }
+  }
+  await backupIfDue(blob);
 }
 
 /** Cuenta de movimientos: para mostrar qué contiene cada copia. */

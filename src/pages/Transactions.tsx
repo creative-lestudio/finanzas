@@ -3,11 +3,10 @@ import { CatBadge, Icon } from '../components/icons';
 import { Empty, Money, Segmented, Sheet, toast } from '../components/ui';
 import { categoryLabel, childrenOf, idsUnder, rootOf } from '../lib/categories';
 import { aiAvailability } from '../lib/ai';
-import { categorizeWithAI, learnFromCorrection } from '../lib/categorize';
-import { CategoryPicker } from '../components/CategoryPicker';
+import { categorizeWithAI } from '../lib/categorize';
+import { TransactionEditor } from '../components/TransactionEditor';
 import { ByCategory, Reports } from '../components/Reports';
-import { Equivalent, type EquivResult } from '../components/Equivalent';
-import { addRate, convert, deleteExchange, txCurrency } from '../lib/fx';
+import { convert, deleteExchange, txCurrency } from '../lib/fx';
 import { monthSummary } from '../lib/insights';
 import { addMonths, capitalize, formatMoney, formatRate, prettyDescription, today } from '../lib/money';
 import type { Transaction } from '../lib/types';
@@ -26,7 +25,6 @@ export function Transactions({ account }: { account?: string }) {
   const [busy, setBusy] = useState(false);
   const [view, setView] = useState<'list' | 'cats' | 'summary'>('list');
   const [catKind, setCatKind] = useState<'expense' | 'income'>('expense');
-  const [equiv, setEquiv] = useState<EquivResult | null>(null);
 
   const catOf = (id: string) => data.categories.find((c) => c.id === id);
   const accOf = (id: string) => data.accounts.find((a) => a.id === id);
@@ -157,37 +155,8 @@ export function Transactions({ account }: { account?: string }) {
       </>}
 
       {editing && (
-        <Sheet title="Movimiento" onClose={() => setEditing(null)}>
-          <div className="center mb">
-            <div className="big">
-              {editing.fx && editing.fx.amount > 0
-                ? <Money cents={editing.amount < 0 ? -editing.fx.amount : editing.fx.amount} currency={editing.fx.currency} sign />
-                : <Money cents={editing.amount} currency={txCurrency(data, editing)} sign />}
-            </div>
-            {editing.fx && <div className="small muted">{formatMoney(Math.abs(editing.amount), txCurrency(data, editing))} a {formatRate(editing.fx.rate)} · {editing.fx.source === 'Personalizada' ? 'tasa acordada' : `tasa ${editing.fx.source}`}</div>}
-            <div className="secondary">{prettyDescription(editing.description)}</div>
-            <div className="small muted">{editing.date} · {accOf(editing.accountId)?.name}</div>
-            {editing.note && <div className="tiny muted mt">{editing.note}</div>}
-          </div>
-          {editing.exchangeId ? (
-            <p className="small muted center">Forma parte de un cambio de divisa. Al borrarlo se elimina la operación completa.</p>
-          ) : (
-            <>
-              <p className="small muted" style={{ marginTop: 0 }}>Cambia la categoría: la app lo recordará para este comercio.</p>
-              <CategoryPicker kind={editing.amount < 0 ? 'expense' : 'income'} value={editing.categoryId} onChange={(id) => { update((d) => learnFromCorrection(d, editing, id)); setEditing({ ...editing, categoryId: id, categorySource: 'user' }); }} />
-            </>
-          )}
-          {!editing.exchangeId && txCurrency(data, editing) !== 'USD' && (
-            <div className="mb">
-              <Equivalent key={editing.id} currency={txCurrency(data, editing)} date={editing.date} cents={Math.abs(editing.amount)} initial={editing.fx} defaultOpen={txCurrency(data, editing) === 'VES'} onChange={setEquiv} />
-              <button className="btn tinted block mt" disabled={!equiv} onClick={() => {
-                update((d) => ({ ...(equiv?.saveRate ? addRate(d, equiv.saveRate) : d), transactions: d.transactions.map((x) => (x.id === editing.id ? { ...x, fx: equiv?.fx } : x)) }));
-                toast('Equivalente guardado');
-                setEditing(null);
-              }}>Guardar equivalente</button>
-            </div>
-          )}
-          <button className="btn danger block" onClick={() => remove(editing)}><Icon name="trash" size={18} /> Eliminar</button>
+        <Sheet title="Editar movimiento" onClose={() => setEditing(null)}>
+          <TransactionEditor key={editing.id} tx={editing} onDone={() => setEditing(null)} onRemove={() => remove(editing)} />
         </Sheet>
       )}
     </>

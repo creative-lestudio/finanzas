@@ -1,4 +1,4 @@
-import type { AppData } from './types';
+import type { AppData, Debt } from './types';
 
 // Fusión a tres bandas para la sincronización: compara la última versión
 // sincronizada (base) con los cambios locales y los remotos, elemento a
@@ -60,6 +60,21 @@ function combineBalance<T extends WithId & { balance: number }>(b: T, l: T, r: T
   return { ...(rest as T), balance: b.balance + (l.balance - b.balance) + (r.balance - b.balance) };
 }
 
+/** Dos dispositivos pueden haber anotado pagos distintos de la misma deuda: se unen por id. */
+function combineDebt(b: Debt, l: Debt, r: Debt): Debt {
+  const ids = new Set(l.payments.map((p) => p.id));
+  const bIds = new Set(b.payments.map((p) => p.id));
+  const fromRemote = r.payments.filter((p) => !ids.has(p.id) && !bIds.has(p.id));
+  const keptByRemote = new Set(r.payments.map((p) => p.id));
+  // Un pago que estaba en la base y ya no está en un lado se borró allí.
+  const local = l.payments.filter((p) => !bIds.has(p.id) || keptByRemote.has(p.id));
+  const { payments: _l, ...lRest } = l;
+  const { payments: _r, ...rRest } = r;
+  const { payments: _b, ...bRest } = b;
+  const rest = eq(lRest, rRest) ? lRest : eq(lRest, bRest) ? rRest : lRest;
+  return { ...(rest as Debt), payments: [...local, ...fromRemote].sort((x, y) => x.date.localeCompare(y.date)) };
+}
+
 function combineSaved<T extends WithId & { saved: number }>(b: T, l: T, r: T): T {
   const { saved: _l, ...lRest } = l;
   const { saved: _r, ...rRest } = r;
@@ -86,6 +101,7 @@ export function merge3(base: AppData, local: AppData, remote: AppData): AppData 
     ...local,
     accounts,
     recurring: mergeById(base.recurring ?? [], local.recurring ?? [], remote.recurring ?? [], preferLocal),
+    debts: mergeById(base.debts ?? [], local.debts ?? [], remote.debts ?? [], preferLocal, combineDebt),
     categories: mergeById(base.categories, local.categories, remote.categories, preferLocal),
     transactions: mergeById(base.transactions, local.transactions, remote.transactions, preferLocal),
     budgets: mergeById(base.budgets, local.budgets, remote.budgets, preferLocal),

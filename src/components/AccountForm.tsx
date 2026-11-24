@@ -11,13 +11,17 @@ export function AccountForm({ value, onSave, onDelete }: { value: Partial<Accoun
   const [name, setName] = useState(value.name ?? '');
   const [kind, setKind] = useState<AccountKind>(value.kind ?? 'checking');
   const [currency, setCurrency] = useState(value.currency ?? 'EUR');
-  const [balance, setBalance] = useState(value.balance !== undefined ? String(Math.abs(value.balance) / 100).replace('.', ',') : '');
+  const isDebtKind = (k: AccountKind) => k === 'loan' || k === 'card';
+  // Cuentas normales: el saldo conserva su signo (puede ser negativo: descubierto, efectivo prestado…).
+  // Tarjetas y préstamos: se escribe lo que se debe, en positivo.
+  const [balance, setBalance] = useState(value.balance !== undefined ? String((isDebtKind(value.kind ?? 'checking') ? Math.abs(value.balance) : value.balance) / 100).replace('.', ',') : '');
   const [image, setImage] = useState<string | undefined>(value.image);
   const [icon, setIcon] = useState<string | undefined>(value.icon);
   const [picking, setPicking] = useState(false);
   const file = useRef<HTMLInputElement>(null);
   const debt = kind === 'loan' || kind === 'card';
   const cents = parseAmount(balance) ?? 0;
+  const overdrawn = !debt && cents < 0;
 
   const upload = async (f?: File) => {
     if (!f) return;
@@ -51,13 +55,14 @@ export function AccountForm({ value, onSave, onDelete }: { value: Partial<Accoun
       </Field>
       <Field label="Nombre"><input value={name} placeholder="BBVA, Banesco, Wise USD, Binance, Hipoteca…" onChange={(e) => setName(e.target.value)} aria-label="Nombre de la cuenta" /></Field>
       <div className="grid2">
-        <Field label={debt ? 'Deuda pendiente' : 'Saldo / valor actual'}><input inputMode="decimal" value={balance} onChange={(e) => setBalance(e.target.value)} aria-label="Saldo" /></Field>
+        <Field label={debt ? 'Deuda pendiente' : 'Saldo / valor actual'}><input inputMode="decimal" value={balance} placeholder={debt ? '0' : '0 (admite negativo: -150)'} onChange={(e) => setBalance(e.target.value)} aria-label="Saldo" /></Field>
         <Field label="Moneda">
           <select value={currency} onChange={(e) => setCurrency(e.target.value)} disabled={Boolean(value.id && value.source !== 'manual')}>
             {CURRENCIES.map((c) => <option key={c.code} value={c.code}>{c.flag} {c.code}</option>)}
           </select>
         </Field>
       </div>
+      {overdrawn && <p className="small muted" style={{ marginTop: 0 }}>Saldo negativo: la cuenta está en descubierto. Cuenta como deuda en tu patrimonio.</p>}
       {value.source && value.source !== 'manual' && value.source !== 'import' && <p className="small muted">El saldo de esta cuenta lo actualiza el banco al sincronizar.</p>}
       <button
         className="btn primary block mt"

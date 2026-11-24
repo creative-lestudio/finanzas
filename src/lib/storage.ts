@@ -123,7 +123,8 @@ export const loadBackup = (stamp: string) => tx<EncryptedBlob | undefined>('read
 export const deleteBackup = (stamp: string) => tx<void>('readwrite', (s) => s.delete(BACKUP_PREFIX + stamp));
 
 export async function pruneBackups(keep: number): Promise<void> {
-  for (const stamp of (await listBackupStamps()).slice(keep)) await deleteBackup(stamp);
+  // Las copias de rescate y las previas a una actualización llevan «~motivo» y nunca se podan.
+  for (const stamp of (await listBackupStamps()).filter((s) => !s.includes('~')).slice(keep)) await deleteBackup(stamp);
 }
 
 /** Guarda tal cual (sin descifrar) un blob que se iba a perder, para poder recuperarlo después. */

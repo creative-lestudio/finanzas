@@ -88,6 +88,7 @@ export function emptyData(): AppData {
     categories: DEFAULT_CATEGORIES,
     transactions: [],
     recurring: [],
+    debts: [],
     budgets: [],
     goals: [],
     goalMovements: [],
@@ -121,6 +122,7 @@ export function migrate(data: AppData | (Omit<AppData, 'version'> & { version: n
     rates: (d.rates ?? []).map((r) => (['BCV', 'Euro', 'Paralelo', 'Personalizada'].includes(r.source) ? r : { ...r, source: 'Personalizada' })),
     exchanges: d.exchanges ?? [],
     recurring: d.recurring ?? [],
+    debts: d.debts ?? [],
     settings: {
       ...emptyData().settings,
       ...d.settings,

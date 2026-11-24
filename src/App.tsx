@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Icon } from './components/icons';
 import { InstallBanner } from './components/Install';
 import { Tour } from './components/Tour';
+import { Debts } from './pages/Debts';
 import { prefillFromUrl, type Prefill } from './lib/shortcut';
 import { finishGuide, guideActive, guideComplete, newGuide } from './lib/guide';
 import { Accounts } from './pages/Accounts';
@@ -28,7 +29,7 @@ import { Wealth } from './pages/Wealth';
 import { AuthForm, RecoveryNotice } from './components/AuthForm';
 import { useStore } from './store';
 
-export type Page = 'home' | 'transactions' | 'plan' | 'assistant' | 'more' | 'accounts' | 'fx' | 'groups' | 'wealth' | 'health' | 'subs' | 'settings';
+export type Page = 'home' | 'transactions' | 'plan' | 'assistant' | 'more' | 'accounts' | 'debts' | 'fx' | 'groups' | 'wealth' | 'health' | 'subs' | 'settings';
 
 const TITLES: Record<Page, string> = {
   home: 'Posición global',
@@ -37,6 +38,7 @@ const TITLES: Record<Page, string> = {
   assistant: 'Asesor IA',
   more: 'Herramientas',
   accounts: 'Cuentas',
+  debts: 'Deudas',
   fx: 'Divisas',
   groups: 'Compartir',
   wealth: 'Patrimonio',
@@ -55,6 +57,7 @@ const TABS: [Page, string, string][] = [
 ];
 
 const MORE: [Page, string, string, string][] = [
+  ['debts', 'scale', 'Deudas', 'Lo que debo y lo que me deben, con plan de pago'],
   ['fx', 'swap', 'Divisas y cambios', 'Tasas BCV/paralelo, Wise, pérdidas por cambio'],
   ['groups', 'users', 'Gastos compartidos', 'Divide cuentas con amigos y familia'],
   ['wealth', 'chart', 'Patrimonio', 'Cuentas, inversiones, cripto y deudas'],
@@ -62,7 +65,7 @@ const MORE: [Page, string, string, string][] = [
   ['subs', 'repeat', 'Suscripciones y comisiones', 'Cobros recurrentes y fugas'],
 ];
 
-const PARENT: Partial<Record<Page, Page>> = { fx: 'more', groups: 'more', wealth: 'more', health: 'more', subs: 'more' };
+const PARENT: Partial<Record<Page, Page>> = { debts: 'more', fx: 'more', groups: 'more', wealth: 'more', health: 'more', subs: 'more' };
 
 applySavedTheme();
 
@@ -223,6 +226,7 @@ export function App() {
           {page === 'accounts' && <Accounts onView={(id) => { setTxAccount(id); setPage('transactions'); }} onAdd={() => setSheet('add')} />}
           {page === 'plan' && <Plan />}
           {page === 'assistant' && <Assistant />}
+          {page === 'debts' && <Debts />}
           {page === 'fx' && <Currency />}
           {page === 'groups' && <Groups go={setPage} />}
           {page === 'wealth' && <Wealth />}

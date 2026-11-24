@@ -124,7 +124,9 @@ export function CloudGroups({ go }: { go: (page: 'settings') => void }) {
             <ul className="list plain" style={{ marginTop: 8 }}>
               {transfers.map((t) => (
                 <li key={`${t.from}-${t.to}`} style={{ minHeight: 48 }}>
-                  <span className="grow small"><b>{t.from === me.id ? 'Tú' : nameOf(t.from)}</b> {t.from === me.id ? 'debes' : 'debe'} <b>{formatMoney(t.amount, cur)}</b> a <b>{t.to === me.id ? 'ti' : nameOf(t.to)}</b></span>
+                  <span className="grow small">
+                    {t.from === me.id ? <>Debes <b className="neg">{formatMoney(t.amount, cur)}</b> a <b>{nameOf(t.to)}</b></> : t.to === me.id ? <><b>{nameOf(t.from)}</b> te debe <b className="pos">{formatMoney(t.amount, cur)}</b></> : <><b>{nameOf(t.from)}</b> debe <b>{formatMoney(t.amount, cur)}</b> a <b>{nameOf(t.to)}</b></>}
+                  </span>
                   <button className="btn sm tinted" onClick={() => void settle(t.from, t.to, t.amount)}>Saldado</button>
                 </li>
               ))}
@@ -141,12 +143,14 @@ export function CloudGroups({ go }: { go: (page: 'settings') => void }) {
             <ul className="list">
               {entries.map((e) => {
                 const myShare = e.shares[me.id] ?? 0;
+                const effect = (e.payer === me.id ? e.amount : 0) - myShare; // + me deben · − debo
                 return (
                   <li key={e.id} className={e.createdBy === me.id ? 'tap' : ''} onClick={() => e.createdBy === me.id && setSheet({ edit: e })}>
                     <span className="icon"><Icon name={e.kind === 'payment' ? 'check' : e.kind === 'debt' ? 'swap' : 'receipt'} size={19} /></span>
                     <div className="grow">
                       <div className="ellipsis">{e.description || (e.kind === 'debt' ? 'Deuda' : 'Gasto')}</div>
-                      <div className="small muted ellipsis">{e.date} · {e.kind === 'debt' ? 'Deuda' : e.kind === 'payment' ? 'Pago' : 'Pagó'} {nameOf(e.payer)}{myShare ? ` · tu parte ${formatMoney(myShare, cur)}` : ''}</div>
+                      <div className="small muted ellipsis">{e.date} · {e.kind === 'debt' ? 'Deuda' : e.kind === 'payment' ? 'Pago' : 'Pagó'} {e.payer === me.id ? 'tú' : nameOf(e.payer)}{myShare ? ` · tu parte ${formatMoney(myShare, cur)}` : ''}</div>
+                      {effect !== 0 && <div className={`tiny ${effect > 0 ? 'pos' : 'neg'}`}>{effect > 0 ? `Te deben ${formatMoney(effect, cur)}` : `Debes ${formatMoney(-effect, cur)}`}</div>}
                     </div>
                     <Money cents={e.amount} currency={cur} />
                   </li>
@@ -257,9 +261,12 @@ function EntryForm({ group, meId, mode, existing, onSave, onDelete }: { group: C
   const cents = Math.abs(parseAmount(amount) ?? 0);
   // Gasto
   const [paidBy, setPaidBy] = useState(existing?.payer ?? meId);
-  const [split, setSplit] = useState<'equal' | 'weights'>('equal');
+  // Al editar se recupera el reparto original: igual si las partes difieren a lo sumo en un céntimo.
+  const prev = existing && existing.kind === 'expense' ? Object.values(existing.shares) : [];
+  const wasEqual = prev.length === 0 || Math.max(...prev) - Math.min(...prev) <= 1;
+  const [split, setSplit] = useState<'equal' | 'weights'>(wasEqual ? 'equal' : 'weights');
   const [included, setIncluded] = useState<string[]>(existing ? Object.keys(existing.shares) : group.members.map((m) => m.userId));
-  const [weights, setWeights] = useState<Record<string, number>>(Object.fromEntries(group.members.map((m) => [m.userId, 1])));
+  const [weights, setWeights] = useState<Record<string, number>>(Object.fromEntries(group.members.map((m) => [m.userId, existing && !wasEqual ? (existing.shares[m.userId] ?? 0) : 1])));
   // Deuda
   const iOwe = existing ? existing.payer !== meId : true;
   const [direction, setDirection] = useState<'iowe' | 'owesme'>(iOwe ? 'iowe' : 'owesme');
@@ -318,6 +325,17 @@ function EntryForm({ group, meId, mode, existing, onSave, onDelete }: { group: C
           </li>
         ))}
       </ul>
+      {cents > 0 && Object.keys(shares).length > 0 && (
+        <div className="card" style={{ margin: '12px 0 0', padding: 12, background: 'var(--fill)' }} aria-live="polite">
+          <div className="tiny muted" style={{ marginBottom: 4 }}>Así quedará</div>
+          {group.members.filter((m) => m.userId !== paidBy && (shares[m.userId] ?? 0) > 0).map((m) => (
+            <div key={m.userId} className="small">
+              {m.userId === meId ? <>Le debes <b className="neg">{formatMoney(shares[m.userId], group.currency)}</b> a <b>{nameOf(paidBy)}</b></> : paidBy === meId ? <><b>{m.displayName}</b> te debe <b className="pos">{formatMoney(shares[m.userId], group.currency)}</b></> : <><b>{m.displayName}</b> debe <b>{formatMoney(shares[m.userId], group.currency)}</b> a <b>{nameOf(paidBy)}</b></>}
+            </div>
+          ))}
+          {group.members.every((m) => m.userId === paidBy || !(shares[m.userId] > 0)) && <div className="small muted">Solo pagó {nameOf(paidBy)} y es todo suyo: nadie debe nada.</div>}
+        </div>
+      )}
       <button className="btn primary block" style={{ marginTop: 12 }} disabled={!cents || !Object.keys(shares).length} onClick={() => onSave({ id: existing?.id, groupId: group.id, kind: 'expense', payer: paidBy, amount: cents, description: description || 'Gasto', date, shares })}>Guardar</button>
       {onDelete && <button className="btn danger block mt" onClick={onDelete}>Eliminar</button>}
     </>
