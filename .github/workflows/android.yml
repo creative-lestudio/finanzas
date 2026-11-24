@@ -87,7 +87,8 @@ jobs:
       - name: Verificar firma
         run: |
           APK=android/app/build/outputs/apk/release/app-release.apk
-          "$ANDROID_HOME"/build-tools/*/apksigner verify --verbose "$APK" | head -5
+          SIGNER=$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          "$SIGNER" verify --verbose "$APK" | head -5
           cp "$APK" finanzas.apk
           ls -lh finanzas.apk
 

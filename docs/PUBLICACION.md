@@ -29,9 +29,9 @@ _Preparado el 23 de noviembre de 2026._ Identificador de la app en ambas tiendas
 
 Hace falta el **Apple Developer Program** (99 USD/año). Los pasos que requieren cuenta Apple no se pueden automatizar sin ella.
 
-1. En <https://developer.apple.com/account> → Identifiers → crea el App ID **`com.lestudio.finanzas`** (capacidades: Sign In with Apple si lo añades; Associated Domains no hace falta).
+1. En <https://developer.apple.com/account> → Identifiers → crea el App ID **`com.lestudio.finanzas`** y otro **`com.lestudio.finanzas.widget`** (el widget). Crea el **App Group `group.com.lestudio.finanzas`** y actívalo en los dos App ID (capacidad App Groups). Sign In with Apple, si lo añades, solo en el principal.
 2. En <https://appstoreconnect.apple.com> → Apps → «+» → Nueva app: nombre, idioma principal español, ID de paquete `com.lestudio.finanzas`, SKU `finanzas-ios`.
-3. **Certificado** (Certificates → «Apple Distribution») y **perfil** (Profiles → «App Store» para ese App ID). Descarga el `.p12` (con contraseña) y el `.mobileprovision`.
+3. **Certificado** (Certificates → «Apple Distribution») y **dos perfiles** (Profiles → «App Store»: uno para `com.lestudio.finanzas` y otro para `com.lestudio.finanzas.widget`). Descarga el `.p12` (con contraseña) y los dos `.mobileprovision`.
 4. **Clave de la API de App Store Connect:** Users and Access → Integrations → Team Keys → «+» (rol App Manager). Descarga el `.p8` (solo se descarga una vez) y anota *Key ID* e *Issuer ID*.
 5. Secretos en GitHub (cada archivo en base64 de una línea: `base64 -i archivo | tr -d '\n' | pbcopy` en Mac):
 
@@ -41,6 +41,7 @@ Hace falta el **Apple Developer Program** (99 USD/año). Los pasos que requieren
 | `IOS_CERT_P12_BASE64` | certificado de distribución `.p12` |
 | `IOS_CERT_PASSWORD` | contraseña del `.p12` |
 | `IOS_PROFILE_BASE64` | perfil de aprovisionamiento `.mobileprovision` |
+| `IOS_WIDGET_PROFILE_BASE64` | perfil «App Store» de la extensión del widget (`com.lestudio.finanzas.widget`) |
 | `ASC_KEY_ID`, `ASC_ISSUER_ID` | de la clave de la API |
 | `ASC_KEY_P8_BASE64` | archivo `.p8` |
 
