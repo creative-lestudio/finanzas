@@ -58,6 +58,7 @@ jobs:
           [ -z "${{ secrets.IOS_CERT_P12_BASE64 }}" ] && missing="$missing IOS_CERT_P12_BASE64"
           [ -z "${{ secrets.IOS_CERT_PASSWORD }}" ] && missing="$missing IOS_CERT_PASSWORD"
           [ -z "${{ secrets.IOS_PROFILE_BASE64 }}" ] && missing="$missing IOS_PROFILE_BASE64"
+          [ -z "${{ secrets.IOS_WIDGET_PROFILE_BASE64 }}" ] && missing="$missing IOS_WIDGET_PROFILE_BASE64"
           [ -z "${{ secrets.ASC_KEY_ID }}" ] && missing="$missing ASC_KEY_ID"
           [ -z "${{ secrets.ASC_ISSUER_ID }}" ] && missing="$missing ASC_ISSUER_ID"
           [ -z "${{ secrets.ASC_KEY_P8_BASE64 }}" ] && missing="$missing ASC_KEY_P8_BASE64"
@@ -79,6 +80,7 @@ jobs:
           CERT_P12: ${{ secrets.IOS_CERT_P12_BASE64 }}
           CERT_PASSWORD: ${{ secrets.IOS_CERT_PASSWORD }}
           PROFILE: ${{ secrets.IOS_PROFILE_BASE64 }}
+          WIDGET_PROFILE: ${{ secrets.IOS_WIDGET_PROFILE_BASE64 }}
         run: |
           KC="$RUNNER_TEMP/build.keychain-db"
           security create-keychain -p ci "$KC"
@@ -94,16 +96,22 @@ jobs:
           cp "$RUNNER_TEMP/profile.mobileprovision" "$HOME/Library/MobileDevice/Provisioning Profiles/$UUID.mobileprovision"
           PNAME=$(/usr/libexec/PlistBuddy -c 'Print Name' /dev/stdin <<< "$(security cms -D -i "$RUNNER_TEMP/profile.mobileprovision")")
           echo "PROFILE_NAME=$PNAME" >> "$GITHUB_ENV"
+          # Perfil de la extensión del widget (otro identificador: com.lestudio.finanzas.widget).
+          printf '%s' "$WIDGET_PROFILE" | tr -d ' \r\n' | base64 -d > "$RUNNER_TEMP/widget.mobileprovision"
+          WUUID=$(/usr/libexec/PlistBuddy -c 'Print UUID' /dev/stdin <<< "$(security cms -D -i "$RUNNER_TEMP/widget.mobileprovision")")
+          cp "$RUNNER_TEMP/widget.mobileprovision" "$HOME/Library/MobileDevice/Provisioning Profiles/$WUUID.mobileprovision"
+          WNAME=$(/usr/libexec/PlistBuddy -c 'Print Name' /dev/stdin <<< "$(security cms -D -i "$RUNNER_TEMP/widget.mobileprovision")")
+          echo "WIDGET_PROFILE_NAME=$WNAME" >> "$GITHUB_ENV"
 
       - name: Archivar y exportar el IPA
-        working-directory: ios/App
         run: |
           BUILD=${{ github.run_number }}
+          # Cada target (app y widget) lleva su propio perfil.
+          ruby scripts/set-ios-signing.rb "$APPLE_TEAM_ID" "$PROFILE_NAME" "$WIDGET_PROFILE_NAME"
+          cd ios/App
           xcodebuild -project App.xcodeproj -scheme App -configuration Release -archivePath "$RUNNER_TEMP/App.xcarchive" \
             -destination 'generic/platform=iOS' archive \
-            CURRENT_PROJECT_VERSION=$BUILD MARKETING_VERSION=1.0.$BUILD \
-            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="Apple Distribution" PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME"
+            CURRENT_PROJECT_VERSION=$BUILD MARKETING_VERSION=1.0.$BUILD
           cat > "$RUNNER_TEMP/export.plist" <<PLIST
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -111,7 +119,7 @@ jobs:
             <key>method</key><string>app-store-connect</string>
             <key>teamID</key><string>$APPLE_TEAM_ID</string>
             <key>signingStyle</key><string>manual</string>
-            <key>provisioningProfiles</key><dict><key>com.lestudio.finanzas</key><string>$PROFILE_NAME</string></dict>
+            <key>provisioningProfiles</key><dict><key>com.lestudio.finanzas</key><string>$PROFILE_NAME</string><key>com.lestudio.finanzas.widget</key><string>$WIDGET_PROFILE_NAME</string></dict>
           </dict></plist>
           PLIST
           xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive" -exportOptionsPlist "$RUNNER_TEMP/export.plist" -exportPath "$RUNNER_TEMP/ipa"
