@@ -3,7 +3,7 @@ import { categorize } from './categorize';
 import { callClaude, textOf } from './ai';
 import { normalize, today } from './money';
 import type { Account, AppData } from './types';
-import { LOCALE } from './i18n';
+import { LANG, LOCALE } from './i18n';
 
 // Registro por voz: "gasté 50 euros en Mercadona" → movimiento.
 // Primero un intérprete local (funciona sin conexión); si la IA está
@@ -88,8 +88,54 @@ function findAccount(data: AppData, text: string, currency: string | null): { id
   return { id: null, ambiguous: ranked.length ? ranked : usable };
 }
 
-/** Intérprete local en español: rápido, sin conexión y sin enviar nada. */
+/** Intérprete local en inglés («I spent 50 dollars at Walmart»): mismo resultado que el español. */
+export function parseVoiceEnglish(input: string, data: AppData): VoiceDraft {
+  const text = normalize(input).replace(/(\d),(\d{3})\b/g, '$1$2');
+  const kind: VoiceDraft['kind'] = /\b(received|earned|salary|paycheck|deposited|paid me|got paid|was paid|income|sold)\b/.test(text) ? 'income' : 'expense';
+  const m = text.match(/(\d+(?:\.\d{1,2})?)/);
+  const amount = m ? Math.round(Number(m[1]) * 100) : null;
+  const CUR: [RegExp, string][] = [
+    [/\b(euros?|eur)\b|€/, 'EUR'],
+    [/\b(dollars?|bucks?|usd)\b|\$/, 'USD'],
+    [/\b(pounds?|gbp|quid)\b|£/, 'GBP'],
+    [/\b(bolivars?|bolivares|bs|ves)\b/, 'VES'],
+    [/\b(usdt|tether)\b/, 'USDT'],
+    [/\b(pesos?)\b/, 'MXN'],
+  ];
+  let currency: string | null = null;
+  for (const [re, code] of CUR) if (re.test(text)) {
+    currency = code;
+    break;
+  }
+  let date = today();
+  if (/\bday before yesterday\b/.test(text)) date = new Date(Date.now() - 2 * 86_400_000).toISOString().slice(0, 10);
+  else if (/\byesterday\b/.test(text)) date = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+  const rest = text
+    .replace(/\b(with|from|using|on) (my |the )?(card|account|checking|savings|cash)\b.*$/, '')
+    .replace(/\b(yesterday|today|day before yesterday)\b/g, '')
+    .trim();
+  const d = rest.match(/\b(?:at|on|for|to|from|in)\s+(?:the |a |an |my )?([a-z0-9 .'&-]+)$/);
+  let description = d ? d[1].trim() : '';
+  if (description && /^\d/.test(description)) description = '';
+  description = description.replace(/\b(dollars?|bucks?|euros?|pounds?|bolivars?)\b/g, '').trim();
+  const { categoryId, source } = description ? categorize(description, kind === 'expense' ? -1 : 1, data) : { categoryId: null, source: 'default' as const };
+  const acc = findAccount(data, text, currency ?? data.settings.currency);
+  const accountCurrency = acc.id ? data.accounts.find((a) => a.id === acc.id)?.currency ?? null : null;
+  return withMissing({
+    kind,
+    amount,
+    currency: currency ?? accountCurrency,
+    description: description ? description.replace(/\b\w/g, (c) => c.toUpperCase()) : '',
+    categoryId: source === 'default' ? null : categoryId,
+    accountId: acc.id,
+    date,
+    missing: [],
+  });
+}
+
+/** Intérprete local (español, o inglés si la app está en inglés): rápido, sin conexión y sin enviar nada. */
 export function parseVoiceLocal(input: string, data: AppData): VoiceDraft {
+  if (LANG === 'en') return parseVoiceEnglish(input, data);
   const text = normalize(input)
     .replace(/(\d)\s*,\s*(\d)/g, '$1,$2')
     // "1.500" dicho en español son mil quinientos, no uno coma cinco.

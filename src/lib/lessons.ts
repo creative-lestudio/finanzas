@@ -2,6 +2,8 @@ import { formatMoney, today } from './money';
 import { detectAntExpenses, detectSubscriptions, isActive, monthSummary } from './insights';
 import { emergencyMonths } from './mentor';
 import { netWorth } from './health';
+import { t as tr } from './i18n';
+import { regionOf, type Region } from './region';
 import type { AppData, Profile } from './types';
 
 // Micro-lecciones de 3 minutos: unas tarjetas cortas, una pregunta y «tu caso» con tus propios números.
@@ -16,6 +18,8 @@ export interface Lesson {
   level: Profile['level'];
   /** Objetivos con los que más encaja. */
   goals: Profile['goal'][];
+  /** Si se indica, solo se ofrece en estas regiones. */
+  regions?: Region[];
   cards: string[];
   quiz: { q: string; options: string[]; answer: number; why: string };
   /** Pantalla a la que lleva el botón final. */
@@ -174,6 +178,80 @@ export const LESSONS: Lesson[] = [
     ],
     quiz: { q: 'Alguien te ofrece duplicar tu dinero en un mes «con garantía». ¿Qué haces?', options: ['Invierto poco para probar', 'Desconfío y lo descarto', 'Invito a mis amigos'], answer: 1, why: 'Duplicar en un mes con garantía no existe: es la firma de las estafas piramidales.' },
   },
+  {
+    id: 'credito-us', title: 'Tarjetas de crédito y tu puntaje de crédito', icon: 'card', minutes: 4, level: 'basic', goals: ['debt', 'control', 'grow'], regions: ['US'],
+    cards: [
+      'En EE. UU. tu puntaje de crédito (por ejemplo el FICO, de 300 a 850) decide si te aprueban un préstamo, una hipoteca o un alquiler, y a qué tasa.',
+      'Pesa sobre todo tu historial de pagos (en torno al 35 %) y cuánto del límite usas (en torno al 30 %). Después, la antigüedad del crédito, la variedad y las consultas nuevas.',
+      'Si pagas el total del estado de cuenta cada mes no pagas intereses. Si dejas saldo, la tasa (APR) de las tarjetas suele rondar el 20 % o más: es de las deudas más caras.',
+      'Dos hábitos que ayudan: pagar siempre a tiempo (automatiza al menos el pago mínimo) y mantener el uso por debajo del 30 % del límite.',
+    ],
+    quiz: { q: '¿Qué pesa más en tu puntaje de crédito?', options: ['Cuántas tarjetas tienes', 'Pagar siempre a tiempo', 'Tu sueldo'], answer: 1, why: 'El historial de pagos es el factor más importante. El sueldo ni siquiera forma parte del puntaje.' },
+    go: 'debts', goLabel: 'Ver mis deudas',
+  },
+  {
+    id: 'retiro-us', title: '401(k) e IRA: ahorrar para el retiro', icon: 'piggy', minutes: 4, level: 'basic', goals: ['grow', 'invest', 'save'], regions: ['US'],
+    cards: [
+      'El 401(k) es un plan de retiro que ofrece tu empleador: aportas desde tu sueldo y el dinero crece invertido. La IRA es una cuenta de retiro individual que abres tú.',
+      'Muchos empleadores igualan parte de tu aporte (employer match). Es dinero gratis: lo primero es aportar lo suficiente para recibir todo el match.',
+      'En la versión tradicional aportas antes de impuestos y pagas al retirar; en la Roth pagas impuestos ahora y los retiros cualificados salen libres de impuestos.',
+      'Retirar antes de los 59 años y medio suele tener penalización e impuestos, así que no es tu colchón de emergencia. Los límites y las reglas cambian cada año: consulta las vigentes.',
+    ],
+    quiz: { q: 'Tu empleador iguala parte de tu aporte al 401(k). ¿Qué conviene?', options: ['Ignorarlo', 'Aportar al menos lo necesario para recibir todo el match', 'Retirarlo cuando suba la bolsa'], answer: 1, why: 'El match es una rentabilidad inmediata que no encontrarás en otro sitio. Es el primer paso del ahorro para el retiro.' },
+  },
+  {
+    id: 'ahorro-es', title: 'Dónde guardar tu dinero en España', icon: 'bank', minutes: 4, level: 'basic', goals: ['save', 'grow', 'invest'], regions: ['ES', 'EU'],
+    cards: [
+      'Para el dinero que quizá necesites pronto (tu colchón): cuenta remunerada o depósito. Poco riesgo y disponible, aunque con rendimiento modesto.',
+      'En España el Fondo de Garantía de Depósitos protege hasta 100.000 € por titular y entidad. Los fondos de inversión y las acciones no están cubiertos por esa garantía.',
+      'Para metas a largo plazo se suelen valorar fondos indexados de bajo coste. Un detalle útil: pasar dinero de un fondo a otro mediante traspaso no tributa hasta que reembolsas.',
+      'Comisiones: una diferencia del 1 % anual parece poco, pero a 30 años se come una parte enorme de lo que ganas. Compara siempre el coste total.',
+    ],
+    quiz: { q: '¿Qué cubre el Fondo de Garantía de Depósitos?', options: ['Los fondos de inversión', 'Los depósitos hasta 100.000 € por titular y entidad', 'Las criptomonedas'], answer: 1, why: 'Protege los depósitos bancarios hasta ese límite; no protege inversiones.' },
+    go: 'plan', goLabel: 'Crear una meta',
+  },
+  {
+    id: 'hacienda-es', title: 'Hacienda sin sustos: lo básico del IRPF', icon: 'receipt', minutes: 3, level: 'basic', goals: ['control', 'grow'], regions: ['ES'],
+    cards: [
+      'El IRPF es el impuesto sobre la renta. Si trabajas por cuenta ajena ya te retienen una parte de la nómina, pero la declaración anual ajusta cuentas (la campaña suele ir de abril a junio).',
+      'Si vendes fondos o acciones con ganancias, esas ganancias tributan en la declaración. Guarda los extractos y las fechas de compra y venta.',
+      'Los autónomos tienen además obligaciones trimestrales: apartar un porcentaje de cada cobro para impuestos evita sustos.',
+      'Esto es una introducción general. Para tu caso concreto consulta la web de la Agencia Tributaria o a un asesor fiscal.',
+    ],
+    quiz: { q: 'Si trabajas por cuenta ajena, ¿qué significa que te retienen en la nómina?', options: ['Que ya no debes declarar', 'Que es un adelanto del impuesto que se ajusta en la declaración', 'Que es un ahorro tuyo'], answer: 1, why: 'La retención es un anticipo del IRPF; la declaración compara lo retenido con lo que realmente te corresponde.' },
+  },
+  {
+    id: 'cobrar-exterior', title: 'Cobrar del exterior sin perder en el cambio', icon: 'globe', minutes: 4, level: 'basic', goals: ['grow', 'save', 'control'], regions: ['VE', 'LATAM', 'OTHER'],
+    cards: [
+      'Cuando te pagan desde fuera, lo que recibes depende de tres cosas: la comisión del método, la tasa de cambio que te aplican y el tiempo que tarda.',
+      'Compara: transferencia bancaria, plataformas como Wise, PayPal o Zelle, y el comercio entre personas. Una tasa peor suele costar más que cualquier comisión visible.',
+      'Anota siempre el equivalente de cada cobro: así sabrás cuánto valió realmente y cuánto pierdes con cada método.',
+      'Seguridad: usa plataformas con garantía (custodia del pago), no salgas del chat para cerrar acuerdos y desconfía de quien tiene prisa o te pide claves.',
+    ],
+    quiz: { q: 'Dos métodos de cobro: uno con comisión baja pero mala tasa, otro con comisión mayor y buena tasa. ¿Qué haces?', options: ['Elijo el de menos comisión', 'Calculo cuánto recibiría con cada uno', 'Elijo el más rápido siempre'], answer: 1, why: 'Lo que importa es lo que recibes al final: tasa y comisión juntas. La app te ayuda a medir la pérdida.' },
+    go: 'fx', goLabel: 'Ver divisas y cambios',
+  },
+  {
+    id: 'ahorrar-dolares', title: 'Proteger tus ahorros cuando la moneda pierde valor', icon: 'shield', minutes: 4, level: 'basic', goals: ['save', 'grow'], regions: ['VE', 'LATAM'],
+    cards: [
+      'Si tu moneda se devalúa, ahorrar en ella es perder poder de compra. Muchas personas guardan parte de su ahorro en una moneda más estable, normalmente el dólar.',
+      'Ninguna opción está libre de riesgo: el efectivo se deteriora y se puede perder o robar; una cuenta en el exterior tiene sus comisiones y trámites; las criptomonedas estables dependen de quien las emite.',
+      'Por eso conviene repartir: no pongas todo en un solo sitio ni en una sola forma de guardarlo.',
+      'Y separa: lo que gastarás este mes en la moneda en la que gastas, y el ahorro de largo plazo en la que mejor conserve su valor.',
+    ],
+    quiz: { q: '¿Por qué conviene repartir el ahorro entre varias formas de guardarlo?', options: ['Porque todas rinden igual', 'Porque ninguna está libre de riesgo y así un fallo no te quita todo', 'Para pagar más comisiones'], answer: 1, why: 'Diversificar reduce el impacto de que una sola opción falle.' },
+  },
+  {
+    id: 'remesas', title: 'Enviar y recibir dinero sin regalar comisiones', icon: 'swap', minutes: 3, level: 'none', goals: ['control', 'save'], regions: ['VE', 'LATAM', 'ES', 'EU', 'OTHER'],
+    cards: [
+      'El coste real de un envío es la comisión más la diferencia entre la tasa que te aplican y la tasa real del mercado.',
+      'Antes de enviar, compara al menos dos o tres servicios con el mismo importe y mira cuánto recibirá exactamente la otra persona.',
+      'Envíos grandes y poco frecuentes suelen salir mejor que muchos pequeños, si hay comisión fija.',
+      'Guarda el comprobante y anota el equivalente en la app: te dirá cuánto estás perdiendo en cada método.',
+    ],
+    quiz: { q: '¿Cómo comparas bien dos servicios de envío?', options: ['Solo miro la comisión', 'Miro cuánto recibe exactamente la otra persona', 'Elijo el más conocido'], answer: 1, why: 'Lo que llega es la comparación justa: incluye comisión y tasa.' },
+    go: 'fx', goLabel: 'Registrar un cambio',
+  },
 ];
 
 const ORDER = ['none', 'basic', 'starter', 'advanced'];
@@ -181,6 +259,7 @@ const ORDER = ['none', 'basic', 'starter', 'advanced'];
 /** Lecciones ordenadas para este usuario: lo que más le importa ahora, antes. */
 export function rankLessons(data: AppData, now = today()): Lesson[] {
   const p = data.settings.profile;
+  const region = regionOf(data);
   const done = new Set(data.settings.learn?.done ?? []);
   const months = emergencyMonths(data, now);
   const month = now.slice(0, 7);
@@ -192,6 +271,7 @@ export function rankLessons(data: AppData, now = today()): Lesson[] {
   const lvl = ORDER.indexOf(p?.level ?? 'none');
   const score = (l: Lesson): number => {
     let s = 100 - LESSONS.indexOf(l);
+    if (l.regions?.includes(region)) s += 20;
     if (done.has(l.id)) s -= 1000;
     if (p && l.goals.includes(p.goal)) s += 25;
     const gap = ORDER.indexOf(l.level) - lvl;
@@ -205,7 +285,7 @@ export function rankLessons(data: AppData, now = today()): Lesson[] {
     if ((l.id === 'diversificar' || l.id === 'empezar-a-invertir') && months < 3) s -= 40; // primero el colchón
     return s;
   };
-  return [...LESSONS].sort((a, b) => score(b) - score(a));
+  return LESSONS.filter((l) => !l.regions || l.regions.includes(region)).sort((a, b) => score(b) - score(a));
 }
 
 /** «Tu caso»: la lección aplicada a los números reales del usuario. null si aún no hay datos. */
@@ -219,36 +299,36 @@ export function yourCase(data: AppData, id: string, now = today()): string | nul
   const typical = ms.expenses;
   switch (id) {
     case 'presupuesto':
-      return ms.income > 0 ? `Este mes ingresas ${f(ms.income)} y gastas ${f(ms.expenses)} (${Math.round((ms.expenses / ms.income) * 100)} %). Con la regla 50/30/20, tu ahorro objetivo sería ${f(Math.round(ms.income * 0.2))} al mes.` : null;
+      return ms.income > 0 ? tr('Este mes ingresas {income} y gastas {spent} ({pct} %). Con la regla 50/30/20, tu ahorro objetivo sería {goal} al mes.', { income: f(ms.income), spent: f(ms.expenses), pct: Math.round((ms.expenses / ms.income) * 100), goal: f(Math.round(ms.income * 0.2)) }) : null;
     case 'fondo-emergencia':
-      return typical > 0 ? `Tu dinero disponible (${f(nw.liquid)}) cubre ${months.toFixed(1)} meses de gastos. Para llegar a 3 meses te ${nw.liquid / typical >= 3 ? 'sobra' : 'faltan'} ${f(Math.abs(Math.round(typical * 3 - nw.liquid)))}.` : null;
+      return typical > 0 ? tr('Tu dinero disponible ({liquid}) cubre {n} meses de gastos. Para llegar a 3 meses te {verb} {amount}.', { liquid: f(nw.liquid), n: months.toFixed(1), verb: nw.liquid / typical >= 3 ? tr('sobra') : tr('faltan'), amount: f(Math.abs(Math.round(typical * 3 - nw.liquid))) }) : null;
     case 'inflacion':
-      return nw.liquid > 0 ? `Con una inflación del 5 % anual, tu dinero disponible de ${f(nw.liquid)} perdería unos ${f(Math.round(nw.liquid * (1 - 1 / 1.05 ** 10)))} de poder de compra en 10 años si se queda parado.` : null;
+      return nw.liquid > 0 ? tr('Con una inflación del 5 % anual, tu dinero disponible de {liquid} perdería unos {loss} de poder de compra en 10 años si se queda parado.', { liquid: f(nw.liquid), loss: f(Math.round(nw.liquid * (1 - 1 / 1.05 ** 10))) }) : null;
     case 'interes-compuesto': {
       const monthly = Math.round(ms.income * 0.1);
       if (monthly <= 0) return null;
       const r = 0.07 / 12;
       const fv = Math.round(monthly * ((1 + r) ** 240 - 1) / r);
-      return `Si apartaras el 10 % de tus ingresos (${f(monthly)} al mes) durante 20 años a un 7 % anual (ejemplo, no garantizado), tendrías unos ${f(fv)}. Tú habrías aportado ${f(monthly * 240)}.`;
+      return tr('Si apartaras el 10 % de tus ingresos ({monthly} al mes) durante 20 años a un 7 % anual (ejemplo, no garantizado), tendrías unos {fv}. Tú habrías aportado {put}.', { monthly: f(monthly), fv: f(fv), put: f(monthly * 240) });
     }
     case 'deudas': {
       const owe = (data.debts ?? []).filter((d) => d.direction === 'owe');
-      return owe.length ? `Tienes ${owe.length} deuda(s) anotada(s). Prioriza la de mayor interés y no dejes que ninguna venza: míralo en Deudas.` : 'No tienes deudas anotadas: si pides dinero prestado, anótalo para planificar cómo pagarlo.';
+      return owe.length ? tr('Tienes {n} deuda(s) anotada(s). Prioriza la de mayor interés y no dejes que ninguna venza: míralo en Deudas.', { n: owe.length }) : tr('No tienes deudas anotadas: si pides dinero prestado, anótalo para planificar cómo pagarlo.');
     }
     case 'gastos-hormiga': {
       const a = detectAntExpenses(data, now);
-      return a.total > 0 ? `En los últimos 30 días tus compras pequeñas suman ${f(a.total)} (${a.count} compras), unos ${f(a.yearly)} al año.` : null;
+      return a.total > 0 ? tr('En los últimos 30 días tus compras pequeñas suman {total} ({n} compras), unos {year} al año.', { total: f(a.total), n: a.count, year: f(a.yearly) }) : null;
     }
     case 'pagarte-primero':
-      return ms.income > 0 ? `Con el 10 % de tus ingresos (${f(Math.round(ms.income * 0.1))}) apartado el día de cobro, en un año ahorrarías ${f(Math.round(ms.income * 0.1 * 12))}.` : null;
+      return ms.income > 0 ? tr('Con el 10 % de tus ingresos ({m}) apartado el día de cobro, en un año ahorrarías {y}.', { m: f(Math.round(ms.income * 0.1)), y: f(Math.round(ms.income * 0.1 * 12)) }) : null;
     case 'suscripciones': {
-      const s = detectSubscriptions(data).filter((x) => x.kind === 'subscription' && isActive(x, now));
-      const yearly = s.reduce((t, x) => t + x.yearlyBase, 0);
-      return s.length ? `Tienes ${s.length} suscripción(es) activa(s) que suman ${f(yearly)} al año.` : null;
+      const subs = detectSubscriptions(data).filter((x) => x.kind === 'subscription' && isActive(x, now));
+      const yearly = subs.reduce((t, x) => t + x.yearlyBase, 0);
+      return subs.length ? tr('Tienes {n} suscripción(es) activa(s) que suman {yearly} al año.', { n: subs.length, yearly: f(yearly) }) : null;
     }
     case 'proteger-valor': {
       const ves = data.accounts.filter((a) => a.currency === 'VES');
-      return ves.length ? `Tienes ${ves.length} cuenta(s) en bolívares. Compara lo que pierdes al cambiar y revisa la tasa en Divisas.` : null;
+      return ves.length ? tr('Tienes {n} cuenta(s) en bolívares. Compara lo que pierdes al cambiar y revisa la tasa en Divisas.', { n: ves.length }) : null;
     }
     default:
       return null;

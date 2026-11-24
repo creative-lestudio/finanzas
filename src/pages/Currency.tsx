@@ -24,6 +24,8 @@ import { applyLiveRates, fetchLiveRates } from '../lib/liverates';
 import type { AppData } from '../lib/types';
 import { useStore } from '../store';
 import { t as _t } from '../lib/i18n';
+import { isVenezuelan } from '../lib/region';
+import { applyMarketRates, fetchMarketRates } from '../lib/liverates';
 
 type Tab = 'summary' | 'rates' | 'calc';
 
@@ -49,11 +51,14 @@ function lastRate(data: AppData, type: RateType, base?: string, quote?: string):
 
 /** Divisas: tasas del día, cambios registrados y cuánto pierdes (o ganas) por tipo de cambio. */
 export function Currency() {
+  const { data } = useStore();
+  const ve = isVenezuelan(data);
   const [tab, setTab] = useState<Tab>('summary');
   const [adding, setAdding] = useState(false);
   return (
     <>
-      <Segmented value={tab} onChange={setTab} options={[['summary', 'Resumen'], ['rates', 'Tasas del día'], ['calc', 'Calculadora']]} />
+      {/* La calculadora BCV/paralelo y las tasas de Venezuela solo se muestran a quien las usa. */}
+      <Segmented value={tab} onChange={setTab} options={ve ? [['summary', 'Resumen'], ['rates', 'Tasas del día'], ['calc', 'Calculadora']] : [['summary', 'Resumen'], ['rates', 'Tasas de cambio']]} />
       {tab === 'summary' && <Summary onAdd={() => setAdding(true)} />}
       {tab === 'rates' && <Rates />}
       {tab === 'calc' && <Calculator />}
@@ -169,7 +174,7 @@ function Summary({ onAdd }: { onAdd: () => void }) {
                   <div className="tiny muted">
                     1 {s} = {formatRate(shown(a.effectiveRate))} {w}
                     {a.referenceRate ? ` · ${a.exchange.referenceSource ?? 'ref.'} ${formatRate(shown(a.referenceRate))}` : ''}
-                    {a.exchange.fee ? ` · comisión ${formatMoney(a.exchange.fee, a.from)}` : ''}
+                    {a.exchange.fee ? _t(' · comisión {fee}', { fee: formatMoney(a.exchange.fee, a.from) }) : ''}
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
@@ -333,14 +338,19 @@ function Rates() {
   const par = num(vals.Paralelo, true) || lastRate(data, 'Paralelo') || 0;
   const mini = { padding: '4px 22px 4px 8px', fontSize: 12, width: 'auto', backgroundPosition: 'calc(100% - 11px) 55%, calc(100% - 7px) 55%' };
 
+  const ve = isVenezuelan(data);
   const [busy, setBusy] = useState(false);
   const refresh = async () => {
     setBusy(true);
-    const live = await fetchLiveRates(today());
+    const [live, market] = await Promise.all([ve ? fetchLiveRates(today()) : Promise.resolve(null), fetchMarketRates()]);
     setBusy(false);
-    if (!live) return toast(_t("No se pudieron descargar las tasas. Revisa tu conexión."));
-    update((d) => applyLiveRates(d, live, true) ?? d);
-    toast(`Tasas de hoy: BCV ${live.BCV ? formatRate(live.BCV) : '—'} · Euro ${live.Euro ? formatRate(live.Euro) : '—'}`);
+    if (!live && !market) return toast(_t("No se pudieron descargar las tasas. Revisa tu conexión."));
+    update((d) => {
+      let next = live ? (applyLiveRates(d, live, true) ?? d) : d;
+      if (market) next = applyMarketRates(next, market, today()) ?? next;
+      return next;
+    });
+    toast(live ? `Tasas de hoy: BCV ${live.BCV ? formatRate(live.BCV) : '—'} · Euro ${live.Euro ? formatRate(live.Euro) : '—'}` : _t('Tasas de mercado actualizadas'));
   };
 
   const save = () => {
@@ -360,10 +370,11 @@ function Rates() {
     <>
       <div className="card glass">
         <div className="card-head">
-          <h2>{_t("Tasas de hoy")}</h2>
+          <h2>{ve ? _t("Tasas de hoy") : _t("Tasas de cambio")}</h2>
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} style={{ width: 'auto', padding: '7px 10px', fontSize: 14 }} aria-label={_t("Fecha")} />
         </div>
-        {(['BCV', 'Euro', 'Paralelo'] as RateType[]).map((t) => (
+        {!ve && <p className="small muted" style={{ marginTop: 0 }}>{_t("Las tasas de mercado se descargan solas al abrir la app. Aquí puedes escribir la tuya (un acuerdo, tu banco, una casa de cambio) y tendrá prioridad ese día.")}</p>}
+        {ve && (['BCV', 'Euro', 'Paralelo'] as RateType[]).map((t) => (
           <div className="rate-input" key={t}>
             <div>
               <div style={{ fontWeight: 600 }}>{t}</div>
@@ -386,10 +397,10 @@ function Rates() {
           <input inputMode="decimal" value={vals.Personalizada} onChange={(e) => set('Personalizada', e.target.value)} placeholder={prev('Personalizada') ? formatRate(prev('Personalizada')!) : '0,00'} aria-label={_t("Tasa personalizada")} />
           <span className="unit">{cQuote}</span>
         </div>
-        {bcv > 0 && par > 0 && (
+        {ve && bcv > 0 && par > 0 && (
           <p className="small secondary" style={{ margin: '10px 0 14px' }}>{_t("Brecha BCV–paralelo:")} <b>{(((par - bcv) / bcv) * 100).toFixed(1)} %</b></p>
         )}
-        <button className="btn ghost block" style={{ marginBottom: 8 }} disabled={busy || data.settings.offlineOnly} title={data.settings.offlineOnly ? _t("Desactiva el modo sin terceros para descargar tasas") : undefined} onClick={() => void refresh()}>{busy ? _t("Descargando…") : _t("Traer tasas oficiales de hoy (BCV)")}</button>
+        <button className="btn ghost block" style={{ marginBottom: 8 }} disabled={busy || data.settings.offlineOnly} title={data.settings.offlineOnly ? _t("Desactiva el modo sin terceros para descargar tasas") : undefined} onClick={() => void refresh()}>{busy ? _t("Descargando…") : ve ? _t("Traer tasas oficiales de hoy (BCV)") : _t("Actualizar tasas del mercado")}</button>
         <button className="btn primary block" disabled={!filled.length || (num(vals.Personalizada, isBs('Personalizada')) > 0 && cBase === cQuote)} onClick={save}>{_t("Guardar tasas")}</button>
         <p className="tiny muted" style={{ marginBottom: 0 }}>{_t("Las tasas oficiales se descargan solas al abrir la app; puedes sobrescribirlas o escribir las tuyas (acuerdos, Binance, casa de cambio). Los campos vacíos mantienen la última guardada.")}</p>
       </div>

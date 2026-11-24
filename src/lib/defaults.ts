@@ -77,6 +77,30 @@ export const KEYWORD_RULES: [string, string][] = [
   ['cajero', 'cash'], ['retirada efectivo', 'cash'], ['reintegro', 'cash'],
   ['nomina', 'salary'], ['salario', 'salary'], ['payroll', 'salary'],
   ['traspaso', 'transfer'],
+  // EE. UU. y comercios internacionales
+  ['walmart', 'groceries'], ['target', 'groceries'], ['costco', 'groceries'], ['kroger', 'groceries'], ['safeway', 'groceries'], ['publix', 'groceries'],
+  ['trader joe', 'groceries'], ['whole foods', 'groceries'], ['wegmans', 'groceries'], ['sprouts', 'groceries'], ['sams club', 'groceries'], ['grocery', 'groceries'],
+  ['chipotle', 'restaurants'], ['subway', 'restaurants'], ['doordash', 'restaurants'], ['grubhub', 'restaurants'], ['domino', 'restaurants'], ['panera', 'restaurants'],
+  ['chick-fil-a', 'restaurants'], ['wendy', 'restaurants'], ['taco bell', 'restaurants'], ['restaurant', 'restaurants'], ['diner', 'restaurants'], ['pizza', 'restaurants'],
+  ['dunkin', 'coffee'], ['peets', 'coffee'], ['coffee', 'coffee'],
+  ['lyft', 'transport'], ['mta', 'transport'], ['amtrak', 'transport'], ['transit', 'transport'], ['toll', 'transport'],
+  ['chevron', 'fuel'], ['exxon', 'fuel'], ['mobil', 'fuel'], ['sunoco', 'fuel'], ['marathon', 'fuel'], ['gas station', 'fuel'],
+  ['con edison', 'utilities'], ['pg&e', 'utilities'], ['duke energy', 'utilities'], ['electric', 'utilities'], ['water bill', 'utilities'],
+  ['comcast', 'telecom'], ['xfinity', 'telecom'], ['at&t', 'telecom'], ['verizon', 'telecom'], ['t-mobile', 'telecom'], ['spectrum', 'telecom'],
+  ['hulu', 'subscriptions'], ['apple music', 'subscriptions'], ['peacock', 'subscriptions'], ['paramount', 'subscriptions'], ['patreon', 'subscriptions'],
+  ['cvs', 'health'], ['walgreens', 'health'], ['rite aid', 'health'], ['pharmacy', 'health'], ['dentist', 'health'], ['urgent care', 'health'],
+  ['planet fitness', 'sport'], ['equinox', 'sport'], ['gym', 'sport'],
+  ['best buy', 'shopping'], ['home depot', 'home'], ['lowes', 'home'], ['ebay', 'shopping'], ['etsy', 'shopping'], ['nike', 'shopping'],
+  ['delta air', 'travel'], ['united airlines', 'travel'], ['southwest', 'travel'], ['american airlines', 'travel'], ['expedia', 'travel'],
+  ['geico', 'insurance'], ['state farm', 'insurance'], ['progressive', 'insurance'], ['allstate', 'insurance'],
+  ['overdraft', 'fees'], ['service charge', 'fees'], ['monthly fee', 'fees'], ['atm fee', 'fees'],
+  ['irs', 'taxes'], ['property tax', 'taxes'], ['dmv', 'taxes'],
+  ['atm withdrawal', 'cash'], ['direct deposit', 'salary'], ['paycheck', 'salary'], ['salary', 'salary'],
+  // Venezuela
+  ['farmatodo', 'health'], ['locatel', 'health'], ['excelsior gama', 'groceries'], ['automercados', 'groceries'], ['plan suarez', 'groceries'], ['bodega', 'groceries'], ['abasto', 'groceries'],
+  ['cantv', 'telecom'], ['digitel', 'telecom'], ['movilnet', 'telecom'], ['inter ', 'telecom'], ['simpletv', 'subscriptions'],
+  ['corpoelec', 'utilities'], ['hidrocapital', 'utilities'], ['gasolina', 'fuel'], ['pdvsa', 'fuel'],
+  ['quincena', 'salary'], ['pago movil', 'transfer'],
 ];
 
 export function emptyData(): AppData {

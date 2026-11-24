@@ -6,6 +6,7 @@ import { useStore } from '../store';
 import { CategorySheet } from './CategorySheet';
 import { CatIcon, Icon } from './icons';
 import { t as _t } from '../lib/i18n';
+import { hasBizum } from '../lib/region';
 
 /**
  * Elegir categoría en dos niveles: primero la madre y, si tiene, la subcategoría.
@@ -23,8 +24,10 @@ export function CategoryPicker({ kind, value, onChange }: { kind: Category['kind
       const r = rootOf(t.categoryId);
       freq[r] = (freq[r] ?? 0) + 1;
     }
-    return [...rootsOf(data.categories, kind)].sort((a, b) => (freq[b.id] ?? 0) - (freq[a.id] ?? 0));
-  }, [data.categories, data.transactions, kind]);
+    // «Bizum» solo se ofrece en España (o si ya lo usas): al resto le sobraría.
+    const keep = (id: string) => !['bizum_out', 'bizum_in'].includes(id) || hasBizum(data) || (freq[id] ?? 0) > 0;
+    return [...rootsOf(data.categories, kind)].filter((c) => keep(c.id)).sort((a, b) => (freq[b.id] ?? 0) - (freq[a.id] ?? 0));
+  }, [data, kind]);
 
   const current = value ? rootOf(value) : null;
   const open = openRoot ?? current;

@@ -63,16 +63,16 @@ export function CategoriesManager() {
                 <div className="cat-row">
                   <CatBadge id={c.id} emoji={c.icon} />
                   <div className="grow"><div className="ellipsis"><b>{_t(c.name)}</b></div><div className="tiny muted">{kids.length ? `${kids.length} subcategorías · ` : ''}{total(c)} {_t("movimientos")}</div></div>
-                  <button className="icon-btn" style={{ width: 32, height: 32 }} aria-label={`Añadir subcategoría a ${c.name}`} title={_t("Añadir subcategoría")} onClick={() => setSheet({ kind, parentId: c.id })}><Icon name="plus" size={16} /></button>
+                  <button className="icon-btn" style={{ width: 32, height: 32 }} aria-label={_t('Añadir subcategoría a {name}', { name: _t(c.name) })} title={_t("Añadir subcategoría")} onClick={() => setSheet({ kind, parentId: c.id })}><Icon name="plus" size={16} /></button>
                   <button className="btn ghost sm" onClick={() => setSheet({ cat: c, kind })}>{_t("Editar")}</button>
-                  {!isDefaultCategory(c.id) && <button className="icon-btn" style={{ width: 32, height: 32 }} aria-label={`Eliminar ${c.name}`} onClick={() => remove(c)}><Icon name="trash" size={15} /></button>}
+                  {!isDefaultCategory(c.id) && <button className="icon-btn" style={{ width: 32, height: 32 }} aria-label={_t('Eliminar {name}', { name: _t(c.name) })} onClick={() => remove(c)}><Icon name="trash" size={15} /></button>}
                 </div>
                 {kids.map((k) => (
                   <div key={k.id} className="cat-row sub">
                     <CatBadge id={k.id} emoji={k.icon} size={17} />
                     <div className="grow"><div className="ellipsis">{_t(k.name)}</div><div className="tiny muted">{used(k.id)} {_t("movimientos")}</div></div>
                     <button className="btn ghost sm" onClick={() => setSheet({ cat: k, kind })}>{_t("Editar")}</button>
-                    {!isDefaultCategory(k.id) && <button className="icon-btn" style={{ width: 32, height: 32 }} aria-label={`Eliminar ${k.name}`} onClick={() => remove(k)}><Icon name="trash" size={15} /></button>}
+                    {!isDefaultCategory(k.id) && <button className="icon-btn" style={{ width: 32, height: 32 }} aria-label={_t('Eliminar {name}', { name: _t(k.name) })} onClick={() => remove(k)}><Icon name="trash" size={15} /></button>}
                   </div>
                 ))}
               </li>

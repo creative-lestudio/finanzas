@@ -44,7 +44,7 @@ export function Health() {
               <span>{f.label}</span>
               <span className="muted">{f.value} · <b style={{ color: 'var(--text)' }}>{f.score}</b>/100</span>
             </div>
-            <Meter ratio={f.score / 100} state={state(f.score)} label={`${f.label}: ${f.score} de 100`} />
+            <Meter ratio={f.score / 100} state={state(f.score)} label={_t('{label}: {score} de 100', { label: f.label, score: f.score })} />
           </div>
         ))}
         <p className="small muted" style={{ marginBottom: 0 }}>

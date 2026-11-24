@@ -18,6 +18,7 @@ import type { Settings as SettingsT } from '../lib/types';
 import { newGuide } from '../lib/guide';
 import { useStore } from '../store';
 import { isNative } from '../lib/native';
+import { hasOpenBanking, regionOf, REGION_LABEL, REGIONS, type Region } from '../lib/region';
 import { t as _t, LOCALE, savedLang, setLang, type Lang } from '../lib/i18n';
 
 async function download(name: string, blob: Blob) {
@@ -77,6 +78,11 @@ export function Settings({ go }: { go?: (p: 'more') => void } = {}) {
             <option value="en">English</option>
           </select>
         </Field>
+        <Field label={_t("País o región")}>
+          <select value={regionOf(data)} onChange={(e) => setSettings({ region: e.target.value as Region })} aria-label={_t("País o región")}>
+            {REGIONS.map((r) => <option key={r} value={r}>{_t(REGION_LABEL[r])}</option>)}
+          </select>
+        </Field>
         <Field label={_t("Moneda principal (informes y patrimonio)")}>
           <select value={s.currency} onChange={(e) => setSettings({ currency: e.target.value })}>
             {CURRENCIES.filter((c) => !c.custom).map((c) => <option key={c.code} value={c.code}>{c.flag} {c.code} · {c.name}</option>)}
@@ -120,8 +126,12 @@ export function Settings({ go }: { go?: (p: 'more') => void } = {}) {
       <div className="section-title">{_t("Datos")}</div>
       <DataSection />
 
-      <div className="section-title">{_t("Banco (Open Banking)")}</div>
-      <BankSection />
+      {(hasOpenBanking(data) || (s.bank?.provider && s.bank.provider !== 'none')) && (
+        <>
+          <div className="section-title">{_t("Banco (Open Banking)")}</div>
+          <BankSection />
+        </>
+      )}
 
       <div className="section-title">{_t("Categorías")}</div>
       <CategoriesManager />

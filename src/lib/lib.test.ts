@@ -853,3 +853,68 @@ describe('mentor y lecciones', () => {
     for (const l of LESSONS) { expect(l.quiz.answer).toBeLessThan(l.quiz.options.length); expect(l.cards.length).toBeGreaterThanOrEqual(3); }
   });
 });
+
+describe('para todo el mundo: región, comercios, voz y tasas', () => {
+  it('detecta país y región del idioma del navegador o la zona horaria', async () => {
+    const { detectCountry, regionFromCountry, defaultCurrency } = await import('./region');
+    expect(regionFromCountry(detectCountry('es-VE'))).toBe('VE');
+    expect(regionFromCountry(detectCountry('en-US'))).toBe('US');
+    expect(regionFromCountry(detectCountry('es-ES'))).toBe('ES');
+    expect(regionFromCountry(detectCountry('de-DE'))).toBe('EU');
+    expect(regionFromCountry(detectCountry('es-MX'))).toBe('LATAM');
+    expect(regionFromCountry(detectCountry('ja-JP'))).toBe('OTHER');
+    expect(detectCountry('es', 'America/Caracas')).toBe('VE');
+    expect(defaultCurrency('MX')).toBe('MXN');
+    expect(defaultCurrency('VE')).toBe('USD');
+    expect(defaultCurrency('DE')).toBe('EUR');
+  });
+  it('lo venezolano y Bizum solo aparecen donde corresponde', async () => {
+    const { isVenezuelan, hasBizum, hasOpenBanking } = await import('./region');
+    const us = { ...emptyData(), settings: { ...emptyData().settings, region: 'US' as const, currency: 'USD' } };
+    expect(isVenezuelan(us)).toBe(false);
+    expect(hasBizum(us)).toBe(false);
+    expect(hasOpenBanking(us)).toBe(false);
+    const conBs = { ...us, accounts: [{ id: 'v', name: 'Banco', kind: 'checking' as const, balance: 0, currency: 'VES', source: 'manual' as const }] };
+    expect(isVenezuelan(conBs)).toBe(true);
+    expect(hasBizum({ settings: { ...us.settings, region: 'ES' as const } })).toBe(true);
+    expect(hasOpenBanking({ settings: { ...us.settings, region: 'EU' as const } })).toBe(true);
+  });
+  it('clasifica comercios de EE. UU. y Venezuela', async () => {
+    const { categorize } = await import('./categorize');
+    const d = emptyData();
+    expect(categorize('WALMART SUPERCENTER #1234', -4000, d).categoryId).toBe('groceries');
+    expect(categorize('Chevron 0045', -3000, d).categoryId).toBe('fuel');
+    expect(categorize('Netflix.com', -1500, d).categoryId).toBe('subscriptions');
+    expect(categorize('CVS Pharmacy', -800, d).categoryId).toBe('health');
+    expect(categorize('Farmatodo Chacao', -500, d).categoryId).toBe('health');
+    expect(categorize('Pago Digitel', -300, d).categoryId).toBe('telecom');
+  });
+  it('entiende frases en inglés al dictar', async () => {
+    const { parseVoiceEnglish } = await import('./voice');
+    const d = emptyData();
+    d.settings.currency = 'USD';
+    d.accounts = [{ id: 'c', name: 'Chase', kind: 'checking', balance: 0, currency: 'USD', source: 'manual' }];
+    const a = parseVoiceEnglish('I spent 50 dollars at Walmart', d);
+    expect(a).toMatchObject({ kind: 'expense', amount: 5000, currency: 'USD', categoryId: 'groceries' });
+    expect(a.description.toLowerCase()).toContain('walmart');
+    const b = parseVoiceEnglish('I received 1,200.50 dollars salary yesterday', d);
+    expect(b).toMatchObject({ kind: 'income', amount: 120050 });
+    expect(b.date).not.toBe(parseVoiceEnglish('x', d).date);
+  });
+  it('las tasas de mercado rellenan lo que falta sin pisar la tuya', async () => {
+    const { applyMarketRates, needsMarketRates } = await import('./liverates');
+    const d = emptyData();
+    d.settings.currency = 'USD';
+    d.accounts = [
+      { id: 'e', name: 'Banco', kind: 'checking', balance: 100000, currency: 'EUR', source: 'manual' },
+      { id: 'g', name: 'UK', kind: 'checking', balance: 5000, currency: 'GBP', source: 'manual' },
+    ];
+    expect(needsMarketRates(d)).toBe(true);
+    d.rates = [{ id: 'mine', date: '2026-11-03', base: 'EUR', quote: 'USD', rate: 1.2, source: 'Personalizada' }];
+    const out = applyMarketRates(d, { EUR: 0.9, GBP: 0.8, USD: 1 }, '2026-11-03')!;
+    expect(out.rates.find((r) => r.quote === 'GBP')?.rate).toBe(0.8); // la que faltaba
+    expect(out.rates.filter((r) => r.quote === 'EUR' || r.base === 'EUR')).toHaveLength(1); // la tuya sigue siendo la única
+    expect(convert(out, 10000, 'EUR', 'USD', '2026-11-03')).toBe(12000);
+    expect(convert(out, 10000, 'GBP', 'USD', '2026-11-03')).toBe(12500);
+  });
+});

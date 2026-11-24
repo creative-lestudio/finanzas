@@ -241,6 +241,8 @@ export interface Settings {
   tourDone?: boolean;
   /** Guía de primer uso: recorrido del asistente y tres tareas iniciales. */
   guide?: import('./guide').Guide;
+  /** País/región: decide los valores por defecto y qué herramientas se muestran. */
+  region?: import('./region').Region;
   /** Ocultó la lista de primeros pasos de Inicio. */
   checklistHidden?: boolean;
   monthlyIncomeHint?: number;

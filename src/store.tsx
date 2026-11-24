@@ -3,7 +3,8 @@ import { createSession, decryptJSON, encryptJSON, unlock, type EncryptedBlob, ty
 import { migrate } from './lib/defaults';
 import { registerCategories } from './lib/categories';
 import { setDefaultCurrency, today } from './lib/money';
-import { applyLiveRates, fetchLiveRates } from './lib/liverates';
+import { applyLiveRates, applyMarketRates, fetchLiveRates, fetchMarketRates, needsMarketRates } from './lib/liverates';
+import { isVenezuelan } from './lib/region';
 import { processRecurring } from './lib/recurring';
 import { bioAvailable, bioDisable, bioEnabled, bioEnroll, bioVerify } from './lib/biometric';
 import { clearDeviceKey, clearMeta, listBackupStamps, loadDeviceKey, saveDeviceKey, loadBackup, loadBase, loadMeta, loadVault, saveBase, saveMeta, saveRescue, saveVault, wipeVault } from './lib/storage';
@@ -247,14 +248,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return () => document.removeEventListener('visibilitychange', onVis);
   }, [status, update, data?.recurring]);
 
-  // Tasas oficiales del día (BCV, Euro, Paralelo): se descargan solas al abrir; no pisan las que escribas tú.
+  // Tasas del día: las oficiales de Venezuela (solo si las usas) y las de mercado para el resto de monedas.
+  // Nunca pisan las que escribas tú ese día.
   useEffect(() => {
     if (status !== 'ready' || !navigator.onLine || dataRef.current?.settings.offlineOnly) return;
-    void fetchLiveRates(today()).then((live) => {
-      const cur = dataRef.current;
-      if (!live || !cur || !applyLiveRates(cur, live)) return;
-      update((d) => applyLiveRates(d, live) ?? d);
-    });
+    const cur = dataRef.current;
+    if (cur && isVenezuelan(cur)) {
+      void fetchLiveRates(today()).then((live) => {
+        const c = dataRef.current;
+        if (!live || !c || !applyLiveRates(c, live)) return;
+        update((d) => applyLiveRates(d, live) ?? d);
+      });
+    }
+    if (cur && needsMarketRates(cur)) {
+      void fetchMarketRates().then((rates) => {
+        const c = dataRef.current;
+        if (!rates || !c || !applyMarketRates(c, rates, today())) return;
+        update((d) => applyMarketRates(d, rates, today()) ?? d);
+      });
+    }
   }, [status, update]);
 
   // Al salir o ocultar la app se fuerza el guardado inmediato.

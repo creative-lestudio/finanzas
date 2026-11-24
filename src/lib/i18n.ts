@@ -25,7 +25,9 @@ function detect(): Lang {
 }
 
 export const LANG: Lang = detect();
-export const LOCALE = LANG === 'en' ? 'en-US' : 'es-ES';
+// El formato de números y fechas sigue al idioma y, si el navegador trae país (es-VE, es-MX, en-GB…), a ese país.
+const nav = typeof navigator !== 'undefined' ? navigator.language : '';
+export const LOCALE = LANG === 'en' ? (/^en-[A-Za-z]{2}/i.test(nav) ? nav : 'en-US') : /^es-[A-Za-z]{2}/i.test(nav) ? nav : 'es-ES';
 
 /** Texto en el idioma activo. Admite variables: t('Hola {name}', { name }). */
 export function t(text: string, vars?: Record<string, string | number>): string {

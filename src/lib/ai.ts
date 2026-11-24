@@ -6,6 +6,7 @@ import { healthReport, netWorth } from './health';
 import { detectSubscriptions, isActive, monthSummary } from './insights';
 import { addMonths, today } from './money';
 import { getSample, hasClaudeHost, IS_PREVIEW, sampleError, type SampleTool } from './preview';
+import { t as tr } from './i18n';
 import { getSupabaseConfig, supabase } from './sync';
 import type { AppData } from './types';
 
@@ -30,11 +31,11 @@ export interface ClaudeRequest {
 export class AIUnavailable extends Error {}
 
 export function aiAvailability(data: AppData): { ok: boolean; reason?: string } {
-  if (data.settings.offlineOnly) return { ok: false, reason: 'El modo sin terceros está activado.' };
-  if (IS_PREVIEW) return hasClaudeHost() ? { ok: true } : { ok: false, reason: 'Abre la vista previa en claude.ai para usar la IA.' };
+  if (data.settings.offlineOnly) return { ok: false, reason: tr('El modo sin terceros está activado.') };
+  if (IS_PREVIEW) return hasClaudeHost() ? { ok: true } : { ok: false, reason: tr('Abre la vista previa en claude.ai para usar la IA.') };
   const mode = data.settings.aiMode ?? 'server';
-  if (mode === 'own') return data.settings.anthropicApiKey ? { ok: true } : { ok: false, reason: 'Falta tu clave de API de Anthropic.' };
-  return getSupabaseConfig() ? { ok: true } : { ok: false, reason: 'El servicio de IA no está configurado.' };
+  if (mode === 'own') return data.settings.anthropicApiKey ? { ok: true } : { ok: false, reason: tr('Falta tu clave de API de Anthropic.') };
+  return getSupabaseConfig() ? { ok: true } : { ok: false, reason: tr('El servicio de IA no está configurado.') };
 }
 
 export async function callClaude(data: AppData, req: ClaudeRequest): Promise<Anthropic.Beta.BetaMessage> {
