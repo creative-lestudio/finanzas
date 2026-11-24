@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="widget_available">Available</string>
+    <string name="widget_open">Open</string>
+    <string name="widget_add">Add transaction</string>
+    <string name="widget_description">Your available balance and a button to log an expense.</string>
+</resources>

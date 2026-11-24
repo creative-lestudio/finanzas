@@ -30,7 +30,27 @@
                 <data android:scheme="com.lestudio.finanzas" android:host="auth" />
             </intent-filter>
 
+            <!-- Botón «+» del widget: com.lestudio.finanzas://nuevo -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="com.lestudio.finanzas" android:host="nuevo" />
+            </intent-filter>
+
         </activity>
+
+        <!-- Widget de pantalla de inicio -->
+        <receiver
+            android:name=".FinanzasWidgetProvider"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/finanzas_widget_info" />
+        </receiver>
 
         <provider
             android:name="androidx.core.content.FileProvider"

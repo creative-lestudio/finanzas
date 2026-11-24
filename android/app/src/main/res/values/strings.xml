@@ -4,4 +4,8 @@
     <string name="title_activity_main">Finanzas</string>
     <string name="package_name">com.lestudio.finanzas</string>
     <string name="custom_url_scheme">com.lestudio.finanzas</string>
+    <string name="widget_available">Disponible</string>
+    <string name="widget_open">Abrir</string>
+    <string name="widget_add">Añadir movimiento</string>
+    <string name="widget_description">Tu saldo disponible y un botón para anotar un gasto.</string>
 </resources>

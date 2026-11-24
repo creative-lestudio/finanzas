@@ -982,5 +982,8 @@ export const EN: Record<string, string> = {
  "Cambio": "Exchange",
  "Asesor": "Advisor",
  "{amount}/día": "{amount}/day",
- "{amount} de más": "{amount} over"
+ "{amount} de más": "{amount} over",
+ "Mostrar saldo en el widget": "Show balance on the widget",
+ "Quien vea tu pantalla de inicio podrá ver la cifra. Para añadirlo: mantén pulsada la pantalla de inicio → Widgets → Finanzas. Sin esto, el widget solo abre la app o anota un gasto, sin cifras.": "Anyone who sees your home screen will be able to see the figure. To add it: long-press the home screen → Widgets → Finanzas. Without this, the widget only opens the app or logs an expense, with no figures.",
+ "Gastos del mes: {amount}": "Spent this month: {amount}"
 };

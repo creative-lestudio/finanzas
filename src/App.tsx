@@ -4,6 +4,8 @@ import { InstallBanner } from './components/Install';
 import { Tour } from './components/Tour';
 import { Debts } from './pages/Debts';
 import { prefillFromUrl, type Prefill } from './lib/shortcut';
+import { consumeWidgetAdd } from './lib/native';
+import { pushWidget } from './lib/widget';
 import { finishGuide, guideActive, guideComplete, newGuide } from './lib/guide';
 import { Accounts } from './pages/Accounts';
 import { bioLabel } from './lib/biometric';
@@ -141,6 +143,20 @@ export function App() {
       void handleBankCallback(store);
     }
   }, [store.status, store]);
+
+  // Widget de inicio: el botón «+» abre «Nuevo movimiento»; si la app estaba bloqueada, se abre al desbloquear.
+  useEffect(() => {
+    const open = () => store.status === 'ready' && consumeWidgetAdd() && setSheet('add');
+    open();
+    window.addEventListener('finanzas:add', open);
+    return () => window.removeEventListener('finanzas:add', open);
+  }, [store.status]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Resumen para el widget (solo con permiso del usuario; ver lib/widget.ts).
+  useEffect(() => {
+    if (store.status !== 'ready' || !store.data) return;
+    const id = window.setTimeout(() => void pushWidget(store.data), 1500);
+    return () => window.clearTimeout(id);
+  }, [store.status, store.data]);
 
   // Atajos del icono de la app (manifest shortcuts): ?accion=voz / ?accion=nuevo
   useEffect(() => {

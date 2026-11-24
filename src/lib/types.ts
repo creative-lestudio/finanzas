@@ -224,6 +224,8 @@ export interface CategoryRule {
 export interface Settings {
   /** Modo privado: ninguna función envía datos a terceros. */
   offlineOnly: boolean;
+  /** Mostrar el saldo disponible en el widget de la pantalla de inicio (solo apps instaladas). */
+  widgetShow?: boolean;
   aiCategorization: boolean;
   /** 'server' = IA del servicio (requiere cuenta); 'own' = clave propia del usuario. */
   aiMode?: 'server' | 'own';

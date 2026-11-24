@@ -17,6 +17,7 @@ import { ACCENTS } from '../lib/theme';
 import type { Settings as SettingsT } from '../lib/types';
 import { newGuide } from '../lib/guide';
 import { useStore } from '../store';
+import { isNative } from '../lib/native';
 import { t as _t, LOCALE, savedLang, setLang, type Lang } from '../lib/i18n';
 
 async function download(name: string, blob: Blob) {
@@ -90,6 +91,14 @@ export function Settings({ go }: { go?: (p: 'more') => void } = {}) {
           <Icon name="info" size={18} /> {_t("Ver el recorrido de la app")}
         </button>
         <ShortcutsHelp />
+        {isNative() && (
+          <div className="mt">
+            <Switch checked={Boolean(s.widgetShow)} onChange={(v) => setSettings({ widgetShow: v })}>
+              <b>{_t("Mostrar saldo en el widget")}</b>
+              <div className="small muted">{_t("Quien vea tu pantalla de inicio podrá ver la cifra. Para añadirlo: mantén pulsada la pantalla de inicio → Widgets → Finanzas. Sin esto, el widget solo abre la app o anota un gasto, sin cifras.")}</div>
+            </Switch>
+          </div>
+        )}
         <button className="btn ghost block mt small" onClick={() => { setSettings({ checklistHidden: false, guide: newGuide('tasks') }); toast(_t("Tareas iniciales restauradas en Global")); }}>{_t("Repetir las tareas iniciales")}</button>
       </div>
       <SyncSection />

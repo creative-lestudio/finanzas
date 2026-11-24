@@ -60,3 +60,25 @@ export async function initNativeShell(): Promise<void> {
     /* opcional */
   }
 }
+
+/** Enlace del botón «+» del widget: com.lestudio.finanzas://nuevo. Abre «Nuevo movimiento» (también con la app cerrada o bloqueada). */
+export const WIDGET_ADD_LINK = 'com.lestudio.finanzas://nuevo';
+let addPending = false;
+export const consumeWidgetAdd = (): boolean => {
+  const v = addPending;
+  addPending = false;
+  return v;
+};
+
+export async function listenWidgetLinks(): Promise<void> {
+  if (!isNative()) return;
+  const { App } = await import('@capacitor/app');
+  const handle = (url?: string | null) => {
+    if (url && url.startsWith(WIDGET_ADD_LINK)) {
+      addPending = true;
+      window.dispatchEvent(new Event('finanzas:add'));
+    }
+  };
+  await App.addListener('appUrlOpen', ({ url }) => handle(url));
+  handle((await App.getLaunchUrl().catch(() => null))?.url);
+}
