@@ -639,3 +639,9 @@ table.simple td.r, table.simple th.r { text-align: right; }
 .coach-hero .bubble b:not(:first-child), .tour-coach .bubble b:not(:first-child) { display: inline; font-size: inherit; color: var(--text); font-family: inherit; letter-spacing: 0; }
 
 .pill-mic.attn { box-shadow: 0 0 0 2px var(--accent); }
+
+/* Mentor: avisos, consejos y felicitaciones */
+.mentor { border-left: 4px solid var(--accent); }
+.mentor.warn { border-left-color: var(--bad); }
+.mentor.praise { border-left-color: var(--good); }
+.callout { margin: 10px 0; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--accent); background: var(--fill, rgb(120 130 150 / 0.1)); font-size: 13.5px; line-height: 1.45; }

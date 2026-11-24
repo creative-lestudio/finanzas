@@ -244,11 +244,24 @@ export interface Settings {
   /** Ocultó la lista de primeros pasos de Inicio. */
   checklistHidden?: boolean;
   monthlyIncomeHint?: number;
+  /** Perfil financiero (3 preguntas) con el que se personalizan lecciones y consejos. */
+  profile?: Profile;
+  /** Lecciones completadas y días con actividad de aprendizaje (para la racha). */
+  learn?: { done: string[]; days: string[] };
+  /** Consejos del mentor ya aplazados (clave → hasta qué día) y felicitaciones ya mostradas. */
+  mentor?: { snoozed: Record<string, string>; seen: string[] };
   bank?: {
     provider: 'none' | 'enablebanking' | 'gocardless' | 'mock';
     /** URL de la función serverless que guarda los secretos del proveedor. */
     proxyUrl?: string;
   };
+}
+
+/** Respuestas de las preguntas iniciales. */
+export interface Profile {
+  level: 'none' | 'basic' | 'starter' | 'advanced';
+  goal: 'control' | 'save' | 'debt' | 'invest' | 'grow';
+  risk: 'low' | 'mid' | 'high';
 }
 
 export interface AppData {

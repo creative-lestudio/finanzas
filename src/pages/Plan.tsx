@@ -11,6 +11,7 @@ import { futureValue, goalProgress, GOAL_KIND_LABEL, GOAL_STATUS_LABEL } from '.
 import { formatMoney, parseAmount, today, uid } from '../lib/money';
 import { applyGoalMovement, safeToSave } from '../lib/savings';
 import type { Budget, Goal, GoalKind } from '../lib/types';
+import { decisionAdvice } from '../lib/mentor';
 import { useStore } from '../store';
 import { t as _t } from '../lib/i18n';
 
@@ -230,6 +231,7 @@ function GoalForm({ value, onSave, onDelete }: { value: Partial<Goal>; onSave: (
 
   return (
     <>
+      {!value.id && <div className="callout"><b>{_t("Consejo")}</b> {decisionAdvice(data, 'goal')}</div>}
       <div className="seg">
         {(Object.keys(GOAL_KIND_LABEL) as GoalKind[]).map((k) => (
           <button key={k} className={kind === k ? 'on' : ''} onClick={() => setKind(k)}>{GOAL_KIND_LABEL[k]}</button>

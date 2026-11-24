@@ -1,10 +1,11 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { budgetAlertFor } from '../lib/budgets';
 import { categorize, detectChannel } from '../lib/categorize';
 import { addRate } from '../lib/fx';
 import { formatMoney, merchantKey, monthKey, parseAmount, today, uid } from '../lib/money';
 import { aiAvailability } from '../lib/ai';
 import { FREQ_LABEL, nextOccurrence } from '../lib/recurring';
+import { decisionTips, newPraise } from '../lib/mentor';
 import { guideTasks, patchGuide } from '../lib/guide';
 import { scanReceipt } from '../lib/receipt';
 import type { Prefill } from '../lib/shortcut';
@@ -99,6 +100,9 @@ export function QuickAdd({ onClose, onVoice, prefill }: { onClose: () => void; o
   const suggested = description ? categorize(description, signed || -1, data).categoryId : null;
   const chosen = categoryId ?? (suggested && cats.some((c) => c.id === suggested) ? suggested : null);
 
+  // Mientras escribes: avisos (duplicado, importe raro, cuenta en negativo) y consejos (gasto grande).
+  const tips = useMemo(() => (cents ? decisionTips(data, { amount: Math.abs(cents), kind, accountId, categoryId: chosen ?? undefined, description, date }) : []), [data, cents, kind, accountId, chosen, description, date]);
+
   const save = () => {
     if (!signed || !chosen || !accountId) return;
     const base = description.trim() || data.categories.find((c) => c.id === chosen)!.name;
@@ -125,6 +129,9 @@ export function QuickAdd({ onClose, onVoice, prefill }: { onClose: () => void; o
     }
     update(() => next);
     toast(message);
+    // Si con este movimiento acabas de hacer algo bien, te lo decimos.
+    const praise = newPraise(data, next);
+    if (praise) window.setTimeout(() => toast(`${praise.title} ${praise.text}`), 1600);
     onClose();
   };
 
@@ -166,6 +173,11 @@ export function QuickAdd({ onClose, onVoice, prefill }: { onClose: () => void; o
         <input placeholder={_t("Concepto (opcional): café, taxi…")} value={description} onChange={(e) => setDescription(e.target.value)} aria-label={_t("Concepto")} />
       </div>
       <CategoryPicker kind={kind} value={chosen} onChange={setCategoryId} />
+      {tips.map((tp, i) => (
+        <div key={i} className="callout" role={tp.level === 'warn' ? 'alert' : 'note'} style={{ borderColor: tp.level === 'warn' ? 'var(--bad)' : 'var(--accent)' }}>
+          <b style={{ color: tp.level === 'warn' ? 'var(--bad)' : 'var(--accent-ink)' }}>{tp.level === 'warn' ? _t('Ojo') : _t('Consejo')}</b> {tp.text}
+        </div>
+      ))}
       <div className="grid2">
         <div className="field">
           <label>

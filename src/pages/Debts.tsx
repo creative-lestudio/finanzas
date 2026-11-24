@@ -6,6 +6,7 @@ import { DEBT_CATEGORIES, debtTotals, FREQ_DEBT_LABEL, installmentFor, isSettled
 import { CURRENCIES } from '../lib/fx';
 import { formatMoney, parseAmount, today, uid } from '../lib/money';
 import type { AppData, Debt, DebtPlan } from '../lib/types';
+import { decisionAdvice } from '../lib/mentor';
 import { useStore } from '../store';
 import { t as _t, LOCALE } from '../lib/i18n';
 
@@ -144,6 +145,7 @@ function DebtForm({ value, onSave }: { value: Partial<Debt>; onSave: (d: Debt, a
         <button className={direction === 'owe' ? 'on' : ''} onClick={() => setDirection('owe')}>{_t("Yo debo")}</button>
         <button className={direction === 'owed' ? 'on' : ''} onClick={() => setDirection('owed')}>{_t("Me deben")}</button>
       </div>
+      {!value.id && direction === 'owe' && decisionAdvice(data, 'debt-owe') && <div className="callout"><b>{_t("Consejo")}</b> {decisionAdvice(data, 'debt-owe')}</div>}
       <Field label={direction === 'owe' ? _t("A quién le debo") : _t("Quién me debe")}><input value={person} placeholder={_t("Nombre de la persona o entidad")} onChange={(e) => setPerson(e.target.value)} aria-label={_t("Persona")} /></Field>
       <Field label={_t("Concepto")}><input value={title} placeholder={_t("Préstamo, alquiler atrasado, trabajo…")} onChange={(e) => setTitle(e.target.value)} aria-label={_t("Concepto")} /></Field>
       <div className="grid2">

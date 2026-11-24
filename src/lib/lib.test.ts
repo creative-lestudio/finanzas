@@ -773,3 +773,83 @@ describe('gastos compartidos: quien paga 100 a medias', () => {
     expect(Object.values(bal).reduce((s, v) => s + v, 0)).toBe(0);
   });
 });
+
+describe('mentor y lecciones', () => {
+  const mk = () => {
+    const d = emptyData();
+    d.settings.currency = 'EUR';
+    d.accounts = [{ id: 'a', name: 'Banco', kind: 'checking', balance: 100000, currency: 'EUR', source: 'manual' }];
+    d.categories = [{ id: 'salary', name: 'Nómina', icon: '', kind: 'income' } as never, { id: 'groceries', name: 'Súper', icon: '', kind: 'expense' } as never];
+    return d;
+  };
+  const tx = (id: string, date: string, amount: number, cat = 'groceries', desc = 'x') => ({ id, accountId: 'a', date, amount, description: desc, categoryId: cat, categorySource: 'user' as const });
+  const NOW = '2026-11-20';
+
+  it('avisa si gastas más de lo que ingresas', async () => {
+    const { mentorMessages } = await import('./mentor');
+    const d = mk();
+    d.transactions = [tx('i', '2026-11-01', 100000, 'salary'), tx('g', '2026-11-05', -150000)];
+    const m = mentorMessages(d, NOW);
+    expect(m[0].kind).toBe('warn');
+    expect(m.some((x) => x.id === 'warn-overspend')).toBe(true);
+  });
+  it('felicita si ahorras el 20 % o más', async () => {
+    const { mentorMessages } = await import('./mentor');
+    const d = mk();
+    d.transactions = [tx('i', '2026-11-01', 200000, 'salary'), tx('g', '2026-11-05', -100000)];
+    const m = mentorMessages(d, NOW);
+    expect(m.some((x) => x.kind === 'praise' && x.id.startsWith('praise-savings'))).toBe(true);
+    expect(m.some((x) => x.id === 'warn-overspend')).toBe(false);
+  });
+  it('aconseja crear un colchón cuando no cubre ni un mes', async () => {
+    const { mentorMessages } = await import('./mentor');
+    const d = mk();
+    d.accounts[0].balance = 10000;
+    d.transactions = [tx('i', '2026-11-01', 200000, 'salary'), tx('g', '2026-11-05', -100000)];
+    expect(mentorMessages(d, NOW).some((x) => x.id === 'tip-emergency')).toBe(true);
+  });
+  it('un aviso aplazado no vuelve y una felicitación vista tampoco', async () => {
+    const { mentorMessages, dismissMentor } = await import('./mentor');
+    let d = mk();
+    d.transactions = [tx('i', '2026-11-01', 100000, 'salary'), tx('g', '2026-11-05', -150000)];
+    const w = mentorMessages(d, NOW).find((x) => x.id === 'warn-overspend')!;
+    d = dismissMentor(d, w, NOW);
+    expect(mentorMessages(d, NOW).some((x) => x.id === 'warn-overspend')).toBe(false);
+    expect(mentorMessages(d, '2026-11-25').some((x) => x.id === 'warn-overspend')).toBe(true); // pasados los 3 días vuelve
+  });
+  it('en el momento de registrar avisa de duplicados, cuenta en negativo y gasto grande', async () => {
+    const { decisionTips } = await import('./mentor');
+    const d = mk();
+    d.accounts[0].balance = 5000;
+    d.transactions = [tx('i', '2026-11-01', 100000, 'salary'), tx('g', '2026-11-19', -3000, 'groceries', 'Mercadona')];
+    expect(decisionTips(d, { amount: 3000, kind: 'expense', accountId: 'a', categoryId: 'groceries', description: 'Mercadona', date: '2026-11-20' }, NOW).some((t) => t.level === 'warn')).toBe(true);
+    expect(decisionTips(d, { amount: 20000, kind: 'expense', accountId: 'a', categoryId: 'groceries', date: NOW }, NOW).map((t) => t.level)).toEqual(expect.arrayContaining(['warn', 'tip']));
+    expect(decisionTips(d, { amount: 100, kind: 'income', accountId: 'a' }, NOW)).toEqual([]);
+  });
+  it('detecta una felicitación nueva al mejorar tus datos', async () => {
+    const { newPraise } = await import('./mentor');
+    const before = mk();
+    before.transactions = [tx('i', '2026-11-01', 200000, 'salary'), tx('g', '2026-11-05', -190000)];
+    const after = { ...before, transactions: [before.transactions[0]] };
+    expect(newPraise(before, after, NOW)?.id).toMatch(/praise-savings/);
+  });
+  it('recomienda primero el colchón si es corto y no recomienda invertir antes', async () => {
+    const { rankLessons } = await import('./lessons');
+    const d = mk();
+    d.accounts[0].balance = 5000;
+    d.settings.profile = { level: 'starter', goal: 'invest', risk: 'mid' };
+    d.transactions = [tx('i', '2026-11-01', 200000, 'salary'), tx('g', '2026-11-05', -100000)];
+    const r = rankLessons(d, NOW).map((l) => l.id);
+    expect(r[0]).toBe('fondo-emergencia');
+    expect(r.indexOf('fondo-emergencia')).toBeLessThan(r.indexOf('empezar-a-invertir'));
+  });
+  it('«tu caso» usa tus números y la racha cuenta días seguidos', async () => {
+    const { yourCase, learnStreak, LESSONS } = await import('./lessons');
+    const d = mk();
+    d.transactions = [tx('i', '2026-11-01', 200000, 'salary'), tx('g', '2026-11-05', -100000)];
+    expect(yourCase(d, 'presupuesto', NOW)).toContain('2000,00');
+    expect(learnStreak(['2026-11-18', '2026-11-19', '2026-11-20'], NOW)).toBe(3);
+    expect(learnStreak(['2026-11-15'], NOW)).toBe(0);
+    for (const l of LESSONS) { expect(l.quiz.answer).toBeLessThan(l.quiz.options.length); expect(l.cards.length).toBeGreaterThanOrEqual(3); }
+  });
+});

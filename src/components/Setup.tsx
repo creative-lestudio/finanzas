@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { CURRENCIES } from '../lib/fx';
 import { uid } from '../lib/money';
-import type { Account } from '../lib/types';
+import type { Account, Profile } from '../lib/types';
+import { ProfileQuestions, profileComplete } from './ProfileQuestions';
 import { useStore } from '../store';
 import { COACH } from './Coach';
 import { Field } from './ui';
@@ -24,12 +25,13 @@ export function Setup() {
   const { data, update } = useStore();
   const [currency, setCurrency] = useState(data.settings.currency);
   const [picked, setPicked] = useState<string[]>(['bank-eur']);
+  const [profile, setProfile] = useState<Partial<Profile>>({});
   const toggle = (id: string) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
 
   const finish = () =>
     update((d) => ({
       ...d,
-      settings: { ...d.settings, currency, onboarded: true },
+      settings: { ...d.settings, currency, onboarded: true, ...(profileComplete(profile) ? { profile } : {}) },
       accounts: [
         ...d.accounts,
         ...TEMPLATES.filter((t) => picked.includes(t.id)).map((t) => ({
@@ -63,6 +65,10 @@ export function Setup() {
               <span>{t.hint}</span>
             </button>
           ))}
+        </div>
+        <div style={{ borderTop: '0.5px solid var(--hairline)', paddingTop: 14, marginTop: 4 }}>
+          <div className="small muted" style={{ margin: '0 4px 10px' }}>{_t("Tres toques para personalizar tus lecciones y consejos")}</div>
+          <ProfileQuestions value={profile} onChange={setProfile} />
         </div>
         <button className="btn primary block" onClick={finish}>{_t("Crear mis cuentas")}</button>
         <button className="btn ghost block mt small muted" onClick={() => update((d) => ({ ...d, settings: { ...d.settings, onboarded: true } }))}>{_t("Ahora no")}</button>

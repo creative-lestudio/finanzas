@@ -3,6 +3,7 @@ import { Icon } from './components/icons';
 import { InstallBanner } from './components/Install';
 import { Tour } from './components/Tour';
 import { Debts } from './pages/Debts';
+import { Learn } from './pages/Learn';
 import { prefillFromUrl, type Prefill } from './lib/shortcut';
 import { consumeWidgetAdd } from './lib/native';
 import { pushWidget } from './lib/widget';
@@ -32,7 +33,7 @@ import { AuthForm, RecoveryNotice } from './components/AuthForm';
 import { useStore } from './store';
 import { t as _t, LOCALE } from './lib/i18n';
 
-export type Page = 'home' | 'transactions' | 'plan' | 'assistant' | 'more' | 'accounts' | 'debts' | 'fx' | 'groups' | 'wealth' | 'health' | 'subs' | 'settings';
+export type Page = 'home' | 'transactions' | 'plan' | 'assistant' | 'more' | 'accounts' | 'debts' | 'learn' | 'fx' | 'groups' | 'wealth' | 'health' | 'subs' | 'settings';
 
 const TITLES: Record<Page, string> = {
   home: 'Posición global',
@@ -42,6 +43,7 @@ const TITLES: Record<Page, string> = {
   more: 'Herramientas',
   accounts: 'Cuentas',
   debts: 'Deudas',
+  learn: 'Aprende',
   fx: 'Divisas',
   groups: 'Compartir',
   wealth: 'Patrimonio',
@@ -60,6 +62,7 @@ const TABS: [Page, string, string][] = [
 ];
 
 const MORE: [Page, string, string, string][] = [
+  ['learn', 'book', 'Aprende', 'Lecciones de 3 minutos con tus números'],
   ['debts', 'scale', 'Deudas', 'Lo que debo y lo que me deben, con plan de pago'],
   ['fx', 'swap', 'Divisas y cambios', 'Tasas BCV/paralelo, Wise, pérdidas por cambio'],
   ['groups', 'users', 'Gastos compartidos', 'Divide cuentas con amigos y familia'],
@@ -68,7 +71,7 @@ const MORE: [Page, string, string, string][] = [
   ['subs', 'repeat', 'Suscripciones y comisiones', 'Cobros recurrentes y fugas'],
 ];
 
-const PARENT: Partial<Record<Page, Page>> = { debts: 'more', fx: 'more', groups: 'more', wealth: 'more', health: 'more', subs: 'more' };
+const PARENT: Partial<Record<Page, Page>> = { learn: 'more', debts: 'more', fx: 'more', groups: 'more', wealth: 'more', health: 'more', subs: 'more' };
 
 applySavedTheme();
 
@@ -244,6 +247,7 @@ export function App() {
           {page === 'plan' && <Plan />}
           {page === 'assistant' && <Assistant />}
           {page === 'debts' && <Debts />}
+          {page === 'learn' && <Learn go={setPage} />}
           {page === 'fx' && <Currency />}
           {page === 'groups' && <Groups go={setPage} />}
           {page === 'wealth' && <Wealth />}
