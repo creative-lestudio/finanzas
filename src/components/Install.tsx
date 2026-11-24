@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Icon } from './icons';
 import { Sheet } from './ui';
+import { t as _t } from '../lib/i18n';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -24,8 +25,8 @@ export function IosGuide({ onClose }: { onClose: () => void }) {
     ['3', 'Ábrela desde tu inicio', 'Aparece el icono de Finanzas. Se abre a pantalla completa y funciona sin conexión.'],
   ];
   return (
-    <Sheet title="Instalar en iPhone" onClose={onClose}>
-      <p className="small muted" style={{ marginTop: 0 }}>Tiene que ser en <b>Safari</b>; en otros navegadores iOS no ofrece esta opción.</p>
+    <Sheet title={_t("Instalar en iPhone")} onClose={onClose}>
+      <p className="small muted" style={{ marginTop: 0 }}>{_t("Tiene que ser en")} <b>{_t("Safari")}</b>{_t("; en otros navegadores iOS no ofrece esta opción.")}</p>
       <div className="ios-steps">
         {steps.map(([n, t, d]) => (
           <div key={n} className="ios-step">
@@ -71,13 +72,13 @@ export function InstallBanner() {
     <div className="card glass row" style={{ padding: 14 }}>
       <span className="icon accent"><Icon name="download" size={20} /></span>
       <div className="grow small">
-        <b>Instala Finanzas</b>
+        <b>{_t("Instala Finanzas")}</b>
         <div className="muted">
-          {canPrompt ? 'Úsala como una app: a pantalla completa y sin conexión.' : <>En Safari pulsa <b>Compartir</b> → <b>Añadir a pantalla de inicio</b>.</>}
+          {canPrompt ? _t("Úsala como una app: a pantalla completa y sin conexión.") : <>{_t("En Safari pulsa")} <b>{_t("Compartir")}</b> → <b>{_t("Añadir a pantalla de inicio")}</b>.</>}
         </div>
       </div>
       {!canPrompt && (
-        <button className="btn primary sm" onClick={() => setGuide(true)}>Ver cómo</button>
+        <button className="btn primary sm" onClick={() => setGuide(true)}>{_t("Ver cómo")}</button>
       )}
       {guide && <IosGuide onClose={() => setGuide(false)} />}
       {canPrompt && (
@@ -89,10 +90,10 @@ export function InstallBanner() {
             close();
           }}
         >
-          Instalar
+          {_t("Instalar")}
         </button>
       )}
-      <button className="icon-btn" style={{ width: 30, height: 30 }} onClick={close} aria-label="Cerrar"><Icon name="close" size={14} stroke={2.4} /></button>
+      <button className="icon-btn" style={{ width: 30, height: 30 }} onClick={close} aria-label={_t("Cerrar")}><Icon name="close" size={14} stroke={2.4} /></button>
     </div>
   );
 }

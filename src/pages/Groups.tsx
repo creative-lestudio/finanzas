@@ -6,6 +6,7 @@ import type { Group } from '../lib/types';
 import { useStore } from '../store';
 import { Empty, Field, Money, Segmented, Sheet } from '../components/ui';
 import { CloudGroups } from './CloudGroups';
+import { t as _t } from '../lib/i18n';
 
 /** Gastos compartidos estilo Splitwise / Settle Up. */
 export function Groups({ go }: { go: (p: 'settings') => void }) {
@@ -25,13 +26,13 @@ export function Groups({ go }: { go: (p: 'settings') => void }) {
         {data.groups.map((g) => (
           <button key={g.id} className={`chip ${g.id === openId ? 'on' : ''}`} onClick={() => setOpenId(g.id)}>{g.name}</button>
         ))}
-        <button className="chip" onClick={() => setNewGroup(true)}>+ Grupo</button>
+        <button className="chip" onClick={() => setNewGroup(true)}>{_t("+ Grupo")}</button>
       </div>
-      {!group && <Empty>Crea un grupo para dividir gastos con tu pareja, familia o amigos.</Empty>}
+      {!group && <Empty>{_t("Crea un grupo para dividir gastos con tu pareja, familia o amigos.")}</Empty>}
       {group && <GroupView group={group} onAdd={() => setAdding(true)} />}
 
       {newGroup && (
-        <Sheet title="Nuevo grupo" onClose={() => setNewGroup(false)}>
+        <Sheet title={_t("Nuevo grupo")} onClose={() => setNewGroup(false)}>
           <NewGroup
             onSave={(g) => {
               update((d) => ({ ...d, groups: [...d.groups, g] }));
@@ -42,7 +43,7 @@ export function Groups({ go }: { go: (p: 'settings') => void }) {
         </Sheet>
       )}
       {adding && group && (
-        <Sheet title="Nuevo gasto compartido" onClose={() => setAdding(false)}>
+        <Sheet title={_t("Nuevo gasto compartido")} onClose={() => setAdding(false)}>
           <AddShared group={group} onDone={() => setAdding(false)} />
         </Sheet>
       )}
@@ -70,13 +71,13 @@ function GroupView({ group, onAdd }: { group: Group; onAdd: () => void }) {
   return (
     <>
       <div className="card glass">
-        <h2>Saldos · gasto total {formatMoney(total)}</h2>
+        <h2>{_t("Saldos · gasto total")} {formatMoney(total)}</h2>
         <ul className="list">
           {group.members.map((m) => (
             <li key={m}>
               <span className="grow">{m}</span>
               <span className={`num ${bal[m] > 0 ? 'pos' : ''}`} style={bal[m] < 0 ? { color: 'var(--bad)' } : undefined}>
-                {bal[m] > 0 ? `le deben ${formatMoney(bal[m])}` : bal[m] < 0 ? `debe ${formatMoney(-bal[m])}` : 'en paz'}
+                {bal[m] > 0 ? `le deben ${formatMoney(bal[m])}` : bal[m] < 0 ? `debe ${formatMoney(-bal[m])}` : _t("en paz")}
               </span>
             </li>
           ))}
@@ -84,32 +85,32 @@ function GroupView({ group, onAdd }: { group: Group; onAdd: () => void }) {
       </div>
       {transfers.length > 0 && (
         <div className="card glass">
-          <h2>Para quedar en paz</h2>
+          <h2>{_t("Para quedar en paz")}</h2>
           <ul className="list">
             {transfers.map((t) => (
               <li key={`${t.from}-${t.to}`}>
                 <span className="grow small"><b>{t.from}</b> → <b>{t.to}</b></span>
                 <Money cents={t.amount} />
-                <button className="btn small" onClick={() => settle(t.from, t.to, t.amount)}>Saldado</button>
+                <button className="btn small" onClick={() => settle(t.from, t.to, t.amount)}>{_t("Saldado")}</button>
               </li>
             ))}
           </ul>
-          <p className="small muted" style={{ marginBottom: 0 }}>Consejo: puedes pagar por Bizum y marcarlo como saldado.</p>
+          <p className="small muted" style={{ marginBottom: 0 }}>{_t("Consejo: puedes pagar por Bizum y marcarlo como saldado.")}</p>
         </div>
       )}
-      <button className="btn primary block mb" onClick={onAdd}>+ Añadir gasto</button>
+      <button className="btn primary block mb" onClick={onAdd}>{_t("+ Añadir gasto")}</button>
       <div className="card glass flush">
-        {expenses.length === 0 && <Empty>Sin gastos en este grupo.</Empty>}
+        {expenses.length === 0 && <Empty>{_t("Sin gastos en este grupo.")}</Empty>}
         <ul className="list">
           {expenses.map((e) => (
             <li key={e.id}>
               <span className="icon"><Icon name={e.settlement ? 'check' : 'receipt'} size={19} /></span>
               <div className="grow">
                 <div className="ellipsis">{e.description}</div>
-                <div className="small muted">{e.date} · pagó {e.paidBy}</div>
+                <div className="small muted">{e.date} {_t("· pagó")} {e.paidBy}</div>
               </div>
               <Money cents={e.amount} />
-              <button className="btn ghost small" aria-label="Eliminar" onClick={() => update((d) => ({ ...d, sharedExpenses: d.sharedExpenses.filter((x) => x.id !== e.id) }))}>✕</button>
+              <button className="btn ghost small" aria-label={_t("Eliminar")} onClick={() => update((d) => ({ ...d, sharedExpenses: d.sharedExpenses.filter((x) => x.id !== e.id) }))}>✕</button>
             </li>
           ))}
         </ul>
@@ -124,9 +125,9 @@ function NewGroup({ onSave }: { onSave: (g: Group) => void }) {
   const list = members.split(',').map((m) => m.trim()).filter(Boolean);
   return (
     <>
-      <Field label="Nombre del grupo"><input value={name} placeholder="Viaje a Lisboa" onChange={(e) => setName(e.target.value)} /></Field>
-      <Field label="Miembros (separados por comas)"><input value={members} onChange={(e) => setMembers(e.target.value)} /></Field>
-      <button className="btn primary block" disabled={!name || list.length < 2} onClick={() => onSave({ id: uid(), name, members: [...new Set(list)] })}>Crear grupo</button>
+      <Field label={_t("Nombre del grupo")}><input value={name} placeholder={_t("Viaje a Lisboa")} onChange={(e) => setName(e.target.value)} /></Field>
+      <Field label={_t("Miembros (separados por comas)")}><input value={members} onChange={(e) => setMembers(e.target.value)} /></Field>
+      <button className="btn primary block" disabled={!name || list.length < 2} onClick={() => onSave({ id: uid(), name, members: [...new Set(list)] })}>{_t("Crear grupo")}</button>
     </>
   );
 }
@@ -144,16 +145,16 @@ function AddShared({ group, onDone }: { group: Group; onDone: () => void }) {
 
   return (
     <>
-      <Field label="Concepto"><input value={description} placeholder="Cena, súper, gasolina…" onChange={(e) => setDescription(e.target.value)} /></Field>
+      <Field label={_t("Concepto")}><input value={description} placeholder={_t("Cena, súper, gasolina…")} onChange={(e) => setDescription(e.target.value)} /></Field>
       <div className="grid2">
-        <Field label="Importe (€)"><input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} /></Field>
-        <Field label="Pagó">
+        <Field label={_t("Importe (€)")}><input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} /></Field>
+        <Field label={_t("Pagó")}>
           <select value={paidBy} onChange={(e) => setPaidBy(e.target.value)}>{group.members.map((m) => <option key={m}>{m}</option>)}</select>
         </Field>
       </div>
       <div className="seg">
-        <button className={mode === 'equal' ? 'on' : ''} onClick={() => setMode('equal')}>A partes iguales</button>
-        <button className={mode === 'weights' ? 'on' : ''} onClick={() => setMode('weights')}>Por partes / %</button>
+        <button className={mode === 'equal' ? 'on' : ''} onClick={() => setMode('equal')}>{_t("A partes iguales")}</button>
+        <button className={mode === 'weights' ? 'on' : ''} onClick={() => setMode('weights')}>{_t("Por partes / %")}</button>
       </div>
       <ul className="list">
         {group.members.map((m) => (
@@ -182,7 +183,7 @@ function AddShared({ group, onDone }: { group: Group; onDone: () => void }) {
           onDone();
         }}
       >
-        Guardar
+        {_t("Guardar")}
       </button>
     </>
   );

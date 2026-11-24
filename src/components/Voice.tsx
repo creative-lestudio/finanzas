@@ -8,6 +8,7 @@ import { useStore } from '../store';
 import { CatIcon, Icon } from './icons';
 import { saveTransaction } from './QuickAdd';
 import { Sheet, toast } from './ui';
+import { t as _t } from '../lib/i18n';
 
 /**
  * Registro por voz: pulsa el micro, di "gasté 50 euros en Mercadona" y
@@ -105,61 +106,61 @@ export function VoiceSheet({ onClose }: { onClose: () => void }) {
   })();
 
   return (
-    <Sheet title="Dictar movimiento" onClose={onClose}>
+    <Sheet title={_t("Dictar movimiento")} onClose={onClose}>
       {supported ? (
         <>
-          <button className={`mic lg tint ${live ? 'live' : ''}`} onClick={() => (live ? stop.current() : start())} aria-label={live ? 'Detener' : 'Hablar'}>
+          <button className={`mic lg tint ${live ? 'live' : ''}`} onClick={() => (live ? stop.current() : start())} aria-label={live ? _t("Detener") : _t("Hablar")}>
             <Icon name="mic" size={38} stroke={2} />
           </button>
-          <div className="transcript">{text || <span className="muted">{live ? 'Te escucho…' : error || 'Pulsa y habla'}</span>}</div>
+          <div className="transcript">{text || <span className="muted">{live ? _t("Te escucho…") : error || _t("Pulsa y habla")}</span>}</div>
         </>
       ) : (
-        <p className="small muted center">Tu navegador no permite dictado por voz. Escribe la frase igual que la dirías:</p>
+        <p className="small muted center">{_t("Tu navegador no permite dictado por voz. Escribe la frase igual que la dirías:")}</p>
       )}
       <form className="row mb" onSubmit={(e) => { e.preventDefault(); setText(typed); void interpret(typed); }}>
-        <input placeholder='"Pagué 20 dólares en efectivo en la farmacia"' value={typed} onChange={(e) => setTyped(e.target.value)} aria-label="Frase" />
-        <button className="btn tinted" disabled={!typed.trim()}>OK</button>
+        <input placeholder={_t("\"Pagué 20 dólares en efectivo en la farmacia\"")} value={typed} onChange={(e) => setTyped(e.target.value)} aria-label={_t("Frase")} />
+        <button className="btn tinted" disabled={!typed.trim()}>{_t("OK")}</button>
       </form>
 
       {draft && (
         <div className="card glass" style={{ padding: 16 }}>
           <div className="row between mb">
             <div className="seg" style={{ margin: 0, flex: 1 }}>
-              <button className={draft.kind === 'expense' ? 'on' : ''} onClick={() => set({ kind: 'expense', categoryId: null })}>Gasto</button>
-              <button className={draft.kind === 'income' ? 'on' : ''} onClick={() => set({ kind: 'income', categoryId: null })}>Ingreso</button>
+              <button className={draft.kind === 'expense' ? 'on' : ''} onClick={() => set({ kind: 'expense', categoryId: null })}>{_t("Gasto")}</button>
+              <button className={draft.kind === 'income' ? 'on' : ''} onClick={() => set({ kind: 'income', categoryId: null })}>{_t("Ingreso")}</button>
             </div>
           </div>
           <div className="center mb">
             {draft.amount ? (
               <div className="big">{formatMoney(draft.kind === 'expense' ? -draft.amount : draft.amount, currency)}</div>
             ) : (
-              <input inputMode="decimal" className="amount-input" placeholder="¿Cuánto?" autoFocus onBlur={(e) => set({ amount: Math.abs(parseAmount(e.target.value) ?? 0) || null })} aria-label="Importe" />
+              <input inputMode="decimal" className="amount-input" placeholder={_t("¿Cuánto?")} autoFocus onBlur={(e) => set({ amount: Math.abs(parseAmount(e.target.value) ?? 0) || null })} aria-label={_t("Importe")} />
             )}
             <div className="secondary">{draft.description || '—'} · {draft.date}</div>
-            {thinking && <div className="tiny muted mt">Completando con IA…</div>}
+            {thinking && <div className="tiny muted mt">{_t("Completando con IA…")}</div>}
           </div>
 
-          <div className="small muted mb">Categoría {draft.missing.includes('category') && <b style={{ color: 'var(--warn)' }}>· elige una</b>}</div>
+          <div className="small muted mb">{_t("Categoría")} {draft.missing.includes('category') && <b style={{ color: 'var(--warn)' }}>{_t("· elige una")}</b>}</div>
           <div className="chips mb">
             {topCats.map((c) => (
               <button key={c.id} style={{ ['--c' as string]: categoryColor(c.id) }} className={`chip cat-chip ${draft.categoryId === c.id ? 'on' : ''}`} onClick={() => set({ categoryId: c.id })}><CatIcon id={c.id} emoji={c.icon} size={16} />{c.name}</button>
             ))}
           </div>
 
-          <div className="small muted mb">Cuenta {draft.missing.includes('account') && <b style={{ color: 'var(--warn)' }}>· ¿de dónde sale?</b>}</div>
+          <div className="small muted mb">{_t("Cuenta")} {draft.missing.includes('account') && <b style={{ color: 'var(--warn)' }}>{_t("· ¿de dónde sale?")}</b>}</div>
           <div className="chips mb">
             {(draft.accountId ? [account!, ...accountChoices(data, draft.currency).filter((a) => a.id !== draft.accountId)] : accountChoices(data, draft.currency)).filter(Boolean).map((a) => (
               <button key={a.id} className={`chip ${draft.accountId === a.id ? 'on' : ''}`} onClick={() => set({ accountId: a.id })}>{a.name} · {a.currency}</button>
             ))}
           </div>
-          {currencyMismatch && <div className="alert warning small">Has dicho {draft.currency} pero la cuenta es en {account!.currency}. Se guardará en {account!.currency}.</div>}
+          {currencyMismatch && <div className="alert warning small">{_t("Has dicho")} {draft.currency} {_t("pero la cuenta es en")} {account!.currency}{_t(". Se guardará en")} {account!.currency}.</div>}
 
           <button className="btn primary block mt" disabled={draft.missing.length > 0} onClick={save}>
-            {draft.missing.length ? 'Completa los datos' : 'Guardar movimiento'}
+            {draft.missing.length ? _t("Completa los datos") : _t("Guardar movimiento")}
           </button>
         </div>
       )}
-      {!ai.ok && <p className="tiny muted center">La interpretación se hace en tu dispositivo{ai.reason ? `. IA no disponible: ${ai.reason.replace(/\.$/, '')}` : ''}.</p>}
+      {!ai.ok && <p className="tiny muted center">{_t("La interpretación se hace en tu dispositivo")}{ai.reason ? `. IA no disponible: ${ai.reason.replace(/\.$/, '')}` : ''}.</p>}
     </Sheet>
   );
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { googleSignInNative, isNative, WEB_APP_URL } from '../lib/native';
 import { supabase } from '../lib/sync';
 import { Icon } from './icons';
+import { t as _t } from '../lib/i18n';
 
 // En la app instalada los enlaces de los correos abren la web (allí se confirma la cuenta).
 const redirectUrl = () => (isNative() ? WEB_APP_URL : `${location.origin}${location.pathname}`);
@@ -15,7 +16,7 @@ export function AuthForm({ onDone }: { onDone: () => void }) {
   const [busy, setBusy] = useState(false);
   const sb = supabase();
 
-  if (!sb) return <p className="small muted">La sincronización no está configurada en esta instalación.</p>;
+  if (!sb) return <p className="small muted">{_t("La sincronización no está configurada en esta instalación.")}</p>;
 
   const say = (text: string, ok = false) => setMsg({ text, ok });
   const friendly = (m: string) =>
@@ -65,27 +66,27 @@ export function AuthForm({ onDone }: { onDone: () => void }) {
         <>
           <button type="button" className="btn block" onClick={() => void google()} disabled={busy} style={{ background: 'var(--surface)', boxShadow: 'inset 0 0 0 0.5px var(--hairline)' }}>
             <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3A12 12 0 1 1 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7A20 20 0 1 0 44 24c0-1.3-.1-2.7-.4-3.9z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8A12 12 0 0 1 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7A20 20 0 0 0 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2A12 12 0 0 1 12.7 28l-6.6 5.1A20 20 0 0 0 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3a12 12 0 0 1-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.7-.4-3.9z"/></svg>
-            Continuar con Google
+            {_t("Continuar con Google")}
           </button>
-          <div className="row tiny muted" style={{ margin: '14px 0' }}><hr style={{ flex: 1, border: 0, borderTop: '0.5px solid var(--hairline)' }} />o con tu correo<hr style={{ flex: 1, border: 0, borderTop: '0.5px solid var(--hairline)' }} /></div>
+          <div className="row tiny muted" style={{ margin: '14px 0' }}><hr style={{ flex: 1, border: 0, borderTop: '0.5px solid var(--hairline)' }} />{_t("o con tu correo")}<hr style={{ flex: 1, border: 0, borderTop: '0.5px solid var(--hairline)' }} /></div>
           <div className="seg">
-            <button type="button" className={mode === 'in' ? 'on' : ''} onClick={() => { setMode('in'); setMsg(null); }}>Iniciar sesión</button>
-            <button type="button" className={mode === 'up' ? 'on' : ''} onClick={() => { setMode('up'); setMsg(null); }}>Crear cuenta</button>
+            <button type="button" className={mode === 'in' ? 'on' : ''} onClick={() => { setMode('in'); setMsg(null); }}>{_t("Iniciar sesión")}</button>
+            <button type="button" className={mode === 'up' ? 'on' : ''} onClick={() => { setMode('up'); setMsg(null); }}>{_t("Crear cuenta")}</button>
           </div>
         </>
       )}
-      {mode === 'reset' && <p className="small secondary" style={{ marginTop: 0 }}>Escribe tu correo y te enviamos un enlace para elegir otra contraseña de cuenta.</p>}
-      <div className="field"><input type="email" autoComplete="email" placeholder="Correo electrónico" value={email} onChange={(e) => setEmail(e.target.value)} aria-label="Correo electrónico" /></div>
+      {mode === 'reset' && <p className="small secondary" style={{ marginTop: 0 }}>{_t("Escribe tu correo y te enviamos un enlace para elegir otra contraseña de cuenta.")}</p>}
+      <div className="field"><input type="email" autoComplete="email" placeholder={_t("Correo electrónico")} value={email} onChange={(e) => setEmail(e.target.value)} aria-label={_t("Correo electrónico")} /></div>
       {mode !== 'reset' && (
-        <div className="field"><input type="password" autoComplete={mode === 'in' ? 'current-password' : 'new-password'} placeholder="Contraseña de la cuenta" value={password} onChange={(e) => setPassword(e.target.value)} aria-label="Contraseña de la cuenta" /></div>
+        <div className="field"><input type="password" autoComplete={mode === 'in' ? 'current-password' : 'new-password'} placeholder={_t("Contraseña de la cuenta")} value={password} onChange={(e) => setPassword(e.target.value)} aria-label={_t("Contraseña de la cuenta")} /></div>
       )}
       {msg && <p className="small" style={{ color: msg.ok ? 'var(--good)' : 'var(--bad)' }}>{msg.text}</p>}
       <button className="btn primary block" disabled={busy || !email || (mode !== 'reset' && password.length < 8)}>
-        {busy ? 'Un momento…' : mode === 'in' ? 'Iniciar sesión' : mode === 'up' ? 'Crear cuenta' : 'Enviar enlace'}
+        {busy ? _t("Un momento…") : mode === 'in' ? _t("Iniciar sesión") : mode === 'up' ? _t("Crear cuenta") : _t("Enviar enlace")}
       </button>
-      {mode === 'in' && <button type="button" className="btn ghost block small mt" onClick={() => { setMode('reset'); setMsg(null); }}>He olvidado la contraseña</button>}
-      {mode === 'reset' && <button type="button" className="btn ghost block small mt" onClick={() => { setMode('in'); setMsg(null); }}>Volver</button>}
-      <p className="tiny muted center" style={{ marginBottom: 0 }}>La contraseña de la cuenta es distinta de la de cifrado: el servidor nunca ve esta última ni tus datos.</p>
+      {mode === 'in' && <button type="button" className="btn ghost block small mt" onClick={() => { setMode('reset'); setMsg(null); }}>{_t("He olvidado la contraseña")}</button>}
+      {mode === 'reset' && <button type="button" className="btn ghost block small mt" onClick={() => { setMode('in'); setMsg(null); }}>{_t("Volver")}</button>}
+      <p className="tiny muted center" style={{ marginBottom: 0 }}>{_t("La contraseña de la cuenta es distinta de la de cifrado: el servidor nunca ve esta última ni tus datos.")}</p>
     </form>
   );
 }
@@ -111,10 +112,10 @@ export function RecoveryNotice({ children }: { children: React.ReactNode }) {
       if (error) setMsg(error.message);
       else setRecovering(false);
     }}>
-      <h2>Elige tu nueva contraseña de cuenta</h2>
-      <div className="field"><input type="password" autoComplete="new-password" placeholder="Nueva contraseña (mín. 8)" value={pass} onChange={(e) => setPass(e.target.value)} aria-label="Nueva contraseña de la cuenta" /></div>
+      <h2>{_t("Elige tu nueva contraseña de cuenta")}</h2>
+      <div className="field"><input type="password" autoComplete="new-password" placeholder={_t("Nueva contraseña (mín. 8)")} value={pass} onChange={(e) => setPass(e.target.value)} aria-label={_t("Nueva contraseña de la cuenta")} /></div>
       {msg && <p className="small" style={{ color: 'var(--bad)' }}>{msg}</p>}
-      <button className="btn primary block" disabled={pass.length < 8}><Icon name="check" size={18} /> Guardar</button>
+      <button className="btn primary block" disabled={pass.length < 8}><Icon name="check" size={18} /> {_t("Guardar")}</button>
     </form>
   );
 }

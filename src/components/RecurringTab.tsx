@@ -7,6 +7,7 @@ import { useStore } from '../store';
 import { CategoryPicker } from './CategoryPicker';
 import { CatBadge, Icon } from './icons';
 import { Empty, Sheet, toast } from './ui';
+import { t as _t, LOCALE } from '../lib/i18n';
 
 const FREQS: Recurring['freq'][] = ['weekly', 'monthly', 'yearly'];
 
@@ -29,16 +30,16 @@ export function RecurringTab() {
   return (
     <>
       <div className="card glass">
-        <h2>Cada mes, sin que lo anotes</h2>
+        <h2>{_t("Cada mes, sin que lo anotes")}</h2>
         <div className="grid2">
-          <div><div className="tiny muted">Gastos fijos</div><div className="mid neg">{formatMoney(monthly.out, base)}</div></div>
-          <div><div className="tiny muted">Ingresos fijos</div><div className="mid pos">{formatMoney(monthly.inc, base)}</div></div>
+          <div><div className="tiny muted">{_t("Gastos fijos")}</div><div className="mid neg">{formatMoney(monthly.out, base)}</div></div>
+          <div><div className="tiny muted">{_t("Ingresos fijos")}</div><div className="mid pos">{formatMoney(monthly.inc, base)}</div></div>
         </div>
-        <p className="tiny muted" style={{ marginBottom: 0 }}>Se crean solos el día que tocan, en la cuenta que elijas. Aparecen en Movimientos con el icono de repetición.</p>
+        <p className="tiny muted" style={{ marginBottom: 0 }}>{_t("Se crean solos el día que tocan, en la cuenta que elijas. Aparecen en Movimientos con el icono de repetición.")}</p>
       </div>
 
       {rules.length === 0 ? (
-        <Empty>Anota una vez el alquiler, Netflix, el gimnasio o tu sueldo y se repetirán solos.</Empty>
+        <Empty>{_t("Anota una vez el alquiler, Netflix, el gimnasio o tu sueldo y se repetirán solos.")}</Empty>
       ) : (
         <div className="card glass flush">
           <ul className="list">
@@ -47,7 +48,7 @@ export function RecurringTab() {
                 <CatBadge id={r.categoryId} />
                 <div className="grow">
                   <div className="ellipsis">{r.description}</div>
-                  <div className="small muted">{FREQ_LABEL[r.freq]} · {r.active ? `próximo ${new Date(`${r.next}T12:00:00`).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}` : 'en pausa'} · {data.accounts.find((a) => a.id === r.accountId)?.name}</div>
+                  <div className="small muted">{FREQ_LABEL[r.freq]} · {r.active ? `próximo ${new Date(`${r.next}T12:00:00`).toLocaleDateString(LOCALE, { day: 'numeric', month: 'short' })}` : _t("en pausa")} · {data.accounts.find((a) => a.id === r.accountId)?.name}</div>
                 </div>
                 <b className={`num ${r.amount < 0 ? 'neg' : 'pos'}`}>{formatMoney(r.amount, cur(r.accountId))}</b>
               </li>
@@ -55,18 +56,18 @@ export function RecurringTab() {
           </ul>
         </div>
       )}
-      <button className="btn block glass" onClick={() => setEdit({ freq: 'monthly', active: true, next: today() })}><Icon name="plus" size={18} /> Nuevo recurrente</button>
+      <button className="btn block glass" onClick={() => setEdit({ freq: 'monthly', active: true, next: today() })}><Icon name="plus" size={18} /> {_t("Nuevo recurrente")}</button>
 
       {edit && (
-        <Sheet title={edit.id ? 'Editar recurrente' : 'Nuevo recurrente'} onClose={() => setEdit(null)}>
+        <Sheet title={edit.id ? _t("Editar recurrente") : _t("Nuevo recurrente")} onClose={() => setEdit(null)}>
           <RecurringForm
             value={edit}
             onSave={(r) => {
               update((d) => ({ ...d, recurring: r.id && (d.recurring ?? []).some((x) => x.id === r.id) ? (d.recurring ?? []).map((x) => (x.id === r.id ? r : x)) : [...(d.recurring ?? []), { ...r, id: uid() }] }));
-              toast(r.next <= today() ? 'Guardado: se crean ahora los movimientos pendientes.' : 'Recurrente guardado.');
+              toast(r.next <= today() ? _t("Guardado: se crean ahora los movimientos pendientes.") : _t("Recurrente guardado."));
               setEdit(null);
             }}
-            onDelete={edit.id ? () => { update((d) => ({ ...d, recurring: (d.recurring ?? []).filter((x) => x.id !== edit.id) })); toast('Eliminado. Los movimientos ya creados se conservan.'); setEdit(null); } : undefined}
+            onDelete={edit.id ? () => { update((d) => ({ ...d, recurring: (d.recurring ?? []).filter((x) => x.id !== edit.id) })); toast(_t("Eliminado. Los movimientos ya creados se conservan.")); setEdit(null); } : undefined}
           />
         </Sheet>
       )}
@@ -93,35 +94,35 @@ function RecurringForm({ value, onSave, onDelete }: { value: Partial<Recurring>;
   return (
     <>
       <div className="seg">
-        <button className={kind === 'expense' ? 'on' : ''} onClick={() => { setKind('expense'); setCategoryId(null); }}>Gasto</button>
-        <button className={kind === 'income' ? 'on' : ''} onClick={() => { setKind('income'); setCategoryId(null); }}>Ingreso</button>
+        <button className={kind === 'expense' ? 'on' : ''} onClick={() => { setKind('expense'); setCategoryId(null); }}>{_t("Gasto")}</button>
+        <button className={kind === 'income' ? 'on' : ''} onClick={() => { setKind('income'); setCategoryId(null); }}>{_t("Ingreso")}</button>
       </div>
-      <div className="field"><input placeholder="Nombre: alquiler, Netflix, nómina…" value={description} onChange={(e) => setDescription(e.target.value)} aria-label="Nombre" /></div>
+      <div className="field"><input placeholder={_t("Nombre: alquiler, Netflix, nómina…")} value={description} onChange={(e) => setDescription(e.target.value)} aria-label={_t("Nombre")} /></div>
       <div className="amount-wrap">
-        <input className="amount-input" inputMode="decimal" placeholder="0" value={amount} onChange={(e) => setAmount(e.target.value)} aria-label="Importe" style={{ width: `${Math.max(2, amount.length + 1)}ch`, maxWidth: '80%' }} />
+        <input className="amount-input" inputMode="decimal" placeholder="0" value={amount} onChange={(e) => setAmount(e.target.value)} aria-label={_t("Importe")} style={{ width: `${Math.max(2, amount.length + 1)}ch`, maxWidth: '80%' }} />
         <span className="cur">{currency}</span>
       </div>
       <CategoryPicker kind={kind} value={categoryId} onChange={setCategoryId} />
       <div className="field">
-        <label>Cuenta
+        <label>{_t("Cuenta")}
           <select value={accountId} onChange={(e) => setAccountId(e.target.value)}>
             {usable.map((a) => <option key={a.id} value={a.id}>{a.name} · {a.currency}</option>)}
           </select>
         </label>
       </div>
-      <div className="seg" role="group" aria-label="Frecuencia">
+      <div className="seg" role="group" aria-label={_t("Frecuencia")}>
         {FREQS.map((f) => <button key={f} className={freq === f ? 'on' : ''} onClick={() => setFreq(f)}>{FREQ_LABEL[f]}</button>)}
       </div>
       <div className="grid2">
-        <div className="field"><label>{value.id ? 'Próxima fecha' : 'Primera fecha'}<input type="date" value={next} onChange={(e) => setNext(e.target.value)} /></label></div>
-        <div className="field"><label>Hasta (opcional)<input type="date" value={end} onChange={(e) => setEnd(e.target.value)} /></label></div>
+        <div className="field"><label>{value.id ? _t("Próxima fecha") : _t("Primera fecha")}<input type="date" value={next} onChange={(e) => setNext(e.target.value)} /></label></div>
+        <div className="field"><label>{_t("Hasta (opcional)")}<input type="date" value={end} onChange={(e) => setEnd(e.target.value)} /></label></div>
       </div>
       {value.id && (
-        <label className="row small" style={{ gap: 8 }}><input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} /> Activo (desmárcalo para pausarlo)</label>
+        <label className="row small" style={{ gap: 8 }}><input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} /> {_t("Activo (desmárcalo para pausarlo)")}</label>
       )}
-      {next < today() && !value.id && <p className="tiny muted">La fecha ya pasó: se crearán los movimientos pendientes desde esa fecha hasta hoy.</p>}
-      <button className="btn primary block mt" disabled={!ok} onClick={() => onSave({ id: value.id ?? '', accountId, amount: kind === 'expense' ? -Math.abs(cents!) : Math.abs(cents!), description: description.trim(), categoryId: categoryId!, freq, next, day: Number(next.slice(8)), end: end || undefined, active })}>Guardar</button>
-      {onDelete && <button className="btn danger block mt" onClick={onDelete}>Eliminar</button>}
+      {next < today() && !value.id && <p className="tiny muted">{_t("La fecha ya pasó: se crearán los movimientos pendientes desde esa fecha hasta hoy.")}</p>}
+      <button className="btn primary block mt" disabled={!ok} onClick={() => onSave({ id: value.id ?? '', accountId, amount: kind === 'expense' ? -Math.abs(cents!) : Math.abs(cents!), description: description.trim(), categoryId: categoryId!, freq, next, day: Number(next.slice(8)), end: end || undefined, active })}>{_t("Guardar")}</button>
+      {onDelete && <button className="btn danger block mt" onClick={onDelete}>{_t("Eliminar")}</button>}
     </>
   );
 }

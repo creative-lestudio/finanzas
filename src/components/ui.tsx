@@ -2,6 +2,7 @@ import { Fragment, useEffect, useState, type ReactNode } from 'react';
 import { formatMoney } from '../lib/money';
 import type { BudgetState } from '../lib/budgets';
 import { Icon } from './icons';
+import { t as _t } from '../lib/i18n';
 
 /**
  * Importe. Con `sign`, verde si es positivo (ingreso) y rojo si es negativo
@@ -36,7 +37,7 @@ export function Sheet({ title, onClose, children, action }: { title: string; onC
           <h3>{title}</h3>
           <div className="row">
             {action}
-            <button className="icon-btn" style={{ width: 32, height: 32 }} onClick={onClose} aria-label="Cerrar">
+            <button className="icon-btn" style={{ width: 32, height: 32 }} onClick={onClose} aria-label={_t("Cerrar")}>
               <Icon name="close" size={16} stroke={2.4} />
             </button>
           </div>
@@ -47,7 +48,7 @@ export function Sheet({ title, onClose, children, action }: { title: string; onC
   );
 }
 
-const STATE_LABEL: Record<BudgetState, string> = { ok: 'En orden', warning: 'Cerca del tope', over: 'Superado' };
+const STATE_LABEL: Record<BudgetState, string> = { ok: _t('En orden'), warning: _t('Cerca del tope'), over: _t('Superado') };
 
 export function StateBadge({ state }: { state: BudgetState }) {
   return <span className={`badge ${state}`}>{STATE_LABEL[state]}</span>;
@@ -57,7 +58,7 @@ export function Meter({ ratio, state, label, mark }: { ratio: number; state: Bud
   return (
     <div className={`meter ${state === 'goal' ? '' : state}`} role="meter" aria-valuenow={Math.round(ratio * 100)} aria-valuemin={0} aria-valuemax={100} aria-label={label}>
       <div style={{ width: `${Math.min(100, Math.max(0, ratio * 100))}%` }} />
-      {mark != null && <span className="mark" style={{ left: `${Math.min(100, mark * 100)}%` }} title="Donde deberías ir hoy" />}
+      {mark != null && <span className="mark" style={{ left: `${Math.min(100, mark * 100)}%` }} title={_t("Donde deberías ir hoy")} />}
     </div>
   );
 }
@@ -135,7 +136,7 @@ export function Segmented<T extends string>({ value, options, onChange }: { valu
     <div className="seg" role="tablist">
       {options.map(([v, label]) => (
         <button key={v} role="tab" aria-selected={value === v} className={value === v ? 'on' : ''} onClick={() => onChange(v)}>
-          {label}
+          {_t(label)}
         </button>
       ))}
     </div>

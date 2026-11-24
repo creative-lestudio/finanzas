@@ -3,6 +3,7 @@ import { CURRENCIES, rateFor, referenceTypesFor } from '../lib/fx';
 import { formatMoney, formatRate, parseAmount } from '../lib/money';
 import type { RateQuote, Transaction } from '../lib/types';
 import { useStore } from '../store';
+import { t as _t } from '../lib/i18n';
 
 export interface EquivResult {
   fx: NonNullable<Transaction['fx']>;
@@ -76,28 +77,28 @@ export function Equivalent({ currency, date, cents, initial, defaultOpen, onChan
   return (
     <div className="card glass" style={{ padding: 14 }}>
       <label className="switch-row" style={{ margin: 0, color: 'var(--text)', fontSize: 15 }}>
-        <span className="grow">Registrar su equivalente en otra moneda<div className="tiny muted">Ej.: pagado en Bs = 1.250 $ a tasa acordada</div></span>
+        <span className="grow">{_t("Registrar su equivalente en otra moneda")}<div className="tiny muted">{_t("Ej.: pagado en Bs = 1.250 $ a tasa acordada")}</div></span>
         <input type="checkbox" className="switch" checked={open} onChange={(e) => setOpen(e.target.checked)} />
       </label>
       {open && (
         <>
           <div className="field mt">
-            <label>Equivalente en
+            <label>{_t("Equivalente en")}
               <select value={eq} onChange={(e) => { setEq(e.target.value); setSource(referenceTypesFor(e.target.value, currency)[0]); setDirty(false); }}>
                 {others.map((c) => <option key={c.code} value={c.code}>{c.flag} {c.code}</option>)}
               </select>
             </label>
           </div>
-          <div className="seg" aria-label="Tasa usada">
+          <div className="seg" aria-label={_t("Tasa usada")}>
             {sources.map((s) => <button key={s} type="button" className={activeSource === s ? 'on' : ''} onClick={() => { setSource(s); setDirty(false); }}>{label(s)}</button>)}
           </div>
           <div className="seg">
-            <button type="button" className={mode === 'rate' ? 'on' : ''} onClick={() => setMode('rate')}>Tengo la tasa</button>
-            <button type="button" className={mode === 'amount' ? 'on' : ''} onClick={() => setMode('amount')}>Tengo el monto en {eq}</button>
+            <button type="button" className={mode === 'rate' ? 'on' : ''} onClick={() => setMode('rate')}>{_t("Tengo la tasa")}</button>
+            <button type="button" className={mode === 'amount' ? 'on' : ''} onClick={() => setMode('amount')}>{_t("Tengo el monto en")} {eq}</button>
           </div>
           {mode === 'rate' ? (
             <div className="field">
-              <input inputMode="decimal" placeholder={`Tasa ${label(activeSource)}: ${currency} por 1 ${eq}`} value={rateStr} onChange={(e) => { setRateStr(e.target.value); setDirty(true); }} aria-label="Tasa" />
+              <input inputMode="decimal" placeholder={`Tasa ${label(activeSource)}: ${currency} por 1 ${eq}`} value={rateStr} onChange={(e) => { setRateStr(e.target.value); setDirty(true); }} aria-label={_t("Tasa")} />
             </div>
           ) : (
             <div className="field">
@@ -105,22 +106,22 @@ export function Equivalent({ currency, date, cents, initial, defaultOpen, onChan
             </div>
           )}
           {mode === 'rate' && !rateStr && activeSource !== 'Personalizada' && (
-            <p className="tiny muted" style={{ margin: 0 }}>No tengo la tasa {activeSource} de este día. Escríbela y se guardará para tus próximos movimientos.</p>
+            <p className="tiny muted" style={{ margin: 0 }}>{_t("No tengo la tasa")} {activeSource} {_t("de este día. Escríbela y se guardará para tus próximos movimientos.")}</p>
           )}
           {valid && (
             <p className="small" style={{ margin: '8px 0 0' }}>
-              {formatMoney(abs, currency)} <span className="muted">≈</span> <b>{formatMoney(eqCents, eq)}</b> a <b>{formatRate(rate)}</b> {currency}/{eq} · {label(activeSource)}
-              {result?.saveRate && <span className="tiny muted"> · se guardará como tasa {activeSource} del día</span>}
+              {formatMoney(abs, currency)} <span className="muted">≈</span> <b>{formatMoney(eqCents, eq)}</b> {_t("a")} <b>{formatRate(rate)}</b> {currency}/{eq} · {label(activeSource)}
+              {result?.saveRate && <span className="tiny muted"> {_t("· se guardará como tasa")} {activeSource} {_t("del día")}</span>}
             </p>
           )}
           {valid && toMain === null && (
             <p className="tiny" style={{ margin: '8px 0 0', color: 'var(--warn)' }}>
-              Tu moneda principal es {main}: para que este importe sume en tus totales, anota la tasa {eq}/{main} en Divisas o cambia tu moneda principal a {eq} en Ajustes.
+              {_t("Tu moneda principal es")} {main}{_t(": para que este importe sume en tus totales, anota la tasa")} {eq}/{main} {_t("en Divisas o cambia tu moneda principal a")} {eq} {_t("en Ajustes.")}
             </p>
           )}
           {valid && gain !== null && market && Math.abs(market - rate) / market > 0.005 && (
             <p className="tiny muted" style={{ margin: '4px 0 0' }}>
-              A tasa de mercado ({formatRate(market)}) valdría {formatMoney(gain, eq)}: {gain > eqCents ? 'diferencia a favor del mercado' : 'por encima del mercado'} de {formatMoney(Math.abs(gain - eqCents), eq)}.
+              {_t("A tasa de mercado (")}{formatRate(market)}{_t(") valdría")} {formatMoney(gain, eq)}: {gain > eqCents ? _t("diferencia a favor del mercado") : _t("por encima del mercado")} {_t("de")} {formatMoney(Math.abs(gain - eqCents), eq)}.
             </p>
           )}
         </>

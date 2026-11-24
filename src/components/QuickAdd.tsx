@@ -15,6 +15,7 @@ import { CategoryPicker } from './CategoryPicker';
 import { Equivalent, type EquivResult } from './Equivalent';
 import { Icon } from './icons';
 import { Sheet, toast } from './ui';
+import { t as _t } from '../lib/i18n';
 
 /** Guarda un movimiento manual, ajusta el saldo y avisa si se acerca a un presupuesto. */
 export function saveTransaction(data: AppData, t: Omit<Transaction, 'id'>): { next: AppData; message: string } {
@@ -58,7 +59,7 @@ export function QuickAdd({ onClose, onVoice, prefill }: { onClose: () => void; o
     setScanning(true);
     try {
       const r = await scanReceipt(data, file);
-      if (!r.amount) { toast('No pude leer el importe. Prueba con otra foto más de frente y con buena luz.'); return; }
+      if (!r.amount) { toast(_t("No pude leer el importe. Prueba con otra foto más de frente y con buena luz.")); return; }
       setKind('expense');
       setAmount(String(r.amount).replace('.', ','));
       if (r.merchant) setDescription(r.merchant);
@@ -67,7 +68,7 @@ export function QuickAdd({ onClose, onVoice, prefill }: { onClose: () => void; o
       if (acc) setAccountId(acc.id);
       const cat = r.category && data.categories.find((c) => c.kind === 'expense' && c.name.toLowerCase() === r.category!.toLowerCase());
       if (cat) setCategoryId(cat.id);
-      toast('Leído. Revisa los datos y guarda.');
+      toast(_t("Leído. Revisa los datos y guarda."));
     } catch (e) {
       toast(e instanceof Error && e.message ? e.message : 'No se pudo leer el recibo.');
     } finally {
@@ -128,47 +129,47 @@ export function QuickAdd({ onClose, onVoice, prefill }: { onClose: () => void; o
   };
 
   return (
-    <Sheet title="Nuevo movimiento" onClose={onClose}>
+    <Sheet title={_t("Nuevo movimiento")} onClose={onClose}>
       {asking && (
         <div className="coach-hero" style={{ borderRadius: 22, marginBottom: 12, padding: 12, gridTemplateColumns: '64px 1fr' }}>
           <img src={COACH.hola} alt="" style={{ width: 64, height: 64 }} />
           <div className="bubble" style={{ fontSize: 14 }}>
-            <b>Tu primer movimiento</b>
-            Pon el importe, elige la categoría y guarda. Abajo decide si lo registras <b>como prueba</b> (lo borro al terminar) o <b>como real</b>.
+            <b>{_t("Tu primer movimiento")}</b>
+            {_t("Pon el importe, elige la categoría y guarda. Abajo decide si lo registras")} <b>{_t("como prueba")}</b> {_t("(lo borro al terminar) o")} <b>{_t("como real")}</b>.
           </div>
         </div>
       )}
       <button className="pill-mic lg" onClick={onVoice}>
         <span className="dot"><Icon name="mic" size={18} /></span>
         <span className="grow">
-          <b>Dictar</b>
-          <div className="small muted">"Gasté 50 euros en Mercadona"</div>
+          <b>{_t("Dictar")}</b>
+          <div className="small muted">{_t("\"Gasté 50 euros en Mercadona\"")}</div>
         </span>
       </button>
       <input ref={scanRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => void scan(e.target.files?.[0])} />
       <button className={`pill-mic lg ${prefill?.scan ? 'attn' : ''}`} onClick={openScan} disabled={scanning} style={{ marginTop: 8 }}>
         <span className="dot"><Icon name="receipt" size={18} /></span>
         <span className="grow">
-          <b>{scanning ? 'Leyendo el recibo…' : 'Escanear recibo'}</b>
-          <div className="small muted">Una foto y la IA rellena importe, comercio y fecha. La foto no se guarda.</div>
+          <b>{scanning ? _t("Leyendo el recibo…") : _t("Escanear recibo")}</b>
+          <div className="small muted">{_t("Una foto y la IA rellena importe, comercio y fecha. La foto no se guarda.")}</div>
         </span>
       </button>
       <div className="seg">
-        <button className={kind === 'expense' ? 'on' : ''} onClick={() => { setKind('expense'); setCategoryId(null); }}>Gasto</button>
-        <button className={kind === 'income' ? 'on' : ''} onClick={() => { setKind('income'); setCategoryId(null); }}>Ingreso</button>
+        <button className={kind === 'expense' ? 'on' : ''} onClick={() => { setKind('expense'); setCategoryId(null); }}>{_t("Gasto")}</button>
+        <button className={kind === 'income' ? 'on' : ''} onClick={() => { setKind('income'); setCategoryId(null); }}>{_t("Ingreso")}</button>
       </div>
       <div className="amount-wrap">
-        <input className="amount-input" inputMode="decimal" placeholder="0" autoFocus value={amount} onChange={(e) => setAmount(e.target.value)} aria-label="Importe" onKeyDown={(e) => e.key === 'Enter' && save()} style={{ width: `${Math.max(2, amount.length + 1)}ch`, maxWidth: '80%' }} />
+        <input className="amount-input" inputMode="decimal" placeholder="0" autoFocus value={amount} onChange={(e) => setAmount(e.target.value)} aria-label={_t("Importe")} onKeyDown={(e) => e.key === 'Enter' && save()} style={{ width: `${Math.max(2, amount.length + 1)}ch`, maxWidth: '80%' }} />
         <span className="cur">{currency}</span>
       </div>
       <div className="field">
-        <input placeholder="Concepto (opcional): café, taxi…" value={description} onChange={(e) => setDescription(e.target.value)} aria-label="Concepto" />
+        <input placeholder={_t("Concepto (opcional): café, taxi…")} value={description} onChange={(e) => setDescription(e.target.value)} aria-label={_t("Concepto")} />
       </div>
       <CategoryPicker kind={kind} value={chosen} onChange={setCategoryId} />
       <div className="grid2">
         <div className="field">
           <label>
-            Cuenta
+            {_t("Cuenta")}
             <select value={accountId} onChange={(e) => setAccountId(e.target.value)}>
               {usable.map((a) => (
                 <option key={a.id} value={a.id}>{a.name} · {a.currency}</option>
@@ -178,30 +179,30 @@ export function QuickAdd({ onClose, onVoice, prefill }: { onClose: () => void; o
         </div>
         <div className="field">
           <label>
-            Fecha
+            {_t("Fecha")}
             <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </label>
         </div>
       </div>
       <div className="field">
-        <label>Repetir
+        <label>{_t("Repetir")}
           <select value={repeat} onChange={(e) => setRepeat(e.target.value as typeof repeat)} disabled={asking && asTest}>
-            <option value="">No se repite</option>
-            <option value="weekly">Cada semana</option>
-            <option value="monthly">Cada mes</option>
-            <option value="yearly">Cada año</option>
+            <option value="">{_t("No se repite")}</option>
+            <option value="weekly">{_t("Cada semana")}</option>
+            <option value="monthly">{_t("Cada mes")}</option>
+            <option value="yearly">{_t("Cada año")}</option>
           </select>
         </label>
       </div>
       <Equivalent key={currency} currency={currency} date={date} cents={signed ? Math.abs(signed) : null} defaultOpen={currency === 'VES'} onChange={setEquiv} />
       {asking && (
-        <div className="seg mt" role="group" aria-label="Tipo de registro">
-          <button className={asTest ? 'on' : ''} onClick={() => setAsTest(true)}>Registrar como prueba</button>
-          <button className={!asTest ? 'on' : ''} onClick={() => setAsTest(false)}>Registro real</button>
+        <div className="seg mt" role="group" aria-label={_t("Tipo de registro")}>
+          <button className={asTest ? 'on' : ''} onClick={() => setAsTest(true)}>{_t("Registrar como prueba")}</button>
+          <button className={!asTest ? 'on' : ''} onClick={() => setAsTest(false)}>{_t("Registro real")}</button>
         </div>
       )}
       <button className="btn primary block mt" disabled={!signed || !chosen} onClick={save}>
-        Guardar {signed ? formatMoney(signed, currency) : ''}
+        {_t("Guardar")} {signed ? formatMoney(signed, currency) : ''}
       </button>
     </Sheet>
   );

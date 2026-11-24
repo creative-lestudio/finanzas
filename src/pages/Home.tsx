@@ -21,11 +21,12 @@ import { applyGoalMovement, savingProposals } from '../lib/savings';
 import type { Account } from '../lib/types';
 import { useStore } from '../store';
 import { askAdvisor } from './Assistant';
+import { t as _t, LOCALE } from '../lib/i18n';
 
-const MONTH_SHORT = new Intl.DateTimeFormat('es-ES', { month: 'short' });
+const MONTH_SHORT = new Intl.DateTimeFormat(LOCALE, { month: 'short' });
 
 const KIND_NAME: Record<Account['kind'], string> = {
-  checking: 'Cuenta', savings: 'Ahorro', cash: 'Efectivo', investment: 'Inversión', crypto: 'Cripto', card: 'Tarjeta', loan: 'Préstamo',
+  checking: _t('Cuenta'), savings: _t('Ahorro'), cash: _t('Efectivo'), investment: _t('Inversión'), crypto: _t('Cripto'), card: _t('Tarjeta'), loan: _t('Préstamo'),
 };
 
 export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void; openVoice: () => void; openAdd: () => void; hidden: boolean }) {
@@ -102,30 +103,30 @@ export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void
       {(data.debts ?? []).some((d) => remainingOf(d) > 0) && !guideActive(data) && (
         <div className="card glass row tap" style={{ padding: 14, cursor: 'pointer' }} onClick={() => go('debts')} role="button">
           <span className="icon accent"><Icon name="scale" size={20} /></span>
-          <div className="grow small"><b>Deudas</b><div className="muted">Debo {formatMoney(debtTotals(data).owe, base)} · Me deben {formatMoney(debtTotals(data).owed, base)}{debtTotals(data).overdue > 0 ? ` · ${debtTotals(data).overdue} vencida(s)` : ''}</div></div>
+          <div className="grow small"><b>{_t("Deudas")}</b><div className="muted">{_t("Debo")} {formatMoney(debtTotals(data).owe, base)} {_t("· Me deben")} {formatMoney(debtTotals(data).owed, base)}{debtTotals(data).overdue > 0 ? ` · ${debtTotals(data).overdue} vencida(s)` : ''}</div></div>
           <Icon name="chevron" size={18} className="chev" />
         </div>
       )}
       {/* Tarjetas deslizables: patrimonio, posición global y inversiones */}
-      <div className="carousel" tabIndex={0} role="region" ref={carousel} onScroll={onScroll} aria-label="Tus saldos">
-        <section className="balance b1" onClick={() => go('wealth')} aria-label="Patrimonio neto">
-          <div className="label"><Icon name="chart" size={16} /> Patrimonio neto</div>
+      <div className="carousel" tabIndex={0} role="region" ref={carousel} onScroll={onScroll} aria-label={_t("Tus saldos")}>
+        <section className="balance b1" onClick={() => go('wealth')} aria-label={_t("Patrimonio neto")}>
+          <div className="label"><Icon name="chart" size={16} /> {_t("Patrimonio neto")}</div>
           <div className="amount">{formatMoney(view.nw.net, base)}</div>
-          <div className="meta">Lo que tienes menos lo que debes</div>
+          <div className="meta">{_t("Lo que tienes menos lo que debes")}</div>
           <div className="rows">
-            <div><span>Activos</span><span className="v">{formatMoney(view.nw.assets)}</span></div>
-            <div><span>Deudas</span><span className="v">{view.nw.liabilities ? "−" : ""}{formatMoney(view.nw.liabilities)}</span></div>
-            <div><span>Este mes</span><span className="v">{saved >= 0 ? '+' : ''}{formatMoney(saved)}</span></div>
+            <div><span>{_t("Activos")}</span><span className="v">{formatMoney(view.nw.assets)}</span></div>
+            <div><span>{_t("Deudas")}</span><span className="v">{view.nw.liabilities ? "−" : ""}{formatMoney(view.nw.liabilities)}</span></div>
+            <div><span>{_t("Este mes")}</span><span className="v">{saved >= 0 ? '+' : ''}{formatMoney(saved)}</span></div>
           </div>
         </section>
-        <section className="balance b2" onClick={() => go('wealth')} aria-label="Posición global">
-          <div className="label"><Icon name="wallet" size={16} /> Posición global · disponible</div>
+        <section className="balance b2" onClick={() => go('wealth')} aria-label={_t("Posición global")}>
+          <div className="label"><Icon name="wallet" size={16} /> {_t("Posición global · disponible")}</div>
           <div className="amount">{formatMoney(view.nw.liquid, base)}</div>
-          <div className="meta">En {view.liquidAccounts.length} cuentas · {view.currencies.join(', ')}</div>
+          <div className="meta">{_t("En")} {view.liquidAccounts.length} {_t("cuentas ·")} {view.currencies.join(', ')}</div>
           <div className="rows">{view.liquidAccounts.slice(0, 4).map(accountRow)}</div>
         </section>
-        <section className="balance b3" onClick={() => go('wealth')} aria-label="Inversiones">
-          <div className="label"><Icon name="trend" size={16} /> Inversiones</div>
+        <section className="balance b3" onClick={() => go('wealth')} aria-label={_t("Inversiones")}>
+          <div className="label"><Icon name="trend" size={16} /> {_t("Inversiones")}</div>
           <div className="amount">{formatMoney(view.investTotal, base)}</div>
           <div className="meta">
             {view.investGoals[0] ? `${Math.round(view.investGoals[0].ratio * 100)} % de «${view.investGoals[0].goal.name}»` : `${view.investAccounts.length} posiciones`}
@@ -133,13 +134,13 @@ export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void
           <div className="rows">
             {view.investAccounts.length ? view.investAccounts.slice(0, 4).map((a) => (
               <div key={a.id}><span className="pill">{KIND_NAME[a.kind]}</span><span className="ellipsis">{a.name}</span><span className="v">{formatMoney(accountBase(data, a, now), base)}</span></div>
-            )) : <div><span>Añade fondos, acciones o cripto en Patrimonio</span></div>}
+            )) : <div><span>{_t("Añade fondos, acciones o cripto en Patrimonio")}</span></div>}
           </div>
         </section>
       </div>
-      <div className="dots" role="tablist" aria-label="Elegir tarjeta">
+      <div className="dots" role="tablist" aria-label={_t("Elegir tarjeta")}>
         {['Patrimonio', 'Posición global', 'Inversiones'].map((l, i) => (
-          <button key={l} className={slide === i ? 'on' : ''} onClick={() => goSlide(i)} aria-label={l} aria-selected={slide === i} role="tab" />
+          <button key={l} className={slide === i ? 'on' : ''} onClick={() => goSlide(i)} aria-label={_t(l)} aria-selected={slide === i} role="tab" />
         ))}
       </div>
 
@@ -152,7 +153,7 @@ export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void
         ] as const).map(([icon, label, fn]) => (
           <button key={label} onClick={fn}>
             <span className="qi lg"><Icon name={icon} size={22} /></span>
-            {label}
+            {_t(label)}
           </button>
         ))}
       </div>
@@ -162,31 +163,31 @@ export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void
         <img src={COACH[view.tip.pose]} alt="" />
         <div className="txt">
           <b>{view.tip.title}</b>
-          <div>{hidden ? 'Toca para hablar con tu asistente.' : view.tip.text}</div>
+          <div>{hidden ? _t("Toca para hablar con tu asistente.") : view.tip.text}</div>
         </div>
       </div>
 
       <div className="card glass" style={{ marginTop: 14 }}>
         <div className="card-head">
-          <h2>Este mes</h2>
-          <button className="link" onClick={() => go('transactions')}>Movimientos</button>
+          <h2>{_t("Este mes")}</h2>
+          <button className="link" onClick={() => go('transactions')}>{_t("Movimientos")}</button>
         </div>
         <div className="grid2" style={{ gap: 10 }}>
           <div>
-            <div className="eyebrow row" style={{ gap: 6 }}><Icon name="arrowDown" size={14} /> Ingresos</div>
+            <div className="eyebrow row" style={{ gap: 6 }}><Icon name="arrowDown" size={14} /> {_t("Ingresos")}</div>
             <div className="mid pos">{formatMoney(view.sum.income)}</div>
           </div>
           <div>
-            <div className="eyebrow row" style={{ gap: 6 }}><Icon name="arrowUp" size={14} /> Gastos</div>
+            <div className="eyebrow row" style={{ gap: 6 }}><Icon name="arrowUp" size={14} /> {_t("Gastos")}</div>
             <div className="mid neg">{formatMoney(view.sum.expenses)}</div>
           </div>
         </div>
         {view.prev.expenses > 0 && (
-          <div className={`small ${delta > 0 ? 'neg' : 'pos'}`} style={{ marginTop: 6 }}>{delta > 0 ? '+' : ''}{(delta * 100).toFixed(0)} % de gasto frente al mes anterior</div>
+          <div className={`small ${delta > 0 ? 'neg' : 'pos'}`} style={{ marginTop: 6 }}>{delta > 0 ? '+' : ''}{(delta * 100).toFixed(0)} {_t("% de gasto frente al mes anterior")}</div>
         )}
         {view.families.length > 0 && (
           <>
-            <div className="segbar" role="img" aria-label="Gasto del mes por grupo">
+            <div className="segbar" role="img" aria-label={_t("Gasto del mes por grupo")}>
               {view.families.map((f) => <i key={f.id} style={{ ['--c' as string]: f.color, flexGrow: f.value }} title={`${f.label}: ${formatMoney(f.value)}`} />)}
             </div>
             <div className="legend">
@@ -200,7 +201,7 @@ export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void
             </div>
           </>
         )}
-        <div className="cols" role="img" aria-label="Gasto de los últimos meses" style={{ gridTemplateColumns: `repeat(${view.history.length}, 1fr)`, marginTop: 18 }}>
+        <div className="cols" role="img" aria-label={_t("Gasto de los últimos meses")} style={{ gridTemplateColumns: `repeat(${view.history.length}, 1fr)`, marginTop: 18 }}>
           {view.history.map((m, i) => (
             <div key={m.month} className={`col ${i === view.history.length - 1 ? 'now' : ''}`} title={`${m.month}: ${formatMoney(m.expenses)}`}>
               <div className="bar" style={{ height: `${(m.expenses / histMax) * 100}%` }} />
@@ -213,21 +214,21 @@ export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void
       {view.sum.missingRates.size > 0 && (
         <div className="alert warning small tap" onClick={() => go('fx')}>
           <Icon name="alert" size={18} />
-          <div>Faltan tasas para {[...view.sum.missingRates].join(', ')}: esos movimientos no se suman. Escríbelas en Divisas.</div>
+          <div>{_t("Faltan tasas para")} {[...view.sum.missingRates].join(', ')}{_t(": esos movimientos no se suman. Escríbelas en Divisas.")}</div>
         </div>
       )}
 
       {alerts > 0 && (
         <>
-          <div className="section-title">Avisos</div>
+          <div className="section-title">{_t("Avisos")}</div>
           <div className="card glass flush">
             <ul className="list">
               {view.budgets.map((b) => (
                 <li key={b.budget.id} className="tap" onClick={() => go('plan')}>
                   <CatBadge id={b.budget.categoryId} emoji={cat(b.budget.categoryId)?.icon} size={18} />
                   <div className="grow">
-                    <div>{cat(b.budget.categoryId)?.name}</div>
-                    <div className={`small ${b.state === 'over' ? 'neg' : 'muted'}`}>{b.state === 'over' ? `Superado en ${formatMoney(-b.remaining)}` : `Quedan ${formatMoney(b.dailyAllowance)} al día`}</div>
+                    <div>{_t(cat(b.budget.categoryId)?.name ?? '')}</div>
+                    <div className={`small ${b.state === 'over' ? 'neg' : 'muted'}`}>{b.state === 'over' ? _t('Superado en {amount}', { amount: formatMoney(-b.remaining) }) : _t('Quedan {amount} al día', { amount: formatMoney(b.dailyAllowance) })}</div>
                   </div>
                   <span className={`badge ${b.state}`}>{Math.round(b.ratio * 100)} %</span>
                 </li>
@@ -236,8 +237,8 @@ export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void
                 <li key={s.key} className="tap" onClick={() => go('subs')}>
                   <span className="icon" style={{ background: 'var(--warn-bg)', color: 'var(--warn)' }}><Icon name="arrowUp" size={18} /></span>
                   <div className="grow">
-                    <div className="ellipsis">{s.name} ha subido</div>
-                    <div className="small neg">+{formatMoney(s.priceIncrease!, s.currency)} en el último cobro</div>
+                    <div className="ellipsis">{s.name} {_t("ha subido")}</div>
+                    <div className="small neg">+{formatMoney(s.priceIncrease!, s.currency)} {_t("en el último cobro")}</div>
                   </div>
                 </li>
               ))}
@@ -245,8 +246,8 @@ export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void
                 <li className="tap" onClick={() => go('subs')}>
                   <span className="icon" style={{ background: 'var(--warn-bg)', color: 'var(--warn)' }}><Icon name="bank" size={18} /></span>
                   <div className="grow">
-                    <div>Comisiones bancarias</div>
-                    <div className="small muted"><span className="neg">{formatMoney(view.fees.reduce((s, f) => s + f.amountBase, 0))}</span> este mes. Mira cómo evitarlas.</div>
+                    <div>{_t("Comisiones bancarias")}</div>
+                    <div className="small muted"><span className="neg">{formatMoney(view.fees.reduce((s, f) => s + f.amountBase, 0))}</span> {_t("este mes. Mira cómo evitarlas.")}</div>
                   </div>
                 </li>
               )}
@@ -257,16 +258,16 @@ export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void
 
       {(view.fx.exchanges.length > 0 || view.fx.incomes.length > 0) && (
         <div className="card glass" onClick={() => go('fx')} style={{ cursor: 'pointer', marginTop: 14 }}>
-          <div className="card-head"><h2>Cambio de divisa · 3 meses</h2><Icon name="chevron" size={16} className="chev" /></div>
+          <div className="card-head"><h2>{_t("Cambio de divisa · 3 meses")}</h2><Icon name="chevron" size={16} className="chev" /></div>
           <div className={`mid ${view.fx.total < 0 ? 'neg' : 'pos'}`}>{formatMoney(view.fx.total)}</div>
-          <div className="small muted">Frente a tus tasas de referencia, comisiones incluidas.</div>
+          <div className="small muted">{_t("Frente a tus tasas de referencia, comisiones incluidas.")}</div>
         </div>
       )}
 
       {view.proposals.length > 0 && (
         <div className="card glass" style={{ marginTop: 14 }}>
-          <h2>Ahorro automático</h2>
-          <p className="small secondary" style={{ marginTop: 0 }}>Puedes apartar <b className="pos">{formatMoney(totalProposal)}</b> este mes sin notarlo.</p>
+          <h2>{_t("Ahorro automático")}</h2>
+          <p className="small secondary" style={{ marginTop: 0 }}>{_t("Puedes apartar")} <b className="pos">{formatMoney(totalProposal)}</b> {_t("este mes sin notarlo.")}</p>
           <ul className="list plain small">
             {view.proposals.map((p, i) => (
               <li key={i} style={{ minHeight: 44 }}>
@@ -275,13 +276,13 @@ export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void
               </li>
             ))}
           </ul>
-          <button className="btn primary block mt" onClick={() => update((d) => view.proposals.reduce((acc, p) => applyGoalMovement(acc, p.goalId, p.amount, p.reason, now), d))}>Apartar a mis huchas</button>
+          <button className="btn primary block mt" onClick={() => update((d) => view.proposals.reduce((acc, p) => applyGoalMovement(acc, p.goalId, p.amount, p.reason, now), d))}>{_t("Apartar a mis huchas")}</button>
         </div>
       )}
 
       {view.goals.length > 0 && (
         <div className="card glass" onClick={() => go('plan')} style={{ cursor: 'pointer' }}>
-          <div className="card-head"><h2>Metas</h2><Icon name="chevron" size={16} className="chev" /></div>
+          <div className="card-head"><h2>{_t("Metas")}</h2><Icon name="chevron" size={16} className="chev" /></div>
           <div className="stack">
             {view.goals.map((p) => (
               <div key={p.goal.id}>
@@ -298,15 +299,15 @@ export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void
 
       {view.ants.byMerchant.length > 0 && (
         <div className="card glass">
-          <h2>Gastos hormiga · 30 días</h2>
+          <h2>{_t("Gastos hormiga · 30 días")}</h2>
           <p className="small secondary" style={{ marginTop: 0 }}>
-            {view.ants.count} compras pequeñas suman <b className="neg">{formatMoney(view.ants.total)}</b>: unos <b className="neg">{formatMoney(view.ants.yearly)}</b> al año.
+            {view.ants.count} {_t("compras pequeñas suman")} <b className="neg">{formatMoney(view.ants.total)}</b>{_t(": unos")} <b className="neg">{formatMoney(view.ants.yearly)}</b> {_t("al año.")}
           </p>
           <ul className="list plain small">
             {view.ants.byMerchant.slice(0, 3).map((m) => (
               <li key={m.key} style={{ minHeight: 44 }}>
                 <span className="grow ellipsis">{m.name}</span>
-                <span className="muted">{m.count} veces</span>
+                <span className="muted">{m.count} {_t("veces")}</span>
                 <Money cents={-m.total} sign />
               </li>
             ))}
@@ -316,16 +317,16 @@ export function Home({ go, openVoice, openAdd, hidden }: { go: (p: Page) => void
 
       <div className="grid2">
         <div className="card glass" onClick={() => go('health')} style={{ cursor: 'pointer' }}>
-          <div className="eyebrow">Salud financiera</div>
+          <div className="eyebrow">{_t("Salud financiera")}</div>
           <div className="big" style={{ fontSize: 30, marginTop: 4, color: view.health.score >= 60 ? 'var(--good)' : view.health.score >= 40 ? 'var(--warn)' : 'var(--bad)' }}>
             {view.health.score}<span className="small muted"> /100</span>
           </div>
           <div className="small secondary">{view.health.grade}</div>
         </div>
         <div className="card glass" onClick={() => go('subs')} style={{ cursor: 'pointer' }}>
-          <div className="eyebrow">Suscripciones</div>
+          <div className="eyebrow">{_t("Suscripciones")}</div>
           <div className="big" style={{ fontSize: 30, marginTop: 4 }}>{view.subs.length}</div>
-          <div className="small secondary"><span className="neg">{formatMoney(view.subs.reduce((s, x) => s + x.yearlyBase, 0))}</span> al año</div>
+          <div className="small secondary"><span className="neg">{formatMoney(view.subs.reduce((s, x) => s + x.yearlyBase, 0))}</span> {_t("al año")}</div>
         </div>
       </div>
     </>

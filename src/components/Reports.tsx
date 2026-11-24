@@ -9,6 +9,7 @@ import { useStore } from '../store';
 import { Donut, MonthBars } from './Charts';
 import { CatBadge } from './icons';
 import { Segmented } from './ui';
+import { t as _t, LOCALE } from '../lib/i18n';
 
 /** Resumen global: posición, ingresos y gastos totales y por mes, y su reparto por categoría. */
 export function Reports() {
@@ -29,28 +30,28 @@ export function Reports() {
       <Segmented value={range} onChange={(v) => setRange(v as RangeKey)} options={[['1', 'Este mes'], ['3', '3 meses'], ['12', '12 meses'], ['all', 'Todo']]} />
 
       <div className="grid2 mb">
-        <div className="card glass"><h2>Patrimonio neto</h2><div className="mid">{formatMoney(nw.net, base)}</div><div className="tiny muted">Hoy</div></div>
-        <div className="card glass"><h2>Disponible</h2><div className="mid">{formatMoney(nw.liquid, base)}</div><div className="tiny muted">Cuentas y efectivo</div></div>
+        <div className="card glass"><h2>{_t("Patrimonio neto")}</h2><div className="mid">{formatMoney(nw.net, base)}</div><div className="tiny muted">{_t("Hoy")}</div></div>
+        <div className="card glass"><h2>{_t("Disponible")}</h2><div className="mid">{formatMoney(nw.liquid, base)}</div><div className="tiny muted">{_t("Cuentas y efectivo")}</div></div>
       </div>
 
       <div className="card glass">
         <div className="grid2" style={{ gap: 18 }}>
-          <div><div className="small muted">Ingresos</div><div className="mid pos">{formatMoney(r.income, base)}</div></div>
-          <div><div className="small muted">Gastos</div><div className="mid neg">{formatMoney(r.expenses, base)}</div></div>
-          <div><div className="small muted">Balance</div><div className={`mid ${r.net >= 0 ? 'pos' : 'neg'}`}>{r.net >= 0 ? '+' : ''}{formatMoney(r.net, base)}</div></div>
-          <div><div className="small muted">Ahorro</div><div className={`mid ${saving !== null && saving >= 0 ? 'pos' : 'neg'}`}>{saving === null ? '—' : `${saving} %`}</div></div>
+          <div><div className="small muted">{_t("Ingresos")}</div><div className="mid pos">{formatMoney(r.income, base)}</div></div>
+          <div><div className="small muted">{_t("Gastos")}</div><div className="mid neg">{formatMoney(r.expenses, base)}</div></div>
+          <div><div className="small muted">{_t("Balance")}</div><div className={`mid ${r.net >= 0 ? 'pos' : 'neg'}`}>{r.net >= 0 ? '+' : ''}{formatMoney(r.net, base)}</div></div>
+          <div><div className="small muted">{_t("Ahorro")}</div><div className={`mid ${saving !== null && saving >= 0 ? 'pos' : 'neg'}`}>{saving === null ? '—' : `${saving} %`}</div></div>
         </div>
-        {r.missingRates.size > 0 && <p className="tiny" style={{ color: 'var(--warn)', marginBottom: 0 }}>Faltan tasas de {[...r.missingRates].join(', ')}: esos importes no se han podido sumar. Anótalas en Divisas.</p>}
+        {r.missingRates.size > 0 && <p className="tiny" style={{ color: 'var(--warn)', marginBottom: 0 }}>{_t("Faltan tasas de")} {[...r.missingRates].join(', ')}{_t(": esos importes no se han podido sumar. Anótalas en Divisas.")}</p>}
       </div>
 
       {r.perMonth.length > 1 && (
         <div className="card glass">
-          <div className="card-head"><h2>Por mes</h2><span className="tiny muted"><b style={{ color: 'var(--good)' }}>■</b> Ingresos <b style={{ color: 'var(--bad)' }}>■</b> Gastos</span></div>
+          <div className="card-head"><h2>{_t("Por mes")}</h2><span className="tiny muted"><b style={{ color: 'var(--good)' }}>■</b> {_t("Ingresos")} <b style={{ color: 'var(--bad)' }}>■</b> {_t("Gastos")}</span></div>
           <MonthBars rows={r.perMonth} base={base} />
           <div className="mtable">
             {[...r.perMonth].reverse().slice(0, 12).map((m) => (
               <div key={m.month} className="mrow">
-                <span className="mname">{new Date(`${m.month}-15`).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</span>
+                <span className="mname">{new Date(`${m.month}-15`).toLocaleDateString(LOCALE, { month: 'long', year: 'numeric' })}</span>
                 <span className="pos num">+{formatMoney(m.income, base)}</span>
                 <span className="neg num">−{formatMoney(m.expenses, base)}</span>
                 <b className={`num ${m.income - m.expenses >= 0 ? 'pos' : 'neg'}`}>{formatMoney(m.income - m.expenses, base)}</b>
@@ -61,8 +62,8 @@ export function Reports() {
       )}
 
       <div className="card glass">
-        <h2>Gastos por categoría</h2>
-        {exp.length === 0 ? <p className="small muted" style={{ margin: 0 }}>Sin gastos en este periodo.</p> : (
+        <h2>{_t("Gastos por categoría")}</h2>
+        {exp.length === 0 ? <p className="small muted" style={{ margin: 0 }}>{_t("Sin gastos en este periodo.")}</p> : (
           <>
             <div className="row" style={{ justifyContent: 'center', margin: '4px 0 10px' }}>
               <Donut parts={exp.map((e) => ({ id: e.id, value: e.value, color: categoryColor(e.id) }))} center={formatMoney(r.expenses, base)} />
@@ -82,7 +83,7 @@ export function Reports() {
                     {isOpen && (
                       <div style={{ padding: '0 18px 10px 70px' }}>
                         {subs.map((s) => <div key={s.id} className="row small" style={{ justifyContent: 'space-between', padding: '4px 0' }}><span>{name(s.id)}</span><span className="num">{formatMoney(s.value, base)}</span></div>)}
-                        {own > 0 && <div className="row small muted" style={{ justifyContent: 'space-between', padding: '4px 0' }}><span>General</span><span className="num">{formatMoney(own, base)}</span></div>}
+                        {own > 0 && <div className="row small muted" style={{ justifyContent: 'space-between', padding: '4px 0' }}><span>{_t("General")}</span><span className="num">{formatMoney(own, base)}</span></div>}
                       </div>
                     )}
                   </li>
@@ -95,7 +96,7 @@ export function Reports() {
 
       {inc.length > 0 && (
         <div className="card glass">
-          <h2>Ingresos por categoría</h2>
+          <h2>{_t("Ingresos por categoría")}</h2>
           <ul className="list plain" >
             {inc.map((e) => (
               <li key={e.id}><CatBadge id={e.id} /><div className="grow"><div className="ellipsis">{name(e.id)}</div><div className="tiny muted">{Math.round(e.pct * 100)} %</div></div><b className="num pos">{formatMoney(e.value, base)}</b></li>
@@ -132,7 +133,7 @@ export function ByCategory({ month, kind }: { month: string; kind: 'expense' | '
   }, [data, month, kind]); // eslint-disable-line react-hooks/exhaustive-deps
   const total = rows.reduce((s, r) => s + r.total, 0);
   const name = (id: string) => data.categories.find((c) => c.id === id)?.name ?? id;
-  if (!rows.length) return <p className="small muted center">No hay {kind === 'income' ? 'ingresos' : 'gastos'} este mes.</p>;
+  if (!rows.length) return <p className="small muted center">{_t("No hay")} {kind === 'income' ? 'ingresos' : 'gastos'} {_t("este mes.")}</p>;
   return (
     <div className="card glass flush">
       <ul className="list plain">
@@ -147,7 +148,7 @@ export function ByCategory({ month, kind }: { month: string; kind: 'expense' | '
                 <div className="grow">
                   <div className="ellipsis">{name(r.root)}</div>
                   <div className="track" style={{ height: 6, margin: '6px 0 2px', borderRadius: 9, background: 'var(--fill-2)', overflow: 'hidden' }}><i style={{ display: 'block', height: '100%', width: `${total ? (r.total / total) * 100 : 0}%`, background: categoryColorOf(r.root) }} /></div>
-                  <div className="tiny muted">{r.count} movimientos · {total ? Math.round((r.total / total) * 100) : 0} %</div>
+                  <div className="tiny muted">{r.count} {_t("movimientos ·")} {total ? Math.round((r.total / total) * 100) : 0} %</div>
                 </div>
                 <b className={`num ${kind === 'income' ? 'pos' : ''}`}>{formatMoney(r.total, base)}</b>
               </div>
@@ -155,7 +156,7 @@ export function ByCategory({ month, kind }: { month: string; kind: 'expense' | '
                 <div style={{ padding: '0 18px 12px 18px', display: 'grid', gap: 10 }}>
                   {[...subs].sort((a, b) => b[1] - a[1]).map(([id, v]) => (
                     <div key={id}>
-                      <div className="row small" style={{ justifyContent: 'space-between' }}><b>{id === r.root ? 'General' : name(id)}</b><span className="num">{formatMoney(v, base)}</span></div>
+                      <div className="row small" style={{ justifyContent: 'space-between' }}><b>{id === r.root ? _t("General") : name(id)}</b><span className="num">{formatMoney(v, base)}</span></div>
                       {r.txs.filter((t) => t.categoryId === id).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8).map((t) => (
                         <div key={t.id} className="row tiny muted" style={{ justifyContent: 'space-between', padding: '2px 0' }}><span className="ellipsis">{t.date.slice(8)}/{t.date.slice(5, 7)} · {prettyDescription(t.description)}</span><span className="num">{formatMoney(Math.abs(t.fx && t.fx.amount > 0 ? t.fx.amount : t.amount), t.fx && t.fx.amount > 0 ? t.fx.currency : data.accounts.find((a) => a.id === t.accountId)?.currency)}</span></div>
                       ))}

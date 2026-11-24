@@ -5,6 +5,7 @@ import type { Category } from '../lib/types';
 import { useStore } from '../store';
 import { CategorySheet } from './CategorySheet';
 import { CatIcon, Icon } from './icons';
+import { t as _t } from '../lib/i18n';
 
 /**
  * Elegir categoría en dos niveles: primero la madre y, si tiene, la subcategoría.
@@ -36,19 +37,19 @@ export function CategoryPicker({ kind, value, onChange }: { kind: Category['kind
         {shown.map((c) => (
           <button key={c.id} type="button" style={{ ['--c' as string]: categoryColor(c.id) }} className={current === c.id ? 'on' : ''} onClick={() => { setOpenRoot(c.id); onChange(c.id); }}>
             <CatIcon id={c.id} emoji={c.icon} size={22} />
-            <span className="ellipsis" style={{ maxWidth: '100%' }}>{c.name}</span>
+            <span className="ellipsis" style={{ maxWidth: '100%' }}>{_t(c.name)}</span>
           </button>
         ))}
-        {!all && roots.length > 11 && <button type="button" onClick={() => setAll(true)}><Icon name="grid" size={22} /><span>Ver todas</span></button>}
-        <button type="button" onClick={() => setSheet({})}><Icon name="plus" size={22} /><span>Nueva</span></button>
+        {!all && roots.length > 11 && <button type="button" onClick={() => setAll(true)}><Icon name="grid" size={22} /><span>{_t("Ver todas")}</span></button>}
+        <button type="button" onClick={() => setSheet({})}><Icon name="plus" size={22} /><span>{_t("Nueva")}</span></button>
       </div>
       {open && current === open && (
-        <div className="subchips" role="group" aria-label="Subcategoría">
-          {subs.length > 0 && <button type="button" className={`chip-pick ${value === open ? 'on' : ''}`} onClick={() => onChange(open)}>General</button>}
+        <div className="subchips" role="group" aria-label={_t("Subcategoría")}>
+          {subs.length > 0 && <button type="button" className={`chip-pick ${value === open ? 'on' : ''}`} onClick={() => onChange(open)}>{_t("General")}</button>}
           {subs.map((s) => (
             <button key={s.id} type="button" className={`chip-pick ${value === s.id ? 'on' : ''}`} onClick={() => onChange(s.id)} style={{ ['--c' as string]: categoryColor(s.id) }}>{s.name}</button>
           ))}
-          <button type="button" className="chip-pick" onClick={() => setSheet({ parentId: open })}><Icon name="plus" size={14} /> Subcategoría</button>
+          <button type="button" className="chip-pick" onClick={() => setSheet({ parentId: open })}><Icon name="plus" size={14} /> {_t("Subcategoría")}</button>
         </div>
       )}
       {sheet && <CategorySheet defaultKind={kind} parentId={sheet.parentId} onClose={() => setSheet(null)} onSaved={(c) => { setOpenRoot(c.parentId ?? c.id); setAll(true); onChange(c.id); }} />}

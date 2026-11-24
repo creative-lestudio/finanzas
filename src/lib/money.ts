@@ -1,3 +1,4 @@
+import { LOCALE } from './i18n';
 export const uid = (): string =>
   globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2) + Date.now().toString(36);
 
@@ -22,10 +23,10 @@ export function formatMoney(cents: number, currency = defaultCurrency): string {
   if (!f) {
     try {
       // El dólar se muestra como "$" (no "US$"), como se escribe a diario.
-      f = new Intl.NumberFormat('es-ES', { style: 'currency', currency, ...(currency === 'USD' ? { currencyDisplay: 'narrowSymbol' as const } : {}) });
+      f = new Intl.NumberFormat(LOCALE, { style: 'currency', currency, ...(currency === 'USD' ? { currencyDisplay: 'narrowSymbol' as const } : {}) });
     } catch {
       // Monedas no ISO (USDT, USDC...): número + código.
-      const n = new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const n = new Intl.NumberFormat(LOCALE, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       f = { format: (v: number) => `${n.format(v)} ${currency}` } as Intl.NumberFormat;
     }
     fmtCache.set(currency, f);
@@ -38,7 +39,7 @@ export function formatMoney(cents: number, currency = defaultCurrency): string {
 /** Formatea una tasa con decimales razonables (40,5 / 0,9213). */
 export function formatRate(rate: number): string {
   const digits = rate >= 100 ? 2 : rate >= 1 ? 4 : 6;
-  return new Intl.NumberFormat('es-ES', { maximumFractionDigits: digits }).format(rate);
+  return new Intl.NumberFormat(LOCALE, { maximumFractionDigits: digits }).format(rate);
 }
 
 /** Convierte "12,50", "-1.234,56", "12.5" o "1,234.56" a céntimos. */

@@ -3,6 +3,7 @@ import { useStore } from '../store';
 import type { Page } from '../App';
 import { COACH } from './Coach';
 import { Icon } from './icons';
+import { t as _t } from '../lib/i18n';
 
 /** Lista de las tres primeras tareas, presentada por el asistente. Desaparece al completarla o al saltarla. */
 export function GuideCard({ go, openAdd, setupPending }: { go: (p: Page) => void; openAdd: () => void; setupPending: boolean }) {
@@ -14,25 +15,25 @@ export function GuideCard({ go, openAdd, setupPending }: { go: (p: Page) => void
     {
       key: 'accounts' as const,
       done: g.accounts,
-      label: 'Configura tus cuentas y saldos',
-      hint: 'Para empezar a registrar desde un punto de partida real',
-      say: 'Primero, tus cuentas. Pon cuánto tienes ahora en cada una (banco, efectivo, dólares…): ese será tu punto de partida y todo lo que registres después se sumará o restará desde ahí.',
+      label: _t("Configura tus cuentas y saldos"),
+      hint: _t("Para empezar a registrar desde un punto de partida real"),
+      say: _t("Primero, tus cuentas. Pon cuánto tienes ahora en cada una (banco, efectivo, dólares…): ese será tu punto de partida y todo lo que registres después se sumará o restará desde ahí."),
       run: () => (setupPending ? window.scrollTo({ top: 0, behavior: 'smooth' }) : go('accounts')),
     },
     {
       key: 'movement' as const,
       done: g.movement,
-      label: 'Registra un movimiento',
-      hint: 'Como prueba o como registro real, tú eliges',
-      say: 'Ahora un movimiento. Con el botón + anotas un gasto o ingreso en segundos (o lo dictas). Al guardarlo elige si es una prueba, que borraré al terminar, o un registro real.',
+      label: _t("Registra un movimiento"),
+      hint: _t("Como prueba o como registro real, tú eliges"),
+      say: _t("Ahora un movimiento. Con el botón + anotas un gasto o ingreso en segundos (o lo dictas). Al guardarlo elige si es una prueba, que borraré al terminar, o un registro real."),
       run: openAdd,
     },
     {
       key: 'budget' as const,
       done: g.budget,
-      label: 'Planifica un presupuesto',
-      hint: 'Un tope mensual por categoría, de prueba o real',
-      say: 'Por último, un presupuesto: un tope mensual para una categoría, como supermercado. Te aviso antes de que te pases. También puedes crearlo de prueba y lo elimino al terminar.',
+      label: _t("Planifica un presupuesto"),
+      hint: _t("Un tope mensual por categoría, de prueba o real"),
+      say: _t("Por último, un presupuesto: un tope mensual para una categoría, como supermercado. Te aviso antes de que te pases. También puedes crearlo de prueba y lo elimino al terminar."),
       run: () => go('plan'),
     },
   ];
@@ -43,7 +44,7 @@ export function GuideCard({ go, openAdd, setupPending }: { go: (p: Page) => void
     <div className="card glass" style={{ padding: 0, overflow: 'hidden' }}>
       <div className="coach-hero" style={{ borderRadius: 0 }}>
         <img src={COACH.hola} alt="" />
-        <div className="bubble"><b>Tarea {done + 1 > 3 ? 3 : done + 1} de 3</b>{current.say}</div>
+        <div className="bubble"><b>{_t("Tarea")} {done + 1 > 3 ? 3 : done + 1} {_t("de 3")}</b>{current.say}</div>
       </div>
       <div className="steps-bar" aria-hidden><i style={{ width: `${(done / tasks.length) * 100}%` }} /></div>
       <ul className="list plain" style={{ padding: '0 18px' }}>
@@ -59,8 +60,8 @@ export function GuideCard({ go, openAdd, setupPending }: { go: (p: Page) => void
         ))}
       </ul>
       <div className="row" style={{ padding: '4px 18px 14px', justifyContent: 'space-between' }}>
-        <button className="btn primary sm" onClick={current.run}>{current.key === 'accounts' ? 'Configurar cuentas' : current.key === 'movement' ? 'Registrar movimiento' : 'Crear presupuesto'}</button>
-        <button className="link" onClick={() => update((d) => finishGuide(d))}>Saltar guía</button>
+        <button className="btn primary sm" onClick={current.run}>{current.key === 'accounts' ? _t("Configurar cuentas") : current.key === 'movement' ? _t("Registrar movimiento") : _t("Crear presupuesto")}</button>
+        <button className="link" onClick={() => update((d) => finishGuide(d))}>{_t("Saltar guía")}</button>
       </div>
     </div>
   );
@@ -79,21 +80,21 @@ export function GuideTip({ task }: { task: 'accounts' | 'budget' }) {
         <div className="bubble">
           {task === 'accounts' ? (
             <>
-              <b>Tus cuentas y saldos</b>
-              Aquí ves cada cuenta con su saldo. Toca <b>Editar</b> para poner lo que tienes hoy y usa <b>+</b> si te falta alguna. Cuando estén todas, confírmalo.
+              <b>{_t("Tus cuentas y saldos")}</b>
+              {_t("Aquí ves cada cuenta con su saldo. Toca")} <b>{_t("Editar")}</b> {_t("para poner lo que tienes hoy y usa")} <b>+</b> {_t("si te falta alguna. Cuando estén todas, confírmalo.")}
             </>
           ) : (
             <>
-              <b>Tu primer presupuesto</b>
-              Toca <b>Nuevo presupuesto</b>, elige una categoría y el tope del mes. Verás una barra que se llena según gastes. Al guardarlo elige si es de prueba o real.
+              <b>{_t("Tu primer presupuesto")}</b>
+              {_t("Toca")} <b>{_t("Nuevo presupuesto")}</b>{_t(", elige una categoría y el tope del mes. Verás una barra que se llena según gastes. Al guardarlo elige si es de prueba o real.")}
             </>
           )}
         </div>
       </div>
       {task === 'accounts' && (
         <div style={{ padding: '12px 18px 16px' }}>
-          <button className="btn primary block" disabled={!hasAccounts} onClick={() => update((d) => patchGuide(d, { accounts: true }))}>Ya están mis cuentas y saldos</button>
-          {!hasAccounts && <p className="tiny muted center" style={{ marginBottom: 0 }}>Crea al menos una cuenta para continuar.</p>}
+          <button className="btn primary block" disabled={!hasAccounts} onClick={() => update((d) => patchGuide(d, { accounts: true }))}>{_t("Ya están mis cuentas y saldos")}</button>
+          {!hasAccounts && <p className="tiny muted center" style={{ marginBottom: 0 }}>{_t("Crea al menos una cuenta para continuar.")}</p>}
         </div>
       )}
     </div>

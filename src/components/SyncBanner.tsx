@@ -5,6 +5,7 @@ import { getSupabaseConfig } from '../lib/sync';
 import { useStore } from '../store';
 import { Icon } from './icons';
 import { toast } from './ui';
+import { t as _t } from '../lib/i18n';
 
 /**
  * Avisos de Inicio sobre la cuenta y la sincronización: sin sesión, sesión sin vincular,
@@ -24,8 +25,8 @@ export function SyncBanner({ go }: { go: (p: Page) => void }) {
       const r = await store.linkCloud(pass);
       if (r === 'linked') {
         setPass('');
-        toast('Sincronización activada');
-      } else toast('Esa clave no coincide con la de tus otros dispositivos.');
+        toast(_t("Sincronización activada"));
+      } else toast(_t("Esa clave no coincide con la de tus otros dispositivos."));
     } catch (e) {
       toast((e as Error).message);
     } finally {
@@ -40,7 +41,7 @@ export function SyncBanner({ go }: { go: (p: Page) => void }) {
     setBusy(false);
     if (r === 'ok') {
       setPass('');
-      toast('Datos de tu cuenta cargados');
+      toast(_t("Datos de tu cuenta cargados"));
     } else toast(r === 'wrong-passphrase' ? 'Esa clave no abre los datos de tu cuenta.' : String(r));
   };
 
@@ -48,8 +49,8 @@ export function SyncBanner({ go }: { go: (p: Page) => void }) {
     return (
       <div className="card glass row" style={{ padding: 14 }}>
         <span className="icon accent"><Icon name="cloud" size={20} /></span>
-        <div className="grow small"><b>Guarda tus datos en tu cuenta</b><div className="muted">Entra con Google y tendrás lo mismo en el móvil y en el ordenador.</div></div>
-        <button className="btn primary sm" onClick={() => go('settings')}>Entrar</button>
+        <div className="grow small"><b>{_t("Guarda tus datos en tu cuenta")}</b><div className="muted">{_t("Entra con Google y tendrás lo mismo en el móvil y en el ordenador.")}</div></div>
+        <button className="btn primary sm" onClick={() => go('settings')}>{_t("Entrar")}</button>
       </div>
     );
   }
@@ -60,17 +61,17 @@ export function SyncBanner({ go }: { go: (p: Page) => void }) {
         <div className="row">
           <span className="icon accent"><Icon name="cloud" size={20} /></span>
           <div className="grow small">
-            <b>{wrongKey ? 'Tu cuenta tiene datos con otra clave' : 'Activa la sincronización'}</b>
+            <b>{wrongKey ? _t("Tu cuenta tiene datos con otra clave") : _t("Activa la sincronización")}</b>
             <div className="muted">
-              {wrongKey ? 'Escribe la clave de cifrado que usas en tus otros dispositivos.' : `Sesión de ${store.account}. Escribe tu clave de cifrado una vez para unir este dispositivo.`}
+              {wrongKey ? _t("Escribe la clave de cifrado que usas en tus otros dispositivos.") : `Sesión de ${store.account}. Escribe tu clave de cifrado una vez para unir este dispositivo.`}
             </div>
           </div>
         </div>
         <form className="row mt" onSubmit={(e) => { e.preventDefault(); void link(); }}>
-          <input type="password" placeholder="Clave de cifrado" value={pass} onChange={(e) => setPass(e.target.value)} aria-label="Clave de cifrado" autoComplete="current-password" />
-          <button className="btn primary" disabled={!pass || busy}>{busy ? '…' : 'Unir'}</button>
+          <input type="password" placeholder={_t("Clave de cifrado")} value={pass} onChange={(e) => setPass(e.target.value)} aria-label={_t("Clave de cifrado")} autoComplete="current-password" />
+          <button className="btn primary" disabled={!pass || busy}>{busy ? '…' : _t("Unir")}</button>
         </form>
-        {wrongKey && <button className="btn ghost block mt small" disabled={!pass || busy} onClick={() => void useCloud()}>Usar los datos de la nube en este dispositivo</button>}
+        {wrongKey && <button className="btn ghost block mt small" disabled={!pass || busy} onClick={() => void useCloud()}>{_t("Usar los datos de la nube en este dispositivo")}</button>}
       </div>
     );
   }
@@ -79,8 +80,8 @@ export function SyncBanner({ go }: { go: (p: Page) => void }) {
     return (
       <div className="card glass row" style={{ padding: 14 }}>
         <span className="icon" style={{ color: 'var(--bad)' }}><Icon name="alert" size={20} /></span>
-        <div className="grow small"><b>No se pudo sincronizar</b><div className="muted">{store.sync.error}</div></div>
-        <button className="btn sm" onClick={() => void store.syncNow()}>Reintentar</button>
+        <div className="grow small"><b>{_t("No se pudo sincronizar")}</b><div className="muted">{store.sync.error}</div></div>
+        <button className="btn sm" onClick={() => void store.syncNow()}>{_t("Reintentar")}</button>
       </div>
     );
   }
@@ -109,9 +110,9 @@ export function BiometricPrompt() {
   return (
     <div className="card glass row" style={{ padding: 14 }}>
       <span className="icon accent"><Icon name="shield" size={20} /></span>
-      <div className="grow small"><b>Entra con {bioLabel()}</b><div className="muted">Sin escribir la clave cada vez. Tus datos siguen cifrados.</div></div>
-      <button className="btn primary sm" onClick={async () => { const ok = await store.enableBiometrics(); toast(ok ? 'Desbloqueo biométrico activado' : 'No se pudo activar'); if (ok) close(); }}>Activar</button>
-      <button className="icon-btn" style={{ width: 30, height: 30 }} onClick={close} aria-label="Ahora no"><Icon name="close" size={14} stroke={2.4} /></button>
+      <div className="grow small"><b>{_t("Entra con")} {bioLabel()}</b><div className="muted">{_t("Sin escribir la clave cada vez. Tus datos siguen cifrados.")}</div></div>
+      <button className="btn primary sm" onClick={async () => { const ok = await store.enableBiometrics(); toast(ok ? _t("Desbloqueo biométrico activado") : _t("No se pudo activar")); if (ok) close(); }}>{_t("Activar")}</button>
+      <button className="icon-btn" style={{ width: 30, height: 30 }} onClick={close} aria-label={_t("Ahora no")}><Icon name="close" size={14} stroke={2.4} /></button>
     </div>
   );
 }

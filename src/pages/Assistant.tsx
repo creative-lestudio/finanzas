@@ -6,6 +6,7 @@ import { Markdown, toast } from '../components/ui';
 import { advisorTurn, aiAvailability, type Proposal } from '../lib/ai';
 import { formatMoney, today, uid } from '../lib/money';
 import { useStore } from '../store';
+import { t as _t } from '../lib/i18n';
 
 interface ChatItem {
   role: 'user' | 'bot';
@@ -120,13 +121,13 @@ export function Assistant() {
     return (
       <>
         <div className="coach-hero">
-          <img src={COACH.curioso} alt="Tu asistente financiero" />
-          <div className="bubble"><b>¡Hola!</b>Soy tu asistente financiero. Para hablar conmigo necesito que actives la IA.</div>
+          <img src={COACH.curioso} alt={_t("Tu asistente financiero")} />
+          <div className="bubble"><b>{_t("¡Hola!")}</b>{_t("Soy tu asistente financiero. Para hablar conmigo necesito que actives la IA.")}</div>
         </div>
         <div className="card glass mt">
           <p className="small" style={{ marginTop: 0, color: 'var(--warn)' }}>{avail.reason}</p>
-          <p className="small secondary">Analizo tus gastos, propongo presupuestos y metas medibles y te ayudo a decidir con tus propios números.</p>
-          <p className="tiny muted" style={{ marginBottom: 0 }}>Actívalo en Ajustes → Inteligencia artificial. Se envía un resumen de tus finanzas a Claude (Anthropic); nunca contraseñas ni IBAN.</p>
+          <p className="small secondary">{_t("Analizo tus gastos, propongo presupuestos y metas medibles y te ayudo a decidir con tus propios números.")}</p>
+          <p className="tiny muted" style={{ marginBottom: 0 }}>{_t("Actívalo en Ajustes → Inteligencia artificial. Se envía un resumen de tus finanzas a Claude (Anthropic); nunca contraseñas ni IBAN.")}</p>
         </div>
       </>
     );
@@ -137,8 +138,8 @@ export function Assistant() {
       {items.length === 0 && (
         <>
           <div className="coach-hero">
-            <img src={COACH.hola} alt="Tu asistente financiero saludando" />
-            <div className="bubble"><b>¡Hola!</b>Soy tu asistente financiero. ¿En qué puedo ayudarte hoy?</div>
+            <img src={COACH.hola} alt={_t("Tu asistente financiero saludando")} />
+            <div className="bubble"><b>{_t("¡Hola!")}</b>{_t("Soy tu asistente financiero. ¿En qué puedo ayudarte hoy?")}</div>
           </div>
           <div className="suggest">
             {SUGGESTIONS.map(([icon, label, q]) => (
@@ -167,7 +168,7 @@ export function Assistant() {
               <div key={j} className="card glass" style={{ alignSelf: 'stretch', marginBottom: 0 }}>
                 {p.type === 'budgets' ? (
                   <>
-                    <h2>Presupuestos propuestos</h2>
+                    <h2>{_t("Presupuestos propuestos")}</h2>
                     <ul className="list plain small">
                       {p.budgets.map((b) => (
                         <li key={b.categoryId} style={{ alignItems: 'flex-start' }}>
@@ -182,13 +183,13 @@ export function Assistant() {
                   </>
                 ) : (
                   <>
-                    <h2>Meta propuesta</h2>
+                    <h2>{_t("Meta propuesta")}</h2>
                     <div className="mid" style={{ fontSize: 19 }}>{p.goal.name}</div>
                     <div className="kv mt">
-                      <span className="muted">Objetivo</span><b>{formatMoney(Math.round(p.goal.target * 100), p.goal.currency)}</b>
-                      <span className="muted">Fecha límite</span><span>{p.goal.deadline}</span>
-                      <span className="muted">Aportación mensual</span><span>{formatMoney(Math.round(p.goal.monthlyPlan * 100), p.goal.currency)}</span>
-                      {p.goal.expectedReturn > 0 && <><span className="muted">Rentabilidad esperada</span><span>{p.goal.expectedReturn} %</span></>}
+                      <span className="muted">{_t("Objetivo")}</span><b>{formatMoney(Math.round(p.goal.target * 100), p.goal.currency)}</b>
+                      <span className="muted">{_t("Fecha límite")}</span><span>{p.goal.deadline}</span>
+                      <span className="muted">{_t("Aportación mensual")}</span><span>{formatMoney(Math.round(p.goal.monthlyPlan * 100), p.goal.currency)}</span>
+                      {p.goal.expectedReturn > 0 && <><span className="muted">{_t("Rentabilidad esperada")}</span><span>{p.goal.expectedReturn} %</span></>}
                     </div>
                     <p className="tiny muted">{p.goal.reason}</p>
                   </>
@@ -196,10 +197,10 @@ export function Assistant() {
                 {it.applied?.[j] ? (
                   <div className="row mt" style={{ gap: 12 }}>
                     <CoachAvatar pose="motiva" size={44} />
-                    <div className="small"><b className="pos">¡Hecho!</b> Ya está aplicado. Te aviso de cómo vas.</div>
+                    <div className="small"><b className="pos">{_t("¡Hecho!")}</b> {_t("Ya está aplicado. Te aviso de cómo vas.")}</div>
                   </div>
                 ) : (
-                  <button className="btn primary block mt" onClick={() => apply(i, j)}>Aplicar</button>
+                  <button className="btn primary block mt" onClick={() => apply(i, j)}>{_t("Aplicar")}</button>
                 )}
               </div>
             ))}
@@ -209,7 +210,7 @@ export function Assistant() {
           <div className="coach-row">
             <CoachAvatar pose="pensando" />
             <div className="msg bot glass">
-              <div className="small muted" style={{ marginBottom: 2 }}>Analizando tus finanzas…</div>
+              <div className="small muted" style={{ marginBottom: 2 }}>{_t("Analizando tus finanzas…")}</div>
               <span className="typing"><i /><i /><i /></span>
             </div>
           </div>
@@ -218,11 +219,11 @@ export function Assistant() {
       </div>
 
       <form className="composer lg" onSubmit={(e) => { e.preventDefault(); void send(input); }}>
-        <textarea rows={1} placeholder="Pregúntame lo que quieras…" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void send(input); } }} aria-label="Mensaje" />
-        <button className="icon-btn" disabled={busy || !input.trim()} aria-label="Enviar"><Icon name="send" size={20} stroke={2.4} /></button>
+        <textarea rows={1} placeholder={_t("Pregúntame lo que quieras…")} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void send(input); } }} aria-label={_t("Mensaje")} />
+        <button className="icon-btn" disabled={busy || !input.trim()} aria-label={_t("Enviar")}><Icon name="send" size={20} stroke={2.4} /></button>
       </form>
       {items.length > 0 && (
-        <button className="btn ghost block small muted mt" onClick={() => { setItems([]); setHistory([]); }}>Nueva conversación</button>
+        <button className="btn ghost block small muted mt" onClick={() => { setItems([]); setHistory([]); }}>{_t("Nueva conversación")}</button>
       )}
     </>
   );

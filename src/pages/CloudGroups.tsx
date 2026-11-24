@@ -7,6 +7,7 @@ import { formatMoney, parseAmount, today } from '../lib/money';
 import { balances, settleUp, splitByWeights, splitEqual } from '../lib/shared';
 import { getSupabaseConfig, supabase } from '../lib/sync';
 import { useStore } from '../store';
+import { t as _t } from '../lib/i18n';
 
 /** Gastos y deudas compartidos con otras personas (p. ej. «Hogar» con tu pareja), sincronizados entre sus cuentas. */
 export function CloudGroups({ go }: { go: (page: 'settings') => void }) {
@@ -54,12 +55,12 @@ export function CloudGroups({ go }: { go: (page: 'settings') => void }) {
     return watchShared(sb, load);
   }, [sb, group?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!getSupabaseConfig() || !sb) return <Empty>La sincronización no está configurada en esta instalación.</Empty>;
+  if (!getSupabaseConfig() || !sb) return <Empty>{_t("La sincronización no está configurada en esta instalación.")}</Empty>;
   if (!store.account) {
     return (
       <div className="card glass">
-        <p className="small" style={{ marginTop: 0 }}><b>Inicia sesión para compartir gastos y deudas con otras personas.</b> Cada uno entra con su cuenta y ambos ven lo mismo, al momento.</p>
-        <button className="btn primary block" onClick={() => go('settings')}>Iniciar sesión</button>
+        <p className="small" style={{ marginTop: 0 }}><b>{_t("Inicia sesión para compartir gastos y deudas con otras personas.")}</b> {_t("Cada uno entra con su cuenta y ambos ven lo mismo, al momento.")}</p>
+        <button className="btn primary block" onClick={() => go('settings')}>{_t("Iniciar sesión")}</button>
       </div>
     );
   }
@@ -101,45 +102,45 @@ export function CloudGroups({ go }: { go: (page: 'settings') => void }) {
       {invites.map((inv) => (
         <div key={inv.groupId} className="card glass row" style={{ padding: 14 }}>
           <span className="icon accent"><Icon name="users" size={20} /></span>
-          <div className="grow small"><b>{inv.invitedBy} te invitó a «{inv.groupName}»</b><div className="muted">Verás los gastos y deudas del grupo.</div></div>
-          <button className="btn primary sm" onClick={() => void accept(inv)}>Unirme</button>
-          <button className="btn ghost sm" onClick={() => void declineInvite(sb, inv.groupId, store.account ?? '').then(refresh)}>No</button>
+          <div className="grow small"><b>{inv.invitedBy} {_t("te invitó a «")}{inv.groupName}»</b><div className="muted">{_t("Verás los gastos y deudas del grupo.")}</div></div>
+          <button className="btn primary sm" onClick={() => void accept(inv)}>{_t("Unirme")}</button>
+          <button className="btn ghost sm" onClick={() => void declineInvite(sb, inv.groupId, store.account ?? '').then(refresh)}>{_t("No")}</button>
         </div>
       ))}
 
       <div className="chips" style={{ marginBottom: 12 }}>
         {groups.map((g) => <button key={g.id} className={`chip ${g.id === group?.id ? 'on' : ''}`} onClick={() => setOpenId(g.id)}>{g.name}</button>)}
-        <button className="chip" onClick={() => setSheet('group')}>+ Grupo</button>
+        <button className="chip" onClick={() => setSheet('group')}>{_t("+ Grupo")}</button>
       </div>
 
-      {loading && <p className="small muted center">Cargando…</p>}
-      {!loading && !group && !error && <Empty>Crea un grupo (por ejemplo «Hogar»), invita a tu pareja con su correo y anota lo que paga cada uno. Ambos lo veréis a la vez.</Empty>}
+      {loading && <p className="small muted center">{_t("Cargando…")}</p>}
+      {!loading && !group && !error && <Empty>{_t("Crea un grupo (por ejemplo «Hogar»), invita a tu pareja con su correo y anota lo que paga cada uno. Ambos lo veréis a la vez.")}</Empty>}
 
       {group && me && (
         <>
           <div className="card glass">
-            <div className="card-head"><h2>{group.name} · {formatMoney(total, cur)} en gastos</h2><button className="btn ghost sm" onClick={() => setSheet('invite')}><Icon name="plus" size={14} /> Invitar</button></div>
-            <p className="small muted" style={{ margin: '0 0 8px' }}>Miembros: {group.members.map((m) => m.displayName).join(', ')}</p>
-            <div className={`mid ${mine > 0 ? 'pos' : mine < 0 ? 'neg' : ''}`}>{mine > 0 ? `Te deben ${formatMoney(mine, cur)}` : mine < 0 ? `Debes ${formatMoney(-mine, cur)}` : 'Estáis en paz'}</div>
+            <div className="card-head"><h2>{group.name} · {formatMoney(total, cur)} {_t("en gastos")}</h2><button className="btn ghost sm" onClick={() => setSheet('invite')}><Icon name="plus" size={14} /> {_t("Invitar")}</button></div>
+            <p className="small muted" style={{ margin: '0 0 8px' }}>{_t("Miembros:")} {group.members.map((m) => m.displayName).join(', ')}</p>
+            <div className={`mid ${mine > 0 ? 'pos' : mine < 0 ? 'neg' : ''}`}>{mine > 0 ? `Te deben ${formatMoney(mine, cur)}` : mine < 0 ? `Debes ${formatMoney(-mine, cur)}` : _t("Estáis en paz")}</div>
             <ul className="list plain" style={{ marginTop: 8 }}>
               {transfers.map((t) => (
                 <li key={`${t.from}-${t.to}`} style={{ minHeight: 48 }}>
                   <span className="grow small">
-                    {t.from === me.id ? <>Debes <b className="neg">{formatMoney(t.amount, cur)}</b> a <b>{nameOf(t.to)}</b></> : t.to === me.id ? <><b>{nameOf(t.from)}</b> te debe <b className="pos">{formatMoney(t.amount, cur)}</b></> : <><b>{nameOf(t.from)}</b> debe <b>{formatMoney(t.amount, cur)}</b> a <b>{nameOf(t.to)}</b></>}
+                    {t.from === me.id ? <>{_t("Debes")} <b className="neg">{formatMoney(t.amount, cur)}</b> {_t("a")} <b>{nameOf(t.to)}</b></> : t.to === me.id ? <><b>{nameOf(t.from)}</b> {_t("te debe")} <b className="pos">{formatMoney(t.amount, cur)}</b></> : <><b>{nameOf(t.from)}</b> {_t("debe")} <b>{formatMoney(t.amount, cur)}</b> {_t("a")} <b>{nameOf(t.to)}</b></>}
                   </span>
-                  <button className="btn sm tinted" onClick={() => void settle(t.from, t.to, t.amount)}>Saldado</button>
+                  <button className="btn sm tinted" onClick={() => void settle(t.from, t.to, t.amount)}>{_t("Saldado")}</button>
                 </li>
               ))}
             </ul>
           </div>
 
           <div className="grid2 mb">
-            <button className="btn primary" onClick={() => setSheet('expense')}><Icon name="plus" size={18} /> Gasto</button>
-            <button className="btn tinted" onClick={() => setSheet('debt')}><Icon name="swap" size={18} /> Deuda</button>
+            <button className="btn primary" onClick={() => setSheet('expense')}><Icon name="plus" size={18} /> {_t("Gasto")}</button>
+            <button className="btn tinted" onClick={() => setSheet('debt')}><Icon name="swap" size={18} /> {_t("Deuda")}</button>
           </div>
 
           <div className="card glass flush">
-            {entries.length === 0 && <Empty>Aún no hay movimientos.</Empty>}
+            {entries.length === 0 && <Empty>{_t("Aún no hay movimientos.")}</Empty>}
             <ul className="list">
               {entries.map((e) => {
                 const myShare = e.shares[me.id] ?? 0;
@@ -148,8 +149,8 @@ export function CloudGroups({ go }: { go: (page: 'settings') => void }) {
                   <li key={e.id} className={e.createdBy === me.id ? 'tap' : ''} onClick={() => e.createdBy === me.id && setSheet({ edit: e })}>
                     <span className="icon"><Icon name={e.kind === 'payment' ? 'check' : e.kind === 'debt' ? 'swap' : 'receipt'} size={19} /></span>
                     <div className="grow">
-                      <div className="ellipsis">{e.description || (e.kind === 'debt' ? 'Deuda' : 'Gasto')}</div>
-                      <div className="small muted ellipsis">{e.date} · {e.kind === 'debt' ? 'Deuda' : e.kind === 'payment' ? 'Pago' : 'Pagó'} {e.payer === me.id ? 'tú' : nameOf(e.payer)}{myShare ? ` · tu parte ${formatMoney(myShare, cur)}` : ''}</div>
+                      <div className="ellipsis">{e.description || (e.kind === 'debt' ? _t("Deuda") : _t("Gasto"))}</div>
+                      <div className="small muted ellipsis">{e.date} · {e.kind === 'debt' ? _t("Deuda") : e.kind === 'payment' ? _t("Pago") : _t("Pagó")} {e.payer === me.id ? 'tú' : nameOf(e.payer)}{myShare ? ` · tu parte ${formatMoney(myShare, cur)}` : ''}</div>
                       {effect !== 0 && <div className={`tiny ${effect > 0 ? 'pos' : 'neg'}`}>{effect > 0 ? `Te deben ${formatMoney(effect, cur)}` : `Debes ${formatMoney(-effect, cur)}`}</div>}
                     </div>
                     <Money cents={e.amount} currency={cur} />
@@ -158,20 +159,20 @@ export function CloudGroups({ go }: { go: (page: 'settings') => void }) {
               })}
             </ul>
           </div>
-          <p className="tiny muted center">Los gastos compartidos se guardan en el servidor para que los vean los miembros del grupo (no van cifrados de extremo a extremo como tus datos personales).</p>
-          <button className="btn ghost block small" onClick={async () => { if (confirm(`¿Salir de «${group.name}»?`)) { await leaveGroup(sb, group.id, me.id).catch((e: Error) => toast(e.message)); setOpenId(null); void refresh(); } }}>Salir del grupo</button>
+          <p className="tiny muted center">{_t("Los gastos compartidos se guardan en el servidor para que los vean los miembros del grupo (no van cifrados de extremo a extremo como tus datos personales).")}</p>
+          <button className="btn ghost block small" onClick={async () => { if (confirm(`¿Salir de «${group.name}»?`)) { await leaveGroup(sb, group.id, me.id).catch((e: Error) => toast(e.message)); setOpenId(null); void refresh(); } }}>{_t("Salir del grupo")}</button>
         </>
       )}
 
       {sheet === 'group' && me && (
-        <Sheet title="Nuevo grupo compartido" onClose={() => setSheet(null)}>
+        <Sheet title={_t("Nuevo grupo compartido")} onClose={() => setSheet(null)}>
           <NewCloudGroup defaultName={me.name} base={store.data.settings.currency} onSave={async (name, currency, display) => {
             try {
               const id = await createGroup(sb, name, currency, display);
               setOpenId(id);
               setSheet(null);
               await refresh();
-              toast('Grupo creado: invita a la otra persona con su correo');
+              toast(_t("Grupo creado: invita a la otra persona con su correo"));
             } catch (e) {
               toast((e as Error).message);
             }
@@ -180,7 +181,7 @@ export function CloudGroups({ go }: { go: (page: 'settings') => void }) {
       )}
       {sheet === 'invite' && group && me && <InviteSheet group={group} meId={me.id} onClose={() => setSheet(null)} />}
       {(sheet === 'expense' || sheet === 'debt' || (typeof sheet === 'object' && sheet && 'edit' in sheet)) && group && me && (
-        <Sheet title={sheet === 'debt' ? 'Nueva deuda' : typeof sheet === 'object' && sheet ? 'Editar movimiento' : 'Nuevo gasto compartido'} onClose={() => setSheet(null)}>
+        <Sheet title={sheet === 'debt' ? _t("Nueva deuda") : typeof sheet === 'object' && sheet ? _t("Editar movimiento") : _t("Nuevo gasto compartido")} onClose={() => setSheet(null)}>
           <EntryForm
             group={group}
             meId={me.id}
@@ -209,12 +210,12 @@ function NewCloudGroup({ defaultName, base, onSave }: { defaultName: string; bas
   const [display, setDisplay] = useState(defaultName);
   return (
     <>
-      <Field label="Nombre del grupo"><input value={name} placeholder="Hogar, Viaje, Pareja…" onChange={(e) => setName(e.target.value)} aria-label="Nombre del grupo" /></Field>
+      <Field label={_t("Nombre del grupo")}><input value={name} placeholder={_t("Hogar, Viaje, Pareja…")} onChange={(e) => setName(e.target.value)} aria-label={_t("Nombre del grupo")} /></Field>
       <div className="grid2">
-        <Field label="Moneda del grupo"><select value={currency} onChange={(e) => setCurrency(e.target.value)}>{CURRENCIES.filter((c) => !c.custom).map((c) => <option key={c.code} value={c.code}>{c.flag} {c.code}</option>)}</select></Field>
-        <Field label="Tu nombre en el grupo"><input value={display} onChange={(e) => setDisplay(e.target.value)} aria-label="Tu nombre en el grupo" /></Field>
+        <Field label={_t("Moneda del grupo")}><select value={currency} onChange={(e) => setCurrency(e.target.value)}>{CURRENCIES.filter((c) => !c.custom).map((c) => <option key={c.code} value={c.code}>{c.flag} {c.code}</option>)}</select></Field>
+        <Field label={_t("Tu nombre en el grupo")}><input value={display} onChange={(e) => setDisplay(e.target.value)} aria-label={_t("Tu nombre en el grupo")} /></Field>
       </div>
-      <button className="btn primary block" disabled={!name.trim()} onClick={() => onSave(name.trim(), currency, display.trim())}>Crear grupo</button>
+      <button className="btn primary block" disabled={!name.trim()} onClick={() => onSave(name.trim(), currency, display.trim())}>{_t("Crear grupo")}</button>
     </>
   );
 }
@@ -228,7 +229,7 @@ function InviteSheet({ group, meId, onClose }: { group: CloudGroup; meId: string
   const send = async () => {
     try {
       await inviteByEmail(sb, group.id, email, meId);
-      toast('Invitación enviada: cuando entre con ese correo la verá en Compartir');
+      toast(_t("Invitación enviada: cuando entre con ese correo la verá en Compartir"));
       setEmail('');
       load();
     } catch (e) {
@@ -236,16 +237,16 @@ function InviteSheet({ group, meId, onClose }: { group: CloudGroup; meId: string
     }
   };
   return (
-    <Sheet title="Invitar al grupo" onClose={onClose}>
-      <p className="small muted" style={{ marginTop: 0 }}>Escribe el correo con el que la otra persona usa Finanzas (o usará). Al entrar con ese correo verá la invitación.</p>
+    <Sheet title={_t("Invitar al grupo")} onClose={onClose}>
+      <p className="small muted" style={{ marginTop: 0 }}>{_t("Escribe el correo con el que la otra persona usa Finanzas (o usará). Al entrar con ese correo verá la invitación.")}</p>
       <form className="row" onSubmit={(e) => { e.preventDefault(); void send(); }}>
-        <input type="email" placeholder="nicole@correo.com" value={email} onChange={(e) => setEmail(e.target.value)} aria-label="Correo de la persona" />
-        <button className="btn primary" disabled={!/.+@.+\..+/.test(email)}>Invitar</button>
+        <input type="email" placeholder={_t("nicole@correo.com")} value={email} onChange={(e) => setEmail(e.target.value)} aria-label={_t("Correo de la persona")} />
+        <button className="btn primary" disabled={!/.+@.+\..+/.test(email)}>{_t("Invitar")}</button>
       </form>
       {pending.length > 0 && (
         <>
-          <div className="section-title">Pendientes</div>
-          <ul className="list plain">{pending.map((p) => <li key={p.id}><span className="grow small">{p.email}</span><button className="btn ghost sm" onClick={() => void cancelInvite(sb, p.id).then(load)}>Cancelar</button></li>)}</ul>
+          <div className="section-title">{_t("Pendientes")}</div>
+          <ul className="list plain">{pending.map((p) => <li key={p.id}><span className="grow small">{p.email}</span><button className="btn ghost sm" onClick={() => void cancelInvite(sb, p.id).then(load)}>{_t("Cancelar")}</button></li>)}</ul>
         </>
       )}
     </Sheet>
@@ -278,34 +279,34 @@ function EntryForm({ group, meId, mode, existing, onSave, onDelete }: { group: C
     return (
       <>
         <div className="seg" style={{ marginBottom: 12 }}>
-          <button className={direction === 'iowe' ? 'on' : ''} onClick={() => setDirection('iowe')}>Yo le debo a…</button>
-          <button className={direction === 'owesme' ? 'on' : ''} onClick={() => setDirection('owesme')}>Me debe…</button>
+          <button className={direction === 'iowe' ? 'on' : ''} onClick={() => setDirection('iowe')}>{_t("Yo le debo a…")}</button>
+          <button className={direction === 'owesme' ? 'on' : ''} onClick={() => setDirection('owesme')}>{_t("Me debe…")}</button>
         </div>
-        {others.length === 0 ? <p className="small muted">Invita primero a la otra persona al grupo.</p> : (
-          <Field label="Persona"><select value={other} onChange={(e) => setOther(e.target.value)} aria-label="Persona">{others.map((m) => <option key={m.userId} value={m.userId}>{m.displayName}</option>)}</select></Field>
+        {others.length === 0 ? <p className="small muted">{_t("Invita primero a la otra persona al grupo.")}</p> : (
+          <Field label={_t("Persona")}><select value={other} onChange={(e) => setOther(e.target.value)} aria-label={_t("Persona")}>{others.map((m) => <option key={m.userId} value={m.userId}>{m.displayName}</option>)}</select></Field>
         )}
         <div className="grid2">
-          <Field label={`Importe (${group.currency})`}><input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} aria-label="Importe" /></Field>
-          <Field label="Fecha"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></Field>
+          <Field label={`Importe (${group.currency})`}><input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} aria-label={_t("Importe")} /></Field>
+          <Field label={_t("Fecha")}><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></Field>
         </div>
-        <Field label="Concepto"><input value={description} placeholder="Préstamo, alquiler, cena…" onChange={(e) => setDescription(e.target.value)} aria-label="Concepto" /></Field>
-        <button className="btn primary block" disabled={!cents || !other} onClick={() => onSave({ id: existing?.id, groupId: group.id, kind: 'debt', payer: direction === 'iowe' ? other : meId, amount: cents, description: description || (direction === 'iowe' ? `Debo a ${nameOf(other)}` : `${nameOf(other)} me debe`), date, shares: { [direction === 'iowe' ? meId : other]: cents } })}>Guardar</button>
-        {onDelete && <button className="btn danger block mt" onClick={onDelete}>Eliminar</button>}
+        <Field label={_t("Concepto")}><input value={description} placeholder={_t("Préstamo, alquiler, cena…")} onChange={(e) => setDescription(e.target.value)} aria-label={_t("Concepto")} /></Field>
+        <button className="btn primary block" disabled={!cents || !other} onClick={() => onSave({ id: existing?.id, groupId: group.id, kind: 'debt', payer: direction === 'iowe' ? other : meId, amount: cents, description: description || (direction === 'iowe' ? `Debo a ${nameOf(other)}` : `${nameOf(other)} me debe`), date, shares: { [direction === 'iowe' ? meId : other]: cents } })}>{_t("Guardar")}</button>
+        {onDelete && <button className="btn danger block mt" onClick={onDelete}>{_t("Eliminar")}</button>}
       </>
     );
   }
 
   return (
     <>
-      <Field label="Concepto"><input value={description} placeholder="Súper, alquiler, luz…" onChange={(e) => setDescription(e.target.value)} aria-label="Concepto" /></Field>
+      <Field label={_t("Concepto")}><input value={description} placeholder={_t("Súper, alquiler, luz…")} onChange={(e) => setDescription(e.target.value)} aria-label={_t("Concepto")} /></Field>
       <div className="grid2">
-        <Field label={`Importe (${group.currency})`}><input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} aria-label="Importe" /></Field>
-        <Field label="Pagó"><select value={paidBy} onChange={(e) => setPaidBy(e.target.value)} aria-label="Quién pagó">{group.members.map((m) => <option key={m.userId} value={m.userId}>{m.userId === meId ? `${m.displayName} (tú)` : m.displayName}</option>)}</select></Field>
+        <Field label={`Importe (${group.currency})`}><input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} aria-label={_t("Importe")} /></Field>
+        <Field label={_t("Pagó")}><select value={paidBy} onChange={(e) => setPaidBy(e.target.value)} aria-label={_t("Quién pagó")}>{group.members.map((m) => <option key={m.userId} value={m.userId}>{m.userId === meId ? `${m.displayName} (tú)` : m.displayName}</option>)}</select></Field>
       </div>
-      <Field label="Fecha"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></Field>
+      <Field label={_t("Fecha")}><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></Field>
       <div className="seg">
-        <button className={split === 'equal' ? 'on' : ''} onClick={() => setSplit('equal')}>A partes iguales</button>
-        <button className={split === 'weights' ? 'on' : ''} onClick={() => setSplit('weights')}>Por partes / %</button>
+        <button className={split === 'equal' ? 'on' : ''} onClick={() => setSplit('equal')}>{_t("A partes iguales")}</button>
+        <button className={split === 'weights' ? 'on' : ''} onClick={() => setSplit('weights')}>{_t("Por partes / %")}</button>
       </div>
       <ul className="list">
         {group.members.map((m) => (
@@ -327,17 +328,17 @@ function EntryForm({ group, meId, mode, existing, onSave, onDelete }: { group: C
       </ul>
       {cents > 0 && Object.keys(shares).length > 0 && (
         <div className="card" style={{ margin: '12px 0 0', padding: 12, background: 'var(--fill)' }} aria-live="polite">
-          <div className="tiny muted" style={{ marginBottom: 4 }}>Así quedará</div>
+          <div className="tiny muted" style={{ marginBottom: 4 }}>{_t("Así quedará")}</div>
           {group.members.filter((m) => m.userId !== paidBy && (shares[m.userId] ?? 0) > 0).map((m) => (
             <div key={m.userId} className="small">
-              {m.userId === meId ? <>Le debes <b className="neg">{formatMoney(shares[m.userId], group.currency)}</b> a <b>{nameOf(paidBy)}</b></> : paidBy === meId ? <><b>{m.displayName}</b> te debe <b className="pos">{formatMoney(shares[m.userId], group.currency)}</b></> : <><b>{m.displayName}</b> debe <b>{formatMoney(shares[m.userId], group.currency)}</b> a <b>{nameOf(paidBy)}</b></>}
+              {m.userId === meId ? <>{_t("Le debes")} <b className="neg">{formatMoney(shares[m.userId], group.currency)}</b> {_t("a")} <b>{nameOf(paidBy)}</b></> : paidBy === meId ? <><b>{m.displayName}</b> {_t("te debe")} <b className="pos">{formatMoney(shares[m.userId], group.currency)}</b></> : <><b>{m.displayName}</b> {_t("debe")} <b>{formatMoney(shares[m.userId], group.currency)}</b> {_t("a")} <b>{nameOf(paidBy)}</b></>}
             </div>
           ))}
-          {group.members.every((m) => m.userId === paidBy || !(shares[m.userId] > 0)) && <div className="small muted">Solo pagó {nameOf(paidBy)} y es todo suyo: nadie debe nada.</div>}
+          {group.members.every((m) => m.userId === paidBy || !(shares[m.userId] > 0)) && <div className="small muted">{_t("Solo pagó")} {nameOf(paidBy)} {_t("y es todo suyo: nadie debe nada.")}</div>}
         </div>
       )}
-      <button className="btn primary block" style={{ marginTop: 12 }} disabled={!cents || !Object.keys(shares).length} onClick={() => onSave({ id: existing?.id, groupId: group.id, kind: 'expense', payer: paidBy, amount: cents, description: description || 'Gasto', date, shares })}>Guardar</button>
-      {onDelete && <button className="btn danger block mt" onClick={onDelete}>Eliminar</button>}
+      <button className="btn primary block" style={{ marginTop: 12 }} disabled={!cents || !Object.keys(shares).length} onClick={() => onSave({ id: existing?.id, groupId: group.id, kind: 'expense', payer: paidBy, amount: cents, description: description || _t("Gasto"), date, shares })}>{_t("Guardar")}</button>
+      {onDelete && <button className="btn danger block mt" onClick={onDelete}>{_t("Eliminar")}</button>}
     </>
   );
 }

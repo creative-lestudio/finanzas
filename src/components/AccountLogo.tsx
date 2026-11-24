@@ -1,14 +1,15 @@
 import type { Account, AccountKind } from '../lib/types';
 import { Icon } from './icons';
+import { t as _t } from '../lib/i18n';
 
 export const KIND_LABEL: Record<AccountKind, string> = {
-  checking: 'Cuentas corrientes',
-  savings: 'Ahorro',
-  cash: 'Efectivo',
-  investment: 'Inversiones',
-  crypto: 'Criptomonedas',
-  card: 'Tarjetas de crédito',
-  loan: 'Préstamos e hipotecas',
+  checking: _t('Cuentas corrientes'),
+  savings: _t('Ahorro'),
+  cash: _t('Efectivo'),
+  investment: _t('Inversiones'),
+  crypto: _t('Criptomonedas'),
+  card: _t('Tarjetas de crédito'),
+  loan: _t('Préstamos e hipotecas'),
 };
 
 export const KIND_ICON: Record<AccountKind, string> = { checking: 'bank', savings: 'piggy', cash: 'banknote', investment: 'trend', crypto: 'coins', card: 'card', loan: 'receipt' };

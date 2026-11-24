@@ -17,6 +17,7 @@ import { ACCENTS } from '../lib/theme';
 import type { Settings as SettingsT } from '../lib/types';
 import { newGuide } from '../lib/guide';
 import { useStore } from '../store';
+import { t as _t, LOCALE, savedLang, setLang, type Lang } from '../lib/i18n';
 
 async function download(name: string, blob: Blob) {
   // En la vista previa de claude.ai las descargas pasan por la capacidad `downloads`.
@@ -24,7 +25,7 @@ async function download(name: string, blob: Blob) {
     const c = (window as unknown as { claude?: { use?: (n: string) => Promise<{ save(r: { filename: string; data: Blob }): Promise<unknown> } | null> } }).claude;
     const downloads = await c?.use?.('downloads');
     if (downloads) {
-      await downloads.save({ filename: name, data: blob }).catch(() => toast('Descarga cancelada'));
+      await downloads.save({ filename: name, data: blob }).catch(() => toast(_t("Descarga cancelada")));
       return;
     }
   }
@@ -49,72 +50,79 @@ export function Settings({ go }: { go?: (p: 'more') => void } = {}) {
           <ul className="list">
             <li className="tap" onClick={() => go('more')}>
               <span className="icon"><Icon name="grid" size={19} /></span>
-              <div className="grow"><div>Más herramientas</div><div className="small muted ellipsis">Divisas, compartir, patrimonio, salud y suscripciones</div></div>
+              <div className="grow"><div>{_t("Más herramientas")}</div><div className="small muted ellipsis">{_t("Divisas, compartir, patrimonio, salud y suscripciones")}</div></div>
               <Icon name="chevron" size={18} className="chev" />
             </li>
           </ul>
         </div>
       )}
-      <div className="section-title">Apariencia</div>
+      <div className="section-title">{_t("Apariencia")}</div>
       <div className="card glass">
-        <h2>Color principal</h2>
+        <h2>{_t("Color principal")}</h2>
         <div className="swatches mb">
           {ACCENTS.map(([name, hex]) => (
             <button key={hex} className={`swatch ${theme.accent.toLowerCase() === hex ? 'on' : ''}`} style={{ background: hex }} aria-label={name} title={name} onClick={() => setSettings({ theme: { ...theme, accent: hex } })} />
           ))}
-          <label title="Color personalizado" style={{ margin: 0 }}>
-            <input type="color" value={theme.accent} onChange={(e) => setSettings({ theme: { ...theme, accent: e.target.value } })} aria-label="Color personalizado" />
+          <label title={_t("Color personalizado")} style={{ margin: 0 }}>
+            <input type="color" value={theme.accent} onChange={(e) => setSettings({ theme: { ...theme, accent: e.target.value } })} aria-label={_t("Color personalizado")} />
           </label>
         </div>
-        <h2>Tema</h2>
+        <h2>{_t("Tema")}</h2>
         <Segmented value={theme.mode} onChange={(mode) => setSettings({ theme: { ...theme, mode } })} options={[['auto', 'Automático'], ['light', 'Claro'], ['dark', 'Oscuro']]} />
-        <Field label="Moneda principal (informes y patrimonio)">
+        <Field label="Idioma / Language">
+          <select value={savedLang()} onChange={(e) => setLang(e.target.value as Lang | 'auto')} aria-label="Idioma">
+            <option value="auto">Automático / Auto</option>
+            <option value="es">Español</option>
+            <option value="en">English</option>
+          </select>
+        </Field>
+        <Field label={_t("Moneda principal (informes y patrimonio)")}>
           <select value={s.currency} onChange={(e) => setSettings({ currency: e.target.value })}>
             {CURRENCIES.filter((c) => !c.custom).map((c) => <option key={c.code} value={c.code}>{c.flag} {c.code} · {c.name}</option>)}
           </select>
         </Field>
       </div>
 
-      <div className="section-title">Cuenta y sincronización</div>
+      <div className="section-title">{_t("Cuenta y sincronización")}</div>
       <div className="card glass">
-        <h2>Ayuda</h2>
+        <h2>{_t("Ayuda")}</h2>
         <button className="btn tinted block" onClick={() => window.dispatchEvent(new Event('finanzas:tour'))}>
-          <Icon name="info" size={18} /> Ver el recorrido de la app
+          <Icon name="info" size={18} /> {_t("Ver el recorrido de la app")}
         </button>
         <ShortcutsHelp />
-        <button className="btn ghost block mt small" onClick={() => { setSettings({ checklistHidden: false, guide: newGuide('tasks') }); toast('Tareas iniciales restauradas en Global'); }}>Repetir las tareas iniciales</button>
+        <button className="btn ghost block mt small" onClick={() => { setSettings({ checklistHidden: false, guide: newGuide('tasks') }); toast(_t("Tareas iniciales restauradas en Global")); }}>{_t("Repetir las tareas iniciales")}</button>
       </div>
       <SyncSection />
 
-      <div className="section-title">Inteligencia artificial</div>
+      <div className="section-title">{_t("Inteligencia artificial")}</div>
       <AISection />
 
-      <div className="section-title">Privacidad</div>
+      <div className="section-title">{_t("Privacidad")}</div>
       <div className="card glass">
         <Switch checked={s.offlineOnly} onChange={(v) => setSettings({ offlineOnly: v })}>
-          <b>Modo sin terceros</b>
-          <div className="small muted">Control 100 % manual. Nada sale del dispositivo: sin banco, IA ni descarga de tasas. La sincronización (cifrada) sigue funcionando si la activas.</div>
+          <b>{_t("Modo sin terceros")}</b>
+          <div className="small muted">{_t("Control 100 % manual. Nada sale del dispositivo: sin banco, IA ni descarga de tasas. La sincronización (cifrada) sigue funcionando si la activas.")}</div>
         </Switch>
         <p className="tiny muted" style={{ marginBottom: 0 }}>
-          Tus datos se guardan cifrados (AES-256-GCM, clave derivada de tu contraseña con PBKDF2 · 600.000 iteraciones). La app se bloquea tras 5 minutos de inactividad.
+          {_t("Tus datos se guardan cifrados (AES-256-GCM, clave derivada de tu contraseña con PBKDF2 · 600.000 iteraciones). La app se bloquea tras 5 minutos de inactividad.")}
         </p>
       </div>
 
-      <div className="section-title">Datos</div>
+      <div className="section-title">{_t("Datos")}</div>
       <DataSection />
 
-      <div className="section-title">Banco (Open Banking)</div>
+      <div className="section-title">{_t("Banco (Open Banking)")}</div>
       <BankSection />
 
-      <div className="section-title">Categorías</div>
+      <div className="section-title">{_t("Categorías")}</div>
       <CategoriesManager />
 
-      <div className="section-title">Categorización</div>
+      <div className="section-title">{_t("Categorización")}</div>
       <RulesSection />
 
-      <div className="section-title">Seguridad</div>
+      <div className="section-title">{_t("Seguridad")}</div>
       <SecuritySection />
-      <p className="tiny muted center">Finanzas · tus datos son tuyos</p>
+      <p className="tiny muted center">{_t("Finanzas · tus datos son tuyos")}</p>
     </>
   );
 }
@@ -141,13 +149,13 @@ function SyncSection() {
     const err = await store.deleteAccount();
     if (err) return toast(err);
     setUser(null);
-    toast('Cuenta eliminada');
+    toast(_t("Cuenta eliminada"));
   };
   const check = async () => {
     setInfo('Comprobando…');
     try {
       const r = await store.cloudInfo();
-      setInfo(r ? `En la nube: versión ${r.version}, actualizada ${new Date(r.updatedAt).toLocaleString('es-ES')}.` : 'Todavía no hay copia en la nube.');
+      setInfo(r ? `En la nube: versión ${r.version}, actualizada ${new Date(r.updatedAt).toLocaleString(LOCALE)}.` : 'Todavía no hay copia en la nube.');
     } catch (e) {
       setInfo(`No se pudo consultar la nube: ${(e as Error).message}`);
     }
@@ -169,25 +177,25 @@ function SyncSection() {
   return (
     <div className="card glass">
       {!sb ? (
-        <p className="small muted" style={{ marginTop: 0 }}>La sincronización no está configurada en esta instalación.</p>
+        <p className="small muted" style={{ marginTop: 0 }}>{_t("La sincronización no está configurada en esta instalación.")}</p>
       ) : !user ? (
         <>
           <p className="small secondary" style={{ marginTop: 0 }}>
-            Crea una cuenta para tener tus datos en el móvil, la tablet y el ordenador. Se suben <b>cifrados de extremo a extremo</b>: ni el servidor puede leerlos.
+            {_t("Crea una cuenta para tener tus datos en el móvil, la tablet y el ordenador. Se suben")} <b>{_t("cifrados de extremo a extremo")}</b>{_t(": ni el servidor puede leerlos.")}
           </p>
           <AuthForm onDone={() => void sb.auth.getUser().then(({ data }) => setUser(data.user?.email ?? null))} />
         </>
       ) : store.sync.status === 'off' ? (
         <>
-          <p className="small" style={{ marginTop: 0 }}>Sesión iniciada como <b>{user}</b>. Escribe tu clave de cifrado una vez para unir este dispositivo a tu cuenta.</p>
+          <p className="small" style={{ marginTop: 0 }}>{_t("Sesión iniciada como")} <b>{user}</b>{_t(". Escribe tu clave de cifrado una vez para unir este dispositivo a tu cuenta.")}</p>
           <div className="row">
-            <input type="password" placeholder="Clave de cifrado" value={pass} onChange={(e) => setPass(e.target.value)} aria-label="Clave de cifrado" />
-            <button className="btn primary" disabled={!pass || busy} onClick={link}>{busy ? '…' : 'Activar'}</button>
+            <input type="password" placeholder={_t("Clave de cifrado")} value={pass} onChange={(e) => setPass(e.target.value)} aria-label={_t("Clave de cifrado")} />
+            <button className="btn primary" disabled={!pass || busy} onClick={link}>{busy ? '…' : _t("Activar")}</button>
           </div>
-          <p className="tiny muted">Si ya usas la app en otro dispositivo, usa la misma clave: se unirán los datos de ambos.</p>
+          <p className="tiny muted">{_t("Si ya usas la app en otro dispositivo, usa la misma clave: se unirán los datos de ambos.")}</p>
           <div className="grid2">
-            <button className="btn ghost sm" onClick={() => void sb.auth.signOut().then(() => setUser(null))}>Cerrar sesión</button>
-            <button className="btn danger sm" onClick={() => void deleteAccount()}>Eliminar mi cuenta</button>
+            <button className="btn ghost sm" onClick={() => void sb.auth.signOut().then(() => setUser(null))}>{_t("Cerrar sesión")}</button>
+            <button className="btn danger sm" onClick={() => void deleteAccount()}>{_t("Eliminar mi cuenta")}</button>
           </div>
         </>
       ) : (
@@ -195,30 +203,30 @@ function SyncSection() {
           <div className="row">
             <span className="icon accent"><Icon name="cloud" size={20} /></span>
             <div className="grow">
-              <b>Sincronización activa</b>
+              <b>{_t("Sincronización activa")}</b>
               <div className="small muted">
-                {user} · {store.sync.status === 'syncing' ? 'sincronizando…' : store.sync.error ? store.sync.error : store.sync.lastSync ? `última: ${new Date(store.sync.lastSync).toLocaleString('es-ES')}` : 'pendiente'}
+                {user} · {store.sync.status === 'syncing' ? 'sincronizando…' : store.sync.error ? store.sync.error : store.sync.lastSync ? `última: ${new Date(store.sync.lastSync).toLocaleString(LOCALE)}` : 'pendiente'}
               </div>
             </div>
           </div>
           <div className="grid2 mt">
-            <button className="btn tinted" onClick={() => void store.syncNow()}>Sincronizar ahora</button>
-            <button className="btn" onClick={() => void store.unlinkCloud()}>Cerrar sesión</button>
+            <button className="btn tinted" onClick={() => void store.syncNow()}>{_t("Sincronizar ahora")}</button>
+            <button className="btn" onClick={() => void store.unlinkCloud()}>{_t("Cerrar sesión")}</button>
           </div>
-          <button className="btn ghost block mt small" onClick={() => void check()}>Comprobar la copia en la nube</button>
+          <button className="btn ghost block mt small" onClick={() => void check()}>{_t("Comprobar la copia en la nube")}</button>
           {info && <p className="tiny muted" style={{ margin: '6px 0 0' }}>{info}</p>}
-          <button className="btn danger block mt" onClick={() => void deleteAccount()}>Eliminar mi cuenta y mis datos de la nube</button>
-          <p className="tiny muted" style={{ marginBottom: 0 }}>Borra tu cuenta y la copia cifrada del servidor. Los datos de este dispositivo no se tocan.</p>
+          <button className="btn danger block mt" onClick={() => void deleteAccount()}>{_t("Eliminar mi cuenta y mis datos de la nube")}</button>
+          <p className="tiny muted" style={{ marginBottom: 0 }}>{_t("Borra tu cuenta y la copia cifrada del servidor. Los datos de este dispositivo no se tocan.")}</p>
         </>
       )}
-      <button className="btn ghost sm mt" onClick={() => setCfgOpen(!cfgOpen)}>{cfgOpen ? 'Ocultar' : 'Servidor propio (avanzado)'}</button>
+      <button className="btn ghost sm mt" onClick={() => setCfgOpen(!cfgOpen)}>{cfgOpen ? _t("Ocultar") : _t("Servidor propio (avanzado)")}</button>
       {cfgOpen && (
         <div className="mt">
-          <Field label="URL de Supabase"><input value={url} onChange={(e) => setUrl(e.target.value.trim())} placeholder="https://xxxx.supabase.co" /></Field>
-          <Field label="Clave pública (anon)"><input value={key} onChange={(e) => setKey(e.target.value.trim())} /></Field>
+          <Field label={_t("URL de Supabase")}><input value={url} onChange={(e) => setUrl(e.target.value.trim())} placeholder={_t("https://xxxx.supabase.co")} /></Field>
+          <Field label={_t("Clave pública (anon)")}><input value={key} onChange={(e) => setKey(e.target.value.trim())} /></Field>
           <div className="grid2">
-            <button className="btn tinted" disabled={!url || !key} onClick={() => { setSupabaseConfig({ url, anonKey: key }); toast('Servidor guardado'); location.reload(); }}>Guardar</button>
-            <button className="btn" onClick={() => { setSupabaseConfig(null); location.reload(); }}>Usar el de la app</button>
+            <button className="btn tinted" disabled={!url || !key} onClick={() => { setSupabaseConfig({ url, anonKey: key }); toast(_t("Servidor guardado")); location.reload(); }}>{_t("Guardar")}</button>
+            <button className="btn" onClick={() => { setSupabaseConfig(null); location.reload(); }}>{_t("Usar el de la app")}</button>
           </div>
         </div>
       )}
@@ -234,19 +242,19 @@ function AISection() {
   return (
     <div className="card glass">
       <p className="small secondary" style={{ marginTop: 0 }}>
-        El asesor, el dictado inteligente y la clasificación automática usan Claude (Anthropic). Se envía un resumen de tus finanzas, nunca contraseñas ni IBAN.
+        {_t("El asesor, el dictado inteligente y la clasificación automática usan Claude (Anthropic). Se envía un resumen de tus finanzas, nunca contraseñas ni IBAN.")}
       </p>
-      {s.offlineOnly && <div className="alert warning small">Desactiva el modo sin terceros para usar la IA.</div>}
+      {s.offlineOnly && <div className="alert warning small">{_t("Desactiva el modo sin terceros para usar la IA.")}</div>}
       <Segmented value={mode} onChange={(v) => setSettings({ aiMode: v })} options={[['server', 'IA de la app'], ['own', 'Mi clave de API']]} />
       {mode === 'server' ? (
-        <p className="small muted" style={{ margin: 0 }}>Incluida con tu cuenta (Ajustes → Cuenta). Límite diario de consultas.</p>
+        <p className="small muted" style={{ margin: 0 }}>{_t("Incluida con tu cuenta (Ajustes → Cuenta). Límite diario de consultas.")}</p>
       ) : (
-        <Field label="Clave de API de Anthropic (console.anthropic.com)">
-          <input type="password" autoComplete="off" value={s.anthropicApiKey ?? ''} onChange={(e) => setSettings({ anthropicApiKey: e.target.value.trim() || undefined })} placeholder="sk-ant-…" />
+        <Field label={_t("Clave de API de Anthropic (console.anthropic.com)")}>
+          <input type="password" autoComplete="off" value={s.anthropicApiKey ?? ''} onChange={(e) => setSettings({ anthropicApiKey: e.target.value.trim() || undefined })} placeholder={_t("sk-ant-…")} />
         </Field>
       )}
       <Switch checked={s.aiCategorization} disabled={s.offlineOnly} onChange={(v) => setSettings({ aiCategorization: v })}>
-        Clasificar con IA lo que las reglas no reconozcan
+        {_t("Clasificar con IA lo que las reglas no reconozcan")}
       </Switch>
     </div>
   );
@@ -261,15 +269,15 @@ function BackupList() {
   }, [store.save.status]);
   return (
     <>
-      <h2 className="mt">Copias automáticas</h2>
+      <h2 className="mt">{_t("Copias automáticas")}</h2>
       <p className="tiny muted" style={{ marginTop: 0 }}>
-        {store.save.status === 'error' ? `⚠ ${store.save.error}` : store.save.status === 'saving' ? 'Guardando…' : 'Todo guardado en este dispositivo.'} Se hace una copia cifrada cada vez que abres la app y antes de fusionar cambios de la nube.
+        {store.save.status === 'error' ? `⚠ ${store.save.error}` : store.save.status === 'saving' ? _t("Guardando…") : _t("Todo guardado en este dispositivo.")} {_t("Se hace una copia cifrada cada vez que abres la app y antes de fusionar cambios de la nube.")}
       </p>
-      {items?.length === 0 && <p className="tiny muted">Aún no hay copias.</p>}
+      {items?.length === 0 && <p className="tiny muted">{_t("Aún no hay copias.")}</p>}
       {items?.slice(0, 5).map((b) => (
         <div key={b.stamp} className="row" style={{ justifyContent: 'space-between', margin: '6px 0' }}>
-          <span className="small">{new Date(b.stamp).toLocaleString('es')} · {b.movements} movimientos</span>
-          <button className="btn sm" onClick={async () => { if (confirm('Se sustituirán tus datos actuales por esta copia (los actuales también quedan guardados como copia). ¿Continuar?')) { toast((await store.restoreBackup(b.stamp)) ? 'Copia restaurada' : 'No se pudo restaurar'); } }}>Restaurar</button>
+          <span className="small">{new Date(b.stamp).toLocaleString('es')} · {b.movements} {_t("movimientos")}</span>
+          <button className="btn sm" onClick={async () => { if (confirm('Se sustituirán tus datos actuales por esta copia (los actuales también quedan guardados como copia). ¿Continuar?')) { toast((await store.restoreBackup(b.stamp)) ? _t("Copia restaurada") : _t("No se pudo restaurar")); } }}>{_t("Restaurar")}</button>
         </div>
       ))}
     </>
@@ -283,16 +291,16 @@ function StorageCheck() {
   const mb = (n: number) => `${(n / 1048576).toFixed(1)} MB`;
   return (
     <>
-      <button className="btn block mt" onClick={() => void storageReport().then(setR)}>Comprobar almacenamiento</button>
+      <button className="btn block mt" onClick={() => void storageReport().then(setR)}>{_t("Comprobar almacenamiento")}</button>
       {r && (
         <div className="tiny muted" style={{ marginTop: 8, lineHeight: 1.6 }}>
-          Base de datos del navegador: <b>{r.idb === 'ok' ? 'funciona' : `falla (${r.idb})`}</b><br />
-          Copia espejo: <b>{r.mirror ? 'sí' : 'no'}</b> · Copias automáticas: <b>{r.backups}</b><br />
-          Almacenamiento protegido: <b>{r.persisted === null ? 'desconocido' : r.persisted ? 'sí' : 'no (el navegador podría borrarlo)'}</b><br />
-          {r.quota && <>Uso: {mb(r.quota.used)} de {mb(r.quota.total)}<br /></>}
-          Modo: <b>{r.standalone ? 'app instalada' : 'navegador'}</b><br />
-          Nube: <b>{store.sync.status === 'off' ? 'no vinculada' : store.sync.status === 'error' ? `error: ${store.sync.error}` : store.sync.lastSync ? `sincronizado ${new Date(store.sync.lastSync).toLocaleString('es')}` : 'vinculada'}</b><br />
-          Dirección: {r.origin}
+          {_t("Base de datos del navegador:")} <b>{r.idb === 'ok' ? 'funciona' : `falla (${r.idb})`}</b><br />
+          {_t("Copia espejo:")} <b>{r.mirror ? 'sí' : 'no'}</b> {_t("· Copias automáticas:")} <b>{r.backups}</b><br />
+          {_t("Almacenamiento protegido:")} <b>{r.persisted === null ? 'desconocido' : r.persisted ? 'sí' : _t("no (el navegador podría borrarlo)")}</b><br />
+          {r.quota && <>{_t("Uso:")} {mb(r.quota.used)} {_t("de")} {mb(r.quota.total)}<br /></>}
+          {_t("Modo:")} <b>{r.standalone ? _t("app instalada") : 'navegador'}</b><br />
+          {_t("Nube:")} <b>{store.sync.status === 'off' ? _t("no vinculada") : store.sync.status === 'error' ? `error: ${store.sync.error}` : store.sync.lastSync ? `sincronizado ${new Date(store.sync.lastSync).toLocaleString('es')}` : 'vinculada'}</b><br />
+          {_t("Dirección:")} {r.origin}
         </div>
       )}
     </>
@@ -311,7 +319,7 @@ function DataSection() {
     try {
       const imp = await readWorkbook(await file.arrayBuffer());
       if (!imp.movements.length) {
-        toast('No encontré movimientos. Necesito columnas de fecha, concepto e importe.');
+        toast(_t("No encontré movimientos. Necesito columnas de fecha, concepto e importe."));
         return;
       }
       let base = data;
@@ -344,14 +352,14 @@ function DataSection() {
     // Hoja propia (Fecha, Tipo, Cuenta, Moneda, Monto…): crea cuentas, categorías y cambios de divisa.
     const ledger = parseLedger(csvRows(text));
     if (ledger) {
-      if (!ledger.rows.length) return toast('El archivo no tiene movimientos válidos.');
+      if (!ledger.rows.length) return toast(_t("El archivo no tiene movimientos válidos."));
       const r = applyLedger(data, ledger.rows, { currencyMap: bsAsUsd ? { BS: 'USD' } : undefined });
       update(() => r.data);
       toast(`${r.transactions} movimientos y ${r.exchanges} cambios importados${r.newAccounts.length ? `, ${r.newAccounts.length} cuentas nuevas` : ''}${r.duplicates ? `, ${r.duplicates} duplicados omitidos` : ''}${ledger.errors ? `, ${ledger.errors} filas ignoradas` : ''}. Revisa los saldos en Patrimonio.`);
       return;
     }
     const { movements, errors } = parseBankCSV(text);
-    if (!movements.length) return toast('No se reconoció el formato. Necesito columnas de fecha, concepto e importe.');
+    if (!movements.length) return toast(_t("No se reconoció el formato. Necesito columnas de fecha, concepto e importe."));
     const r = mergeMovements(base, accountId, movements);
     update(() => r.data);
     toast(`${r.added.length} movimientos importados${r.duplicates ? `, ${r.duplicates} duplicados omitidos` : ''}${errors ? `, ${errors} filas ignoradas` : ''}`);
@@ -365,29 +373,29 @@ function DataSection() {
 
   return (
     <div className="card glass">
-      <h2>Exportar</h2>
+      <h2>{_t("Exportar")}</h2>
       <button className="btn tinted block" disabled={busy} onClick={async () => { setBusy(true); try { await download(`finanzas-${today()}.xlsx`, await exportWorkbook(data)); } finally { setBusy(false); } }}>
-        <Icon name="download" size={18} /> Descargar Excel completo
+        <Icon name="download" size={18} /> {_t("Descargar Excel completo")}
       </button>
-      <p className="tiny muted">Movimientos, cuentas, presupuestos, metas, cambios de divisa y tasas, cada uno en su hoja.</p>
+      <p className="tiny muted">{_t("Movimientos, cuentas, presupuestos, metas, cambios de divisa y tasas, cada uno en su hoja.")}</p>
       <BackupList />
       <StorageCheck />
-      <h2 className="mt">Importar</h2>
-      <Field label="Cuenta de destino (si el archivo no indica cuenta)">
+      <h2 className="mt">{_t("Importar")}</h2>
+      <Field label={_t("Cuenta de destino (si el archivo no indica cuenta)")}>
         <select value={account} onChange={(e) => setAccount(e.target.value)}>
-          <option value="">Crear cuenta nueva</option>
+          <option value="">{_t("Crear cuenta nueva")}</option>
           {data.accounts.filter((a) => a.kind !== 'investment' && a.kind !== 'crypto').map((a) => <option key={a.id} value={a.id}>{a.name} · {a.currency}</option>)}
         </select>
       </Field>
       <label className="btn block" style={{ margin: 0, color: 'var(--text)', fontSize: 16 }}>
-        <Icon name="upload" size={18} /> {busy ? 'Importando…' : 'Elegir Excel (.xlsx) o CSV'}
+        <Icon name="upload" size={18} /> {busy ? _t("Importando…") : _t("Elegir Excel (.xlsx) o CSV")}
         <input type="file" accept=".xlsx,.csv,.txt,.tsv" hidden onChange={(e) => onFile(e.target.files?.[0])} />
       </label>
       <Switch checked={bsAsUsd} onChange={setBsAsUsd}>
-        Tratar la moneda «BS» como dólares equivalentes
-        <div className="tiny muted">Solo para hojas propias con columnas Tipo, Cuenta, Moneda y Monto.</div>
+        {_t("Tratar la moneda «BS» como dólares equivalentes")}
+        <div className="tiny muted">{_t("Solo para hojas propias con columnas Tipo, Cuenta, Moneda y Monto.")}</div>
       </Switch>
-      <p className="tiny muted" style={{ marginBottom: 0 }}>Vale el extracto de tu banco, una hoja propia (Fecha, Tipo, Cuenta, Moneda, Categoría, Descripción, Monto…) o un Excel exportado por esta app. Los duplicados se ignoran.</p>
+      <p className="tiny muted" style={{ marginBottom: 0 }}>{_t("Vale el extracto de tu banco, una hoja propia (Fecha, Tipo, Cuenta, Moneda, Categoría, Descripción, Monto…) o un Excel exportado por esta app. Los duplicados se ignoran.")}</p>
     </div>
   );
 }
@@ -398,13 +406,13 @@ function RulesSection() {
   const [ruleCat, setRuleCat] = useState('groceries');
   return (
     <div className="card glass">
-      <p className="small muted" style={{ marginTop: 0 }}>La app aprende cada vez que corriges una categoría. También puedes crear reglas:</p>
+      <p className="small muted" style={{ marginTop: 0 }}>{_t("La app aprende cada vez que corriges una categoría. También puedes crear reglas:")}</p>
       <div className="row">
-        <input placeholder="Texto, p. ej. 'frutería paco'" value={rulePattern} onChange={(e) => setRulePattern(e.target.value)} />
+        <input placeholder={_t("Texto, p. ej. 'frutería paco'")} value={rulePattern} onChange={(e) => setRulePattern(e.target.value)} />
         <select value={ruleCat} onChange={(e) => setRuleCat(e.target.value)} style={{ maxWidth: 140 }}>
           {data.categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
-        <button className="icon-btn" style={{ background: 'var(--accent)', color: 'var(--on-accent)', flex: 'none' }} disabled={!rulePattern.trim()} aria-label="Añadir regla" onClick={() => { update((d) => ({ ...d, rules: [...d.rules, { id: uid(), pattern: normalize(rulePattern), categoryId: ruleCat }] })); setRulePattern(''); }}>
+        <button className="icon-btn" style={{ background: 'var(--accent)', color: 'var(--on-accent)', flex: 'none' }} disabled={!rulePattern.trim()} aria-label={_t("Añadir regla")} onClick={() => { update((d) => ({ ...d, rules: [...d.rules, { id: uid(), pattern: normalize(rulePattern), categoryId: ruleCat }] })); setRulePattern(''); }}>
           <Icon name="plus" size={20} stroke={2.4} />
         </button>
       </div>
@@ -412,7 +420,7 @@ function RulesSection() {
         {data.rules.map((r) => (
           <li key={r.id}>
             <span className="grow">"{r.pattern}" → {data.categories.find((c) => c.id === r.categoryId)?.name}</span>
-            <button className="btn ghost sm" aria-label="Eliminar regla" onClick={() => update((d) => ({ ...d, rules: d.rules.filter((x) => x.id !== r.id) }))}><Icon name="trash" size={16} /></button>
+            <button className="btn ghost sm" aria-label={_t("Eliminar regla")} onClick={() => update((d) => ({ ...d, rules: d.rules.filter((x) => x.id !== r.id) }))}><Icon name="trash" size={16} /></button>
           </li>
         ))}
       </ul>
@@ -435,31 +443,31 @@ function SecuritySection() {
         <Switch
           checked={store.biometrics.enabled}
           onChange={async (on) => {
-            if (on) toast((await store.enableBiometrics()) ? 'Desbloqueo biométrico activado' : 'No se pudo activar');
+            if (on) toast((await store.enableBiometrics()) ? _t("Desbloqueo biométrico activado") : _t("No se pudo activar"));
             else {
               await store.disableBiometrics();
-              toast('Desbloqueo biométrico desactivado');
+              toast(_t("Desbloqueo biométrico desactivado"));
             }
           }}
         >
-          Desbloquear con {bioLabel()}
-          <div className="tiny muted">Entra sin escribir tu clave de cifrado. La clave se guarda solo en este dispositivo.</div>
+          {_t("Desbloquear con")} {bioLabel()}
+          <div className="tiny muted">{_t("Entra sin escribir tu clave de cifrado. La clave se guarda solo en este dispositivo.")}</div>
         </Switch>
       )}
-      <h2 className="mt">Cambiar clave de cifrado</h2>
+      <h2 className="mt">{_t("Cambiar clave de cifrado")}</h2>
       <div className="row mb">
-        <input type="password" placeholder="Nueva contraseña" value={newPass} onChange={(e) => setNewPass(e.target.value)} aria-label="Nueva contraseña" />
-        <button className="btn tinted" disabled={newPass.length < 6} onClick={async () => { await store.changePassphrase(newPass); setNewPass(''); toast('Contraseña cambiada'); }}>Cambiar</button>
+        <input type="password" placeholder={_t("Nueva contraseña")} value={newPass} onChange={(e) => setNewPass(e.target.value)} aria-label={_t("Nueva contraseña")} />
+        <button className="btn tinted" disabled={newPass.length < 6} onClick={async () => { await store.changePassphrase(newPass); setNewPass(''); toast(_t("Contraseña cambiada")); }}>{_t("Cambiar")}</button>
       </div>
       <div className="grid2">
-        <button className="btn" onClick={async () => void download(`finanzas-${today()}.cifrado.json`, new Blob([JSON.stringify(await store.exportBackup())], { type: 'application/json' }))}>Copia cifrada</button>
+        <button className="btn" onClick={async () => void download(`finanzas-${today()}.cifrado.json`, new Blob([JSON.stringify(await store.exportBackup())], { type: 'application/json' }))}>{_t("Copia cifrada")}</button>
         <label className="btn" style={{ margin: 0, color: 'var(--text)', fontSize: 16 }}>
-          Restaurar
+          {_t("Restaurar")}
           <input type="file" accept=".json" hidden onChange={(e) => e.target.files?.[0] && void onBackup(e.target.files[0])} />
         </label>
       </div>
-      <button className="btn block mt" onClick={store.lock}><Icon name="lock" size={18} /> Bloquear ahora</button>
-      <button className="btn danger block mt" onClick={() => confirm('Se borrarán todos tus datos de este dispositivo. ¿Seguro?') && void store.wipe()}>Borrar todos los datos</button>
+      <button className="btn block mt" onClick={store.lock}><Icon name="lock" size={18} /> {_t("Bloquear ahora")}</button>
+      <button className="btn danger block mt" onClick={() => confirm('Se borrarán todos tus datos de este dispositivo. ¿Seguro?') && void store.wipe()}>{_t("Borrar todos los datos")}</button>
     </div>
   );
 }
@@ -482,7 +490,7 @@ function BankSection() {
   if (s.offlineOnly) {
     return (
       <div className="card glass">
-        <p className="small muted" style={{ margin: 0 }}>Desactivada por el modo sin terceros. Desactívalo para vincular bancos mediante Open Banking (PSD2). Mientras, puedes importar extractos en Excel o CSV.</p>
+        <p className="small muted" style={{ margin: 0 }}>{_t("Desactivada por el modo sin terceros. Desactívalo para vincular bancos mediante Open Banking (PSD2). Mientras, puedes importar extractos en Excel o CSV.")}</p>
       </div>
     );
   }
@@ -518,28 +526,28 @@ function BankSection() {
   return (
     <div className="card glass">
       <p className="small muted" style={{ marginTop: 0 }}>
-        Te identificas en la web de tu banco y la app solo recibe permiso de <b>lectura</b> (PSD2, hasta 180 días) a través de un proveedor regulado. Nunca vemos tus claves.
+        {_t("Te identificas en la web de tu banco y la app solo recibe permiso de")} <b>{_t("lectura")}</b> {_t("(PSD2, hasta 180 días) a través de un proveedor regulado. Nunca vemos tus claves.")}
       </p>
-      <Field label="URL del servidor puente (bank-proxy)">
-        <input placeholder="https://<proyecto>.supabase.co/functions/v1/bank-proxy" value={bank.proxyUrl ?? ''} onChange={(e) => update((d) => ({ ...d, settings: { ...d.settings, bank: { provider: 'enablebanking', proxyUrl: e.target.value.trim() || undefined } } }))} />
+      <Field label={_t("URL del servidor puente (bank-proxy)")}>
+        <input placeholder={_t("https://<proyecto>.supabase.co/functions/v1/bank-proxy")} value={bank.proxyUrl ?? ''} onChange={(e) => update((d) => ({ ...d, settings: { ...d.settings, bank: { provider: 'enablebanking', proxyUrl: e.target.value.trim() || undefined } } }))} />
       </Field>
       {client && (
         <>
           {linked.length > 0 && (
-            <button className="btn primary block mb" disabled={busy} onClick={sync}>{busy ? 'Sincronizando…' : `Sincronizar ${linked.length} cuenta(s)`}</button>
+            <button className="btn primary block mb" disabled={busy} onClick={sync}>{busy ? _t("Sincronizando…") : `Sincronizar ${linked.length} cuenta(s)`}</button>
           )}
-          <Field label="Vincular un banco"><input placeholder="Busca tu banco: BBVA, Santander, CaixaBank…" value={q} onChange={(e) => setQ(e.target.value)} /></Field>
+          <Field label={_t("Vincular un banco")}><input placeholder={_t("Busca tu banco: BBVA, Santander, CaixaBank…")} value={q} onChange={(e) => setQ(e.target.value)} /></Field>
           <ul className="list plain small">
             {filtered.map((b) => (
               <li key={b.name}>
                 {b.logo && <img src={b.logo} alt="" width={24} height={24} />}
                 <span className="grow">{b.name}</span>
-                <button className="btn sm tinted" disabled={busy} onClick={() => connect(b)}>Conectar</button>
+                <button className="btn sm tinted" disabled={busy} onClick={() => connect(b)}>{_t("Conectar")}</button>
               </li>
             ))}
-            {!banks.length && <li className="muted">No se pudo cargar la lista de bancos desde el servidor.</li>}
+            {!banks.length && <li className="muted">{_t("No se pudo cargar la lista de bancos desde el servidor.")}</li>}
           </ul>
-          <p className="tiny muted">Bizum: sus movimientos llegan dentro de tu cuenta bancaria y se detectan solos.</p>
+          <p className="tiny muted">{_t("Bizum: sus movimientos llegan dentro de tu cuenta bancaria y se detectan solos.")}</p>
         </>
       )}
     </div>
@@ -575,14 +583,14 @@ function ShortcutsHelp() {
   const url = `${location.origin}${location.pathname}?accion=nuevo&monto=25,50&comercio=Mercadona`;
   return (
     <details className="mt" style={{ marginTop: 10 }}>
-      <summary className="small" style={{ cursor: 'pointer', fontWeight: 600 }}>Anotar gastos al instante (atajos de iPhone)</summary>
+      <summary className="small" style={{ cursor: 'pointer', fontWeight: 600 }}>{_t("Anotar gastos al instante (atajos de iPhone)")}</summary>
       <div className="small muted" style={{ marginTop: 8, display: 'grid', gap: 8 }}>
-        <p style={{ margin: 0 }}>Esta app abre «Nuevo movimiento» ya rellenado desde un enlace. Con la app <b>Atajos</b> del iPhone puedes lanzarlo cuando pagas con Apple Pay o con dos golpecitos en la parte de atrás.</p>
-        <p style={{ margin: 0 }}><b>Dos golpecitos:</b> en Atajos crea uno con la acción «Abrir URL» y pega el enlace de abajo (sin monto ni comercio). Luego, en Ajustes del iPhone → Accesibilidad → Tocar → Tocar atrás → Doble toque, elige ese atajo.</p>
-        <p style={{ margin: 0 }}><b>Apple Pay:</b> en Atajos → Automatización → Transacción, añade «Abrir URL» y usa las variables de importe y comercio en <code>monto=</code> y <code>comercio=</code>.</p>
-        <p style={{ margin: 0 }}>Parámetros: <code>monto</code>, <code>comercio</code>, <code>tipo</code> (gasto/ingreso), <code>moneda</code>, <code>cuenta</code>, <code>fecha</code>. Para escanear un recibo usa <code>?accion=escanear</code>.</p>
-        <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} aria-label="Enlace de ejemplo" style={{ fontSize: 12 }} />
-        <button className="btn tinted block small" onClick={() => { void navigator.clipboard?.writeText(url); toast('Enlace copiado'); }}>Copiar enlace de ejemplo</button>
+        <p style={{ margin: 0 }}>{_t("Esta app abre «Nuevo movimiento» ya rellenado desde un enlace. Con la app")} <b>{_t("Atajos")}</b> {_t("del iPhone puedes lanzarlo cuando pagas con Apple Pay o con dos golpecitos en la parte de atrás.")}</p>
+        <p style={{ margin: 0 }}><b>{_t("Dos golpecitos:")}</b> {_t("en Atajos crea uno con la acción «Abrir URL» y pega el enlace de abajo (sin monto ni comercio). Luego, en Ajustes del iPhone → Accesibilidad → Tocar → Tocar atrás → Doble toque, elige ese atajo.")}</p>
+        <p style={{ margin: 0 }}><b>{_t("Apple Pay:")}</b> {_t("en Atajos → Automatización → Transacción, añade «Abrir URL» y usa las variables de importe y comercio en")} <code>{_t("monto=")}</code> {_t("y")} <code>{_t("comercio=")}</code>.</p>
+        <p style={{ margin: 0 }}>{_t("Parámetros:")} <code>{_t("monto")}</code>, <code>{_t("comercio")}</code>, <code>{_t("tipo")}</code> {_t("(gasto/ingreso),")} <code>{_t("moneda")}</code>, <code>{_t("cuenta")}</code>, <code>{_t("fecha")}</code>{_t(". Para escanear un recibo usa")} <code>{_t("?accion=escanear")}</code>.</p>
+        <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} aria-label={_t("Enlace de ejemplo")} style={{ fontSize: 12 }} />
+        <button className="btn tinted block small" onClick={() => { void navigator.clipboard?.writeText(url); toast(_t("Enlace copiado")); }}>{_t("Copiar enlace de ejemplo")}</button>
       </div>
     </details>
   );

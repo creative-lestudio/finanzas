@@ -7,6 +7,7 @@ import type { Category } from '../lib/types';
 import { useStore } from '../store';
 import { CATEGORY_ICON_CHOICES, Icon } from './icons';
 import { Field, Sheet, toast } from './ui';
+import { t as _t } from '../lib/i18n';
 
 const EMOJIS = ['🏢', '🏬', '🧾', '🔧', '📦', '🛠️', '📣', '🧑‍💼', '💻', '🚚', '🏷️', '🧴', '🍴', '🍺', '🌳', '👕', '💍', '🎯', '💡', '🌐'];
 
@@ -35,17 +36,17 @@ export function businessCategories(name: string): Category[] {
 export function IconPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <>
-      <div className="icon-grid" role="group" aria-label="Iconos de línea">
+      <div className="icon-grid" role="group" aria-label={_t("Iconos de línea")}>
         {CATEGORY_ICON_CHOICES.map((n) => (
           <button key={n} type="button" className={value === `ic:${n}` ? 'on' : ''} onClick={() => onChange(`ic:${n}`)} aria-label={`Icono ${n}`} aria-pressed={value === `ic:${n}`}><Icon name={n} size={20} /></button>
         ))}
       </div>
-      <div className="icon-grid" role="group" aria-label="Emojis" style={{ marginTop: 6 }}>
+      <div className="icon-grid" role="group" aria-label={_t("Emojis")} style={{ marginTop: 6 }}>
         {EMOJIS.map((e) => (
           <button key={e} type="button" className={value === e ? 'on' : ''} onClick={() => onChange(e)} aria-label={`Emoji ${e}`} aria-pressed={value === e} style={{ fontSize: 19 }}>{e}</button>
         ))}
       </div>
-      <input className="mt" placeholder="…o escribe tu propio emoji" value={value.startsWith('ic:') ? '' : value} onChange={(e) => onChange(e.target.value.trim().slice(0, 4))} aria-label="Emoji propio" style={{ marginTop: 8 }} />
+      <input className="mt" placeholder={_t("…o escribe tu propio emoji")} value={value.startsWith('ic:') ? '' : value} onChange={(e) => onChange(e.target.value.trim().slice(0, 4))} aria-label={_t("Emoji propio")} style={{ marginTop: 8 }} />
     </>
   );
 }
@@ -85,34 +86,34 @@ export function CategorySheet({ initial, defaultKind = 'expense', parentId, onCl
   };
 
   return (
-    <Sheet title={initial ? 'Editar categoría' : parentId ? 'Nueva subcategoría' : 'Nueva categoría'} onClose={onClose}>
-      <Field label="Nombre"><input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder={parentId ? 'Ropa, Higiene, Bar…' : 'Compras, Ocio, Legacy World…'} aria-label="Nombre de la categoría" /></Field>
-      {duplicate && <p className="tiny" style={{ color: 'var(--bad)', marginTop: -4 }}>Ya existe una con ese nombre en este grupo.</p>}
+    <Sheet title={initial ? _t("Editar categoría") : parentId ? _t("Nueva subcategoría") : _t("Nueva categoría")} onClose={onClose}>
+      <Field label={_t("Nombre")}><input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder={parentId ? _t("Ropa, Higiene, Bar…") : _t("Compras, Ocio, Legacy World…")} aria-label={_t("Nombre de la categoría")} /></Field>
+      {duplicate && <p className="tiny" style={{ color: 'var(--bad)', marginTop: -4 }}>{_t("Ya existe una con ese nombre en este grupo.")}</p>}
       {!initial && !parentId && (
         <div className="seg" style={{ marginBottom: 12 }}>
-          <button type="button" className={kind === 'expense' ? 'on' : ''} onClick={() => { setKind('expense'); setParent(''); }}>Gasto</button>
-          <button type="button" className={kind === 'income' ? 'on' : ''} onClick={() => { setKind('income'); setParent(''); }}>Ingreso</button>
+          <button type="button" className={kind === 'expense' ? 'on' : ''} onClick={() => { setKind('expense'); setParent(''); }}>{_t("Gasto")}</button>
+          <button type="button" className={kind === 'income' ? 'on' : ''} onClick={() => { setKind('income'); setParent(''); }}>{_t("Ingreso")}</button>
         </div>
       )}
       {!hasChildren && (
-        <Field label="Pertenece a">
-          <select value={parent} onChange={(e) => { setParent(e.target.value); if (e.target.value && !initial) setIcon(''); }} aria-label="Categoría madre">
-            <option value="">— Ninguna: es una categoría madre —</option>
+        <Field label={_t("Pertenece a")}>
+          <select value={parent} onChange={(e) => { setParent(e.target.value); if (e.target.value && !initial) setIcon(''); }} aria-label={_t("Categoría madre")}>
+            <option value="">{_t("— Ninguna: es una categoría madre —")}</option>
             {options.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </Field>
       )}
-      <label style={{ margin: '0 4px' }}>Icono</label>
+      <label style={{ margin: '0 4px' }}>{_t("Icono")}</label>
       {parent && (
         <label className="switch-row" style={{ margin: '6px 0', color: 'var(--text)', fontSize: 15 }}>
-          <span className="grow">Usar el icono de «{parentCat?.name}»<div className="tiny muted">Mantiene la estética: las subcategorías heredan el de su madre.</div></span>
+          <span className="grow">{_t("Usar el icono de «")}{parentCat?.name}»<div className="tiny muted">{_t("Mantiene la estética: las subcategorías heredan el de su madre.")}</div></span>
           <input type="checkbox" className="switch" checked={inherit} onChange={(e) => setIcon(e.target.checked ? '' : parentCat?.icon || 'ic:box')} />
         </label>
       )}
       {!inherit && <IconPicker value={icon} onChange={setIcon} />}
       {!parent && kind === 'expense' && (
         <>
-          <label style={{ margin: '12px 4px 0' }}>Color</label>
+          <label style={{ margin: '12px 4px 0' }}>{_t("Color")}</label>
           <div className="row wrap" style={{ gap: 8, margin: '6px 0 6px' }}>
             {FAMILIES.map((f) => (
               <button key={f.id} type="button" className="chip-pick" onClick={() => setFamily(f.id)} aria-pressed={family === f.id} style={{ boxShadow: family === f.id ? `0 0 0 2px ${f.color}` : undefined }}>
@@ -120,10 +121,10 @@ export function CategorySheet({ initial, defaultKind = 'expense', parentId, onCl
               </button>
             ))}
           </div>
-          <p className="tiny muted" style={{ marginTop: 0 }}>Sus subcategorías usan este color.</p>
+          <p className="tiny muted" style={{ marginTop: 0 }}>{_t("Sus subcategorías usan este color.")}</p>
         </>
       )}
-      <button className="btn primary block mt" disabled={!name.trim() || duplicate} onClick={save}>{initial ? 'Guardar' : 'Crear'}</button>
+      <button className="btn primary block mt" disabled={!name.trim() || duplicate} onClick={save}>{initial ? _t("Guardar") : _t("Crear")}</button>
     </Sheet>
   );
 }

@@ -1,6 +1,7 @@
 import { addMonths, monthKey, uid } from './money';
 import { monthSummary } from './insights';
 import type { AppData, Goal, GoalMovement } from './types';
+import { t } from './i18n';
 
 /** Redondeo de una compra: lo que falta hasta el siguiente múltiplo. */
 export function roundUpAmount(amount: number, to = 100): number {
@@ -59,7 +60,7 @@ export function savingProposals(data: AppData, month: string): SavingProposal[] 
   if (r.roundUp && !already.has('roundup')) {
     const card = txs.filter((t) => t.amount < 0 && (t.channel === 'card' || t.channel === 'cash'));
     const total = card.reduce((s, t) => s + roundUpAmount(t.amount, r.roundUpTo), 0);
-    if (total > 0) pending.push({ amount: total, reason: 'roundup', detail: `Redondeo de ${card.length} compras` });
+    if (total > 0) pending.push({ amount: total, reason: 'roundup', detail: t('Redondeo de {n} compras', { n: card.length }) });
   }
   if (r.percentOfIncome > 0 && !already.has('percent_income')) {
     const income = monthSummary(data, month).income;
@@ -68,7 +69,7 @@ export function savingProposals(data: AppData, month: string): SavingProposal[] 
   }
   if (r.smartSave && !already.has('smart')) {
     const amount = safeToSave(data, month);
-    if (amount > 0) pending.push({ amount, reason: 'smart', detail: 'Excedente seguro según tus hábitos' });
+    if (amount > 0) pending.push({ amount, reason: 'smart', detail: t('Excedente seguro según tus hábitos') });
   }
 
   // Simula el reparto acumulando lo ya asignado para no sobrepasar objetivos.

@@ -28,6 +28,7 @@ import { Transactions } from './pages/Transactions';
 import { Wealth } from './pages/Wealth';
 import { AuthForm, RecoveryNotice } from './components/AuthForm';
 import { useStore } from './store';
+import { t as _t, LOCALE } from './lib/i18n';
 
 export type Page = 'home' | 'transactions' | 'plan' | 'assistant' | 'more' | 'accounts' | 'debts' | 'fx' | 'groups' | 'wealth' | 'health' | 'subs' | 'settings';
 
@@ -169,9 +170,9 @@ export function App() {
       <div className="lock">
         <div className="card lg" style={{ maxWidth: 400 }}>
           <div className="app-icon"><Icon name="lock" size={36} /></div>
-          <h1 className="center" style={{ margin: '4px 0 6px', fontSize: 24, fontFamily: 'var(--font-display)' }}>No puedo leer tus datos</h1>
-          <p className="small muted center">El navegador no responde al leer el almacenamiento de este dispositivo. <b>Tus datos no se han borrado</b>: es un fallo temporal. Por seguridad no te dejo crear una cuenta nueva encima.</p>
-          <button className="btn primary block" onClick={() => location.reload()}>Reintentar</button>
+          <h1 className="center" style={{ margin: '4px 0 6px', fontSize: 24, fontFamily: 'var(--font-display)' }}>{_t("No puedo leer tus datos")}</h1>
+          <p className="small muted center">{_t("El navegador no responde al leer el almacenamiento de este dispositivo.")} <b>{_t("Tus datos no se han borrado")}</b>{_t(": es un fallo temporal. Por seguridad no te dejo crear una cuenta nueva encima.")}</p>
+          <button className="btn primary block" onClick={() => location.reload()}>{_t("Reintentar")}</button>
         </div>
       </div>
     </>
@@ -193,31 +194,31 @@ export function App() {
         <header className="nav">
           {parent ? (
             <button className="back lg" onClick={() => setPage(parent)}>
-              <Icon name="back" size={22} stroke={2.4} /> {TITLES[parent]}
+              <Icon name="back" size={22} stroke={2.4} /> {_t(TITLES[parent])}
             </button>
           ) : page === 'more' ? (
             <button className="back lg" onClick={() => setPage('settings')}>
-              <Icon name="back" size={22} stroke={2.4} /> {TITLES.settings}
+              <Icon name="back" size={22} stroke={2.4} /> {_t(TITLES.settings)}
             </button>
           ) : (
             <span />
           )}
           <div className="nav-actions">
-            <button className="icon-btn lg" onClick={toggleHidden} aria-label={hidden ? 'Mostrar importes' : 'Ocultar importes'} aria-pressed={hidden} title={hidden ? 'Mostrar importes' : 'Ocultar importes'}>
+            <button className="icon-btn lg" onClick={toggleHidden} aria-label={hidden ? _t("Mostrar importes") : _t("Ocultar importes")} aria-pressed={hidden} title={hidden ? _t("Mostrar importes") : _t("Ocultar importes")}>
               <Icon name={hidden ? 'eyeOff' : 'eye'} size={19} />
             </button>
             {store.sync.status !== 'off' && (
-              <button className="icon-btn lg" onClick={() => void store.syncNow()} aria-label="Sincronizar" title={store.sync.error ?? (store.sync.lastSync ? `Sincronizado ${new Date(store.sync.lastSync).toLocaleTimeString('es-ES')}` : 'Sincronizar')}>
+              <button className="icon-btn lg" onClick={() => void store.syncNow()} aria-label={_t("Sincronizar")} title={store.sync.error ?? (store.sync.lastSync ? `Sincronizado ${new Date(store.sync.lastSync).toLocaleTimeString(LOCALE)}` : _t("Sincronizar"))}>
                 <Icon name="cloud" size={19} className={store.sync.status === 'syncing' ? 'spin' : ''} />
                 {store.sync.status === 'error' && <span style={{ position: 'absolute', top: 6, right: 6, width: 8, height: 8, borderRadius: 4, background: 'var(--bad)' }} />}
               </button>
             )}
-            <button className="icon-btn lg" onClick={store.lock} aria-label="Bloquear">
+            <button className="icon-btn lg" onClick={store.lock} aria-label={_t("Bloquear")}>
               <Icon name="lock" size={19} />
             </button>
           </div>
         </header>
-        <h1 className="large-title">{TITLES[page]}</h1>
+        <h1 className="large-title">{_t(TITLES[page])}</h1>
         {page === 'home' && !(store.data && guideActive(store.data)) && <InstallBanner />}
 
         <main>
@@ -240,8 +241,8 @@ export function App() {
                   <li key={p} className="tap" onClick={() => setPage(p)}>
                     <span className="icon"><Icon name={icon} size={19} /></span>
                     <div className="grow">
-                      <div>{label}</div>
-                      <div className="small muted ellipsis">{hint}</div>
+                      <div>{_t(label)}</div>
+                      <div className="small muted ellipsis">{_t(hint)}</div>
                     </div>
                     <Icon name="chevron" size={18} className="chev" />
                   </li>
@@ -254,15 +255,15 @@ export function App() {
 
       <div className="dock">
         <div className="dock-inner">
-          <nav className="tabbar lg" aria-label="Secciones">
+          <nav className="tabbar lg" aria-label={_t("Secciones")}>
             {TABS.map(([p, icon, label]) => (
               <button key={p} className={tab === p ? 'on' : ''} onClick={() => setPage(p)} aria-current={tab === p ? 'page' : undefined}>
                 <Icon name={icon} size={23} stroke={tab === p ? 2.2 : 1.8} />
-                <span>{label}</span>
+                <span>{_t(label)}</span>
               </button>
             ))}
           </nav>
-          <button className="fab lg tint" onClick={() => setSheet('add')} aria-label="Añadir movimiento" onContextMenu={(e) => { e.preventDefault(); setSheet('voice'); }}>
+          <button className="fab lg tint" onClick={() => setSheet('add')} aria-label={_t("Añadir movimiento")} onContextMenu={(e) => { e.preventDefault(); setSheet('voice'); }}>
             <Icon name="plus" size={28} stroke={2.4} />
           </button>
         </div>
@@ -270,7 +271,7 @@ export function App() {
 
       {store.save.status === 'error' && (
         <div role="alert" className="card" style={{ position: 'fixed', top: 'max(8px, env(safe-area-inset-top))', left: 12, right: 12, zIndex: 200, color: 'var(--bad)' }}>
-          No se pudo guardar en este dispositivo: {store.save.error} Reintentando… Descarga un Excel por si acaso.
+          {_t("No se pudo guardar en este dispositivo:")} {store.save.error} {_t("Reintentando… Descarga un Excel por si acaso.")}
         </div>
       )}
       {sheet === 'add' && <QuickAdd prefill={prefill} onClose={() => { setSheet(null); setPrefill(undefined); }} onVoice={() => setSheet('voice')} />}
@@ -390,13 +391,13 @@ function Lock() {
     return (
       <div className="lock">
         <div style={{ width: '100%', maxWidth: 400 }}>
-          <LockHero title="Tu dinero, con claridad." sub="Gastos, presupuestos y metas en bolívares, dólares y euros. Privada y cifrada." />
+          <LockHero title={_t("Tu dinero, con claridad.")} sub={_t("Gastos, presupuestos y metas en bolívares, dólares y euros. Privada y cifrada.")} />
           <RecoveryNotice><></></RecoveryNotice>
           <div className="card lock-card">
-            <p className="small muted center" style={{ marginTop: 0 }}>Crea tu cuenta o inicia sesión para guardar tus datos y usarlos en todos tus dispositivos.</p>
+            <p className="small muted center" style={{ marginTop: 0 }}>{_t("Crea tu cuenta o inicia sesión para guardar tus datos y usarlos en todos tus dispositivos.")}</p>
             {error && <p className="small" style={{ color: 'var(--bad)' }}>{error}</p>}
             <AuthForm onDone={() => { setSignedIn(true); void afterSignIn(); }} />
-            <button className="btn ghost block mt small" onClick={() => setMode('pass')}>Usar sin cuenta, solo en este dispositivo</button>
+            <button className="btn ghost block mt small" onClick={() => setMode('pass')}>{_t("Usar sin cuenta, solo en este dispositivo")}</button>
           </div>
         </div>
       </div>
@@ -409,20 +410,20 @@ function Lock() {
         <div style={{ width: '100%', maxWidth: 400 }}>
         <div className="card lock-card">
           <div className="app-icon"><Icon name="cloud" size={36} /></div>
-          <h1 className="center" style={{ margin: '4px 0 6px', fontSize: 26, letterSpacing: '-0.035em', fontFamily: 'var(--font-display)' }}>Recuperar mis datos</h1>
-          <p className="small muted center" style={{ marginTop: 0 }}>{found ? 'Hemos encontrado tus datos en la nube. Escribe tu clave de cifrado para abrirlos.' : 'Inicia sesión y escribe la clave de cifrado que usas en tu otro dispositivo.'}</p>
+          <h1 className="center" style={{ margin: '4px 0 6px', fontSize: 26, letterSpacing: '-0.035em', fontFamily: 'var(--font-display)' }}>{_t("Recuperar mis datos")}</h1>
+          <p className="small muted center" style={{ marginTop: 0 }}>{found ? _t("Hemos encontrado tus datos en la nube. Escribe tu clave de cifrado para abrirlos.") : _t("Inicia sesión y escribe la clave de cifrado que usas en tu otro dispositivo.")}</p>
           {!signedIn ? (
             <AuthForm onDone={() => setSignedIn(true)} />
           ) : (
             <form onSubmit={(e) => { e.preventDefault(); void restore(); }}>
               <div className="field">
-                <input type="password" autoFocus placeholder="Clave de cifrado" value={pass} onChange={(e) => setPass(e.target.value)} aria-label="Clave de cifrado" />
+                <input type="password" autoFocus placeholder={_t("Clave de cifrado")} value={pass} onChange={(e) => setPass(e.target.value)} aria-label={_t("Clave de cifrado")} />
               </div>
               {error && <p className="small" style={{ color: 'var(--bad)' }}>{error}</p>}
-              <button className="btn primary block" disabled={busy || !pass}>{busy ? 'Descifrando…' : 'Recuperar'}</button>
+              <button className="btn primary block" disabled={busy || !pass}>{busy ? _t("Descifrando…") : _t("Recuperar")}</button>
             </form>
           )}
-          <button className="btn ghost block mt small" onClick={() => setMode('pass')}>Volver</button>
+          <button className="btn ghost block mt small" onClick={() => setMode('pass')}>{_t("Volver")}</button>
         </div>
         </div>
       </div>
@@ -432,43 +433,43 @@ function Lock() {
   return (
     <div className="lock">
       <div style={{ width: '100%', maxWidth: 400 }}>
-      <LockHero title={isNew ? 'Tu dinero, con claridad.' : 'Hola de nuevo'} sub={isNew ? 'Gastos, presupuestos y metas en bolívares, dólares y euros. Privada y cifrada.' : bioReady ? `Usa ${bioLabel()} o tu clave de cifrado.` : 'Introduce tu clave de cifrado para abrir tus datos.'} />
+      <LockHero title={isNew ? _t('Tu dinero, con claridad.') : _t('Hola de nuevo')} sub={isNew ? _t('Gastos, presupuestos y metas en bolívares, dólares y euros. Privada y cifrada.') : bioReady ? _t('Usa {bio} o tu clave de cifrado.', { bio: bioLabel() }) : _t('Introduce tu clave de cifrado para abrir tus datos.')} />
       <RecoveryNotice><></></RecoveryNotice>
       <form className="card lock-card" onSubmit={(e) => { e.preventDefault(); void submit(); }}>
         {bioReady && (
           <>
             <button type="button" className="btn primary block" disabled={busy} onClick={() => void tryBio()}>
-              <Icon name="shield" size={18} /> Desbloquear con {bioLabel()}
+              <Icon name="shield" size={18} /> {_t("Desbloquear con")} {bioLabel()}
             </button>
-            <div className="row tiny muted" style={{ margin: '14px 0' }}><hr style={{ flex: 1, border: 0, borderTop: '0.5px solid var(--hairline)' }} />o con tu clave<hr style={{ flex: 1, border: 0, borderTop: '0.5px solid var(--hairline)' }} /></div>
+            <div className="row tiny muted" style={{ margin: '14px 0' }}><hr style={{ flex: 1, border: 0, borderTop: '0.5px solid var(--hairline)' }} />{_t("o con tu clave")}<hr style={{ flex: 1, border: 0, borderTop: '0.5px solid var(--hairline)' }} /></div>
           </>
         )}
-        {isNew && <p className="small muted center" style={{ marginTop: 0 }}>Crea tu clave de cifrado. Protege tus datos y no se puede recuperar: guárdala bien. Solo se pide una vez en cada dispositivo; después puedes entrar con Face ID o huella.</p>}
+        {isNew && <p className="small muted center" style={{ marginTop: 0 }}>{_t("Crea tu clave de cifrado. Protege tus datos y no se puede recuperar: guárdala bien. Solo se pide una vez en cada dispositivo; después puedes entrar con Face ID o huella.")}</p>}
         <div className="field">
-          <input type="password" autoFocus autoComplete={isNew ? 'new-password' : 'current-password'} placeholder="Contraseña" value={pass} onChange={(e) => setPass(e.target.value)} aria-label="Contraseña" />
+          <input type="password" autoFocus autoComplete={isNew ? 'new-password' : 'current-password'} placeholder={_t("Contraseña")} value={pass} onChange={(e) => setPass(e.target.value)} aria-label={_t("Contraseña")} />
         </div>
         {isNew && (
           <div className="field">
-            <input type="password" autoComplete="new-password" placeholder="Repite la contraseña" value={pass2} onChange={(e) => setPass2(e.target.value)} aria-label="Repite la contraseña" />
+            <input type="password" autoComplete="new-password" placeholder={_t("Repite la contraseña")} value={pass2} onChange={(e) => setPass2(e.target.value)} aria-label={_t("Repite la contraseña")} />
           </div>
         )}
         {error && <p className="small" style={{ color: 'var(--bad)' }}>{error}</p>}
-        <button className="btn primary block" disabled={busy || !pass}>{busy ? 'Un momento…' : isNew ? 'Empezar' : 'Desbloquear'}</button>
+        <button className="btn primary block" disabled={busy || !pass}>{busy ? _t("Un momento…") : isNew ? _t("Empezar") : _t("Desbloquear")}</button>
         {isNew && (
           <>
             <button type="button" className="btn tinted block mt" disabled={busy || !pass} onClick={() => void submit(true)}>
-              Probar con datos de ejemplo
+              {_t("Probar con datos de ejemplo")}
             </button>
             {supabase() && (
               <button type="button" className="btn ghost block mt small" onClick={() => setMode('restore')}>
-                Ya tengo datos guardados en mi cuenta
+                {_t("Ya tengo datos guardados en mi cuenta")}
               </button>
             )}
           </>
         )}
         {!isNew && (
           <button type="button" className="btn ghost block mt small muted" onClick={() => confirm('Se borrarán los datos cifrados de este dispositivo. ¿Continuar?') && void store.wipe()}>
-            He olvidado la contraseña
+            {_t("He olvidado la contraseña")}
           </button>
         )}
       </form>

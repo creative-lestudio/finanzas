@@ -3,6 +3,7 @@ import { categorize } from './categorize';
 import { callClaude, textOf } from './ai';
 import { normalize, today } from './money';
 import type { Account, AppData } from './types';
+import { LOCALE } from './i18n';
 
 // Registro por voz: "gasté 50 euros en Mercadona" → movimiento.
 // Primero un intérprete local (funciona sin conexión); si la IA está
@@ -236,7 +237,7 @@ function listenNative(onText: (text: string, final: boolean) => void, onError: (
       onText(last, false);
     });
     await plugin.addListener('listeningState', (st) => st.status === 'stopped' && finish());
-    await plugin.start({ language: 'es-ES', partialResults: true, popup: false });
+    await plugin.start({ language: LOCALE, partialResults: true, popup: false });
   })().catch(() => onError('No se pudo iniciar el dictado. Escribe la frase.'));
   return () => void plugin?.stop().catch(() => finish());
 }
@@ -251,7 +252,7 @@ export function listen(onText: (text: string, final: boolean) => void, onError: 
     return () => {};
   }
   const rec = new Ctor();
-  rec.lang = 'es-ES';
+  rec.lang = LOCALE;
   rec.interimResults = true;
   rec.continuous = false;
   let finalSent = false;

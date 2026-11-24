@@ -7,8 +7,9 @@ import { CURRENCIES } from '../lib/fx';
 import { formatMoney, parseAmount, today, uid } from '../lib/money';
 import type { AppData, Debt, DebtPlan } from '../lib/types';
 import { useStore } from '../store';
+import { t as _t, LOCALE } from '../lib/i18n';
 
-const dateFmt = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+const dateFmt = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString(LOCALE, { day: 'numeric', month: 'short', year: 'numeric' });
 const toInput = (cents: number) => String(cents / 100).replace('.', ',');
 
 /** Deudas: lo que me deben y lo que debo, con categoría, prioridad, pagos y plan de pago. */
@@ -34,12 +35,12 @@ export function Debts() {
     <>
       <div className="hero glass">
         <div className="grid2">
-          <div><div className="tiny muted">Debo</div><div className="mid neg">{formatMoney(totals.owe, base)}</div></div>
-          <div><div className="tiny muted">Me deben</div><div className="mid pos">{formatMoney(totals.owed, base)}</div></div>
+          <div><div className="tiny muted">{_t("Debo")}</div><div className="mid neg">{formatMoney(totals.owe, base)}</div></div>
+          <div><div className="tiny muted">{_t("Me deben")}</div><div className="mid pos">{formatMoney(totals.owed, base)}</div></div>
         </div>
         <div className="small muted" style={{ marginTop: 6 }}>
-          Balance <b className={totals.net >= 0 ? 'pos' : 'neg'}>{formatMoney(totals.net, base)}</b>
-          {totals.overdue > 0 && <> · <b className="neg">{totals.overdue} vencida{totals.overdue > 1 ? 's' : ''}</b></>}
+          {_t("Balance")} <b className={totals.net >= 0 ? 'pos' : 'neg'}>{formatMoney(totals.net, base)}</b>
+          {totals.overdue > 0 && <> · <b className="neg">{totals.overdue} {_t("vencida")}{totals.overdue > 1 ? 's' : ''}</b></>}
         </div>
       </div>
 
@@ -47,26 +48,26 @@ export function Debts() {
 
       {mine.length > 0 && (
         <div className="chips" style={{ marginBottom: 8 }}>
-          <button className={`chip ${!cat ? 'on' : ''}`} onClick={() => setCat('')}>Todas</button>
+          <button className={`chip ${!cat ? 'on' : ''}`} onClick={() => setCat('')}>{_t("Todas")}</button>
           {usedCats.map((c) => <button key={c} className={`chip ${cat === c ? 'on' : ''}`} onClick={() => setCat(cat === c ? '' : c)}>{DEBT_CATEGORIES[c].label}</button>)}
         </div>
       )}
       {mine.length > 0 && (
         <div className="chips" style={{ marginBottom: 12 }}>
-          {(['high', 'medium', 'low'] as const).map((p) => <button key={p} className={`chip ${prio === p ? 'on' : ''}`} onClick={() => setPrio(prio === p ? '' : p)}>Prioridad {PRIORITY_LABEL[p].toLowerCase()}</button>)}
+          {(['high', 'medium', 'low'] as const).map((p) => <button key={p} className={`chip ${prio === p ? 'on' : ''}`} onClick={() => setPrio(prio === p ? '' : p)}>{_t("Prioridad")} {PRIORITY_LABEL[p].toLowerCase()}</button>)}
         </div>
       )}
 
       {list.length === 0 ? (
-        <Empty>{mine.length === 0 ? (dir === 'owe' ? 'No tienes deudas anotadas. Si pides o debes dinero, anótalo aquí y planifica cómo pagarlo.' : 'Nadie te debe dinero (en lo anotado). Si prestas, anótalo para no olvidarlo.') : 'Ninguna deuda coincide con el filtro.'}</Empty>
+        <Empty>{mine.length === 0 ? (dir === 'owe' ? _t("No tienes deudas anotadas. Si pides o debes dinero, anótalo aquí y planifica cómo pagarlo.") : _t("Nadie te debe dinero (en lo anotado). Si prestas, anótalo para no olvidarlo.")) : _t("Ninguna deuda coincide con el filtro.")}</Empty>
       ) : (
         list.map((d) => <DebtCard key={d.id} debt={d} onOpen={() => setOpenId(d.id)} />)
       )}
-      {settledCount > 0 && <button className="btn ghost block small" onClick={() => setShowSettled(!showSettled)}>{showSettled ? 'Ocultar saldadas' : `Ver saldadas (${settledCount})`}</button>}
-      <button className="btn block glass" onClick={() => setEdit({ direction: dir, priority: 'medium', category: 'personal', currency: base })}><Icon name="plus" size={18} /> Nueva deuda</button>
+      {settledCount > 0 && <button className="btn ghost block small" onClick={() => setShowSettled(!showSettled)}>{showSettled ? _t("Ocultar saldadas") : `Ver saldadas (${settledCount})`}</button>}
+      <button className="btn block glass" onClick={() => setEdit({ direction: dir, priority: 'medium', category: 'personal', currency: base })}><Icon name="plus" size={18} /> {_t("Nueva deuda")}</button>
 
       {edit && (
-        <Sheet title={edit.id ? 'Editar deuda' : 'Nueva deuda'} onClose={() => setEdit(null)}>
+        <Sheet title={edit.id ? _t("Editar deuda") : _t("Nueva deuda")} onClose={() => setEdit(null)}>
           <DebtForm
             value={edit}
             onSave={(d, accountId) => {
@@ -79,7 +80,7 @@ export function Debts() {
                 }
                 return next;
               });
-              toast('Deuda guardada');
+              toast(_t("Deuda guardada"));
               setEdit(null);
               setDir(d.direction);
             }}
@@ -108,13 +109,13 @@ function DebtCard({ debt, onOpen }: { debt: Debt; onOpen: () => void }) {
         </div>
         <div style={{ textAlign: 'right' }}>
           <div className={`mid num ${debt.direction === 'owe' ? 'neg' : 'pos'}`} style={{ fontSize: 18 }}>{formatMoney(st.remaining, debt.currency)}</div>
-          <div className="tiny muted">de {formatMoney(debt.amount, debt.currency)}</div>
+          <div className="tiny muted">{_t("de")} {formatMoney(debt.amount, debt.currency)}</div>
         </div>
       </div>
-      <div style={{ margin: '10px 0 6px' }}><Meter ratio={st.ratio} state={st.settled ? 'goal' : st.overdue ? 'over' : 'ok'} label="Pagado" /></div>
+      <div style={{ margin: '10px 0 6px' }}><Meter ratio={st.ratio} state={st.settled ? 'goal' : st.overdue ? 'over' : 'ok'} label={_t("Pagado")} /></div>
       <div className="row small between" style={{ gap: 8 }}>
         <span className="muted">
-          {st.settled ? 'Sin pendiente' : st.next ? `Cuota ${formatMoney(st.next.amount, debt.currency)} · ${dateFmt(st.next.date)}` : debt.dueDate ? `Vence ${dateFmt(debt.dueDate)}` : 'Sin fecha'}
+          {st.settled ? _t("Sin pendiente") : st.next ? `Cuota ${formatMoney(st.next.amount, debt.currency)} · ${dateFmt(st.next.date)}` : debt.dueDate ? `Vence ${dateFmt(debt.dueDate)}` : _t("Sin fecha")}
         </span>
         {tag && <span className="pill" style={{ color: st.overdue ? 'var(--bad)' : debt.priority === 'high' ? 'var(--warn)' : undefined }}>{tag}</span>}
       </div>
@@ -140,35 +141,35 @@ function DebtForm({ value, onSave }: { value: Partial<Debt>; onSave: (d: Debt, a
   return (
     <>
       <div className="seg" style={{ marginBottom: 12 }}>
-        <button className={direction === 'owe' ? 'on' : ''} onClick={() => setDirection('owe')}>Yo debo</button>
-        <button className={direction === 'owed' ? 'on' : ''} onClick={() => setDirection('owed')}>Me deben</button>
+        <button className={direction === 'owe' ? 'on' : ''} onClick={() => setDirection('owe')}>{_t("Yo debo")}</button>
+        <button className={direction === 'owed' ? 'on' : ''} onClick={() => setDirection('owed')}>{_t("Me deben")}</button>
       </div>
-      <Field label={direction === 'owe' ? 'A quién le debo' : 'Quién me debe'}><input value={person} placeholder="Nombre de la persona o entidad" onChange={(e) => setPerson(e.target.value)} aria-label="Persona" /></Field>
-      <Field label="Concepto"><input value={title} placeholder="Préstamo, alquiler atrasado, trabajo…" onChange={(e) => setTitle(e.target.value)} aria-label="Concepto" /></Field>
+      <Field label={direction === 'owe' ? _t("A quién le debo") : _t("Quién me debe")}><input value={person} placeholder={_t("Nombre de la persona o entidad")} onChange={(e) => setPerson(e.target.value)} aria-label={_t("Persona")} /></Field>
+      <Field label={_t("Concepto")}><input value={title} placeholder={_t("Préstamo, alquiler atrasado, trabajo…")} onChange={(e) => setTitle(e.target.value)} aria-label={_t("Concepto")} /></Field>
       <div className="grid2">
-        <Field label="Importe total"><input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} aria-label="Importe" /></Field>
-        <Field label="Moneda"><select value={currency} onChange={(e) => { setCurrency(e.target.value); setAccountId(''); }}>{CURRENCIES.map((c) => <option key={c.code} value={c.code}>{c.flag} {c.code}</option>)}</select></Field>
+        <Field label={_t("Importe total")}><input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} aria-label={_t("Importe")} /></Field>
+        <Field label={_t("Moneda")}><select value={currency} onChange={(e) => { setCurrency(e.target.value); setAccountId(''); }}>{CURRENCIES.map((c) => <option key={c.code} value={c.code}>{c.flag} {c.code}</option>)}</select></Field>
       </div>
-      <Field label="Categoría">
-        <select value={category} onChange={(e) => setCategory(e.target.value as Debt['category'])} aria-label="Categoría">
+      <Field label={_t("Categoría")}>
+        <select value={category} onChange={(e) => setCategory(e.target.value as Debt['category'])} aria-label={_t("Categoría")}>
           {(Object.keys(DEBT_CATEGORIES) as Debt['category'][]).map((c) => <option key={c} value={c}>{DEBT_CATEGORIES[c].label}</option>)}
         </select>
       </Field>
-      <div className="small muted" style={{ margin: '0 4px 4px' }}>Prioridad</div>
+      <div className="small muted" style={{ margin: '0 4px 4px' }}>{_t("Prioridad")}</div>
       <div className="seg" style={{ marginBottom: 12 }}>
         {(['high', 'medium', 'low'] as const).map((p) => <button key={p} className={priority === p ? 'on' : ''} onClick={() => setPriority(p)}>{PRIORITY_LABEL[p]}</button>)}
       </div>
-      <Field label="Fecha límite (opcional)"><input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} aria-label="Fecha límite" /></Field>
-      <Field label="Nota (opcional)"><input value={note} onChange={(e) => setNote(e.target.value)} aria-label="Nota" /></Field>
+      <Field label={_t("Fecha límite (opcional)")}><input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} aria-label={_t("Fecha límite")} /></Field>
+      <Field label={_t("Nota (opcional)")}><input value={note} onChange={(e) => setNote(e.target.value)} aria-label={_t("Nota")} /></Field>
       {!value.id && accounts.length > 0 && (
-        <Field label={direction === 'owed' ? 'Descontar de una cuenta (si ya les diste el dinero)' : 'Sumar a una cuenta (si ya recibiste el dinero)'}>
-          <select value={accountId} onChange={(e) => setAccountId(e.target.value)} aria-label="Cuenta">
-            <option value="">No anotar en ninguna cuenta</option>
+        <Field label={direction === 'owed' ? _t("Descontar de una cuenta (si ya les diste el dinero)") : _t("Sumar a una cuenta (si ya recibiste el dinero)")}>
+          <select value={accountId} onChange={(e) => setAccountId(e.target.value)} aria-label={_t("Cuenta")}>
+            <option value="">{_t("No anotar en ninguna cuenta")}</option>
             {accounts.map((a) => <option key={a.id} value={a.id}>{a.name} · {a.currency}</option>)}
           </select>
         </Field>
       )}
-      <button className="btn primary block mt" disabled={!person.trim() || !cents} onClick={() => onSave({ id: value.id ?? uid(), direction, person: person.trim(), title: title.trim() || (direction === 'owe' ? 'Deuda' : 'Préstamo'), category, priority, amount: cents, currency, dueDate: dueDate || undefined, note: note.trim() || undefined, createdAt: value.createdAt ?? today(), payments: value.payments ?? [], plan: value.plan }, accountId || undefined)}>Guardar</button>
+      <button className="btn primary block mt" disabled={!person.trim() || !cents} onClick={() => onSave({ id: value.id ?? uid(), direction, person: person.trim(), title: title.trim() || (direction === 'owe' ? _t("Deuda") : _t("Préstamo")), category, priority, amount: cents, currency, dueDate: dueDate || undefined, note: note.trim() || undefined, createdAt: value.createdAt ?? today(), payments: value.payments ?? [], plan: value.plan }, accountId || undefined)}>{_t("Guardar")}</button>
     </>
   );
 }
@@ -222,63 +223,63 @@ function DebtDetail({ debt, onEdit, onClose }: { debt: Debt; onEdit: () => void;
     const a = Math.abs(parseAmount(planAmount) ?? 0);
     if (!a) return;
     patch((d) => ({ ...d, plan: { amount: a, freq, start } }));
-    toast('Plan de pago guardado');
+    toast(_t("Plan de pago guardado"));
     setPlanOpen(false);
   };
 
   return (
     <>
       <div className="center mb">
-        <div className="small muted">{debt.title} · {DEBT_CATEGORIES[debt.category].label} · prioridad {PRIORITY_LABEL[debt.priority].toLowerCase()}</div>
+        <div className="small muted">{debt.title} · {DEBT_CATEGORIES[debt.category].label} {_t("· prioridad")} {PRIORITY_LABEL[debt.priority].toLowerCase()}</div>
         <div className={`big num ${debt.direction === 'owe' ? 'neg' : 'pos'}`}>{formatMoney(st.remaining, cur)}</div>
-        <div className="small muted">{debt.direction === 'owe' ? 'pendiente de pagar' : 'pendiente de cobrar'} · de {formatMoney(debt.amount, cur)}</div>
-        <div style={{ margin: '10px 0 0' }}><Meter ratio={st.ratio} state={st.settled ? 'goal' : st.overdue ? 'over' : 'ok'} label="Pagado" /></div>
-        {debt.dueDate && <div className="small muted" style={{ marginTop: 6 }}>Fecha límite: <span className={st.overdue ? 'neg' : ''}>{dateFmt(debt.dueDate)}</span></div>}
+        <div className="small muted">{debt.direction === 'owe' ? _t("pendiente de pagar") : _t("pendiente de cobrar")} {_t("· de")} {formatMoney(debt.amount, cur)}</div>
+        <div style={{ margin: '10px 0 0' }}><Meter ratio={st.ratio} state={st.settled ? 'goal' : st.overdue ? 'over' : 'ok'} label={_t("Pagado")} /></div>
+        {debt.dueDate && <div className="small muted" style={{ marginTop: 6 }}>{_t("Fecha límite:")} <span className={st.overdue ? 'neg' : ''}>{dateFmt(debt.dueDate)}</span></div>}
         {debt.note && <div className="tiny muted mt">{debt.note}</div>}
       </div>
 
       {!st.settled && (
         <div className="card glass" style={{ margin: '0 0 12px' }}>
-          <h2>{debt.direction === 'owe' ? 'Registrar un pago' : 'Registrar un cobro'}</h2>
+          <h2>{debt.direction === 'owe' ? _t("Registrar un pago") : _t("Registrar un cobro")}</h2>
           <div className="grid2">
-            <Field label={`Importe (${cur})`}><input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} aria-label="Importe del pago" /></Field>
-            <Field label="Fecha"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} aria-label="Fecha del pago" /></Field>
+            <Field label={`Importe (${cur})`}><input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} aria-label={_t("Importe del pago")} /></Field>
+            <Field label={_t("Fecha")}><input type="date" value={date} onChange={(e) => setDate(e.target.value)} aria-label={_t("Fecha del pago")} /></Field>
           </div>
           {accounts.length > 0 && (
-            <Field label={debt.direction === 'owe' ? 'Pagado desde' : 'Recibido en'}>
-              <select value={accountId} onChange={(e) => setAccountId(e.target.value)} aria-label="Cuenta del pago">
-                <option value="">Solo anotar en la deuda</option>
+            <Field label={debt.direction === 'owe' ? _t("Pagado desde") : _t("Recibido en")}>
+              <select value={accountId} onChange={(e) => setAccountId(e.target.value)} aria-label={_t("Cuenta del pago")}>
+                <option value="">{_t("Solo anotar en la deuda")}</option>
                 {accounts.map((a) => <option key={a.id} value={a.id}>{a.name} · {a.currency}</option>)}
               </select>
             </Field>
           )}
-          <Field label="Nota (opcional)"><input value={note} onChange={(e) => setNote(e.target.value)} aria-label="Nota del pago" /></Field>
+          <Field label={_t("Nota (opcional)")}><input value={note} onChange={(e) => setNote(e.target.value)} aria-label={_t("Nota del pago")} /></Field>
           <div className="grid2">
-            <button className="btn primary" disabled={!parseAmount(amount)} onClick={pay}>Guardar pago</button>
-            <button className="btn tinted" onClick={() => setAmount(toInput(st.remaining))}>Todo ({formatMoney(st.remaining, cur)})</button>
+            <button className="btn primary" disabled={!parseAmount(amount)} onClick={pay}>{_t("Guardar pago")}</button>
+            <button className="btn tinted" onClick={() => setAmount(toInput(st.remaining))}>{_t("Todo (")}{formatMoney(st.remaining, cur)})</button>
           </div>
         </div>
       )}
 
       <div className="card glass" style={{ margin: '0 0 12px' }}>
-        <div className="card-head"><h2>Plan de pago</h2><button className="btn ghost sm" onClick={() => setPlanOpen(!planOpen)}>{debt.plan ? 'Cambiar' : 'Crear plan'}</button></div>
+        <div className="card-head"><h2>{_t("Plan de pago")}</h2><button className="btn ghost sm" onClick={() => setPlanOpen(!planOpen)}>{debt.plan ? _t("Cambiar") : _t("Crear plan")}</button></div>
         {debt.plan ? (
-          <p className="small" style={{ margin: '0 0 6px' }}>{formatMoney(debt.plan.amount, cur)} · {FREQ_DEBT_LABEL[debt.plan.freq].toLowerCase()}, desde {dateFmt(debt.plan.start)}{st.endsOn ? <> · termina hacia <b>{dateFmt(st.endsOn)}</b></> : null}</p>
+          <p className="small" style={{ margin: '0 0 6px' }}>{formatMoney(debt.plan.amount, cur)} · {FREQ_DEBT_LABEL[debt.plan.freq].toLowerCase()}{_t(", desde")} {dateFmt(debt.plan.start)}{st.endsOn ? <> {_t("· termina hacia")} <b>{dateFmt(st.endsOn)}</b></> : null}</p>
         ) : (
-          <p className="small muted" style={{ margin: '0 0 6px' }}>Define una cuota y la app calcula las fechas y avisa si te atrasas.</p>
+          <p className="small muted" style={{ margin: '0 0 6px' }}>{_t("Define una cuota y la app calcula las fechas y avisa si te atrasas.")}</p>
         )}
         {planOpen && (
           <>
             <div className="grid2">
-              <Field label="Saldar en (meses)"><input inputMode="numeric" value={months} placeholder="12" onChange={(e) => { setMonths(e.target.value); const n = Number(e.target.value); if (n > 0) setPlanAmount(toInput(installmentFor(st.remaining || debt.amount, n))); }} aria-label="Meses" /></Field>
-              <Field label={`Cuota (${cur})`}><input inputMode="decimal" value={planAmount} onChange={(e) => setPlanAmount(e.target.value)} aria-label="Cuota" /></Field>
+              <Field label={_t("Saldar en (meses)")}><input inputMode="numeric" value={months} placeholder="12" onChange={(e) => { setMonths(e.target.value); const n = Number(e.target.value); if (n > 0) setPlanAmount(toInput(installmentFor(st.remaining || debt.amount, n))); }} aria-label={_t("Meses")} /></Field>
+              <Field label={`Cuota (${cur})`}><input inputMode="decimal" value={planAmount} onChange={(e) => setPlanAmount(e.target.value)} aria-label={_t("Cuota")} /></Field>
             </div>
             <div className="seg" style={{ marginBottom: 8 }}>
               {(['weekly', 'biweekly', 'monthly'] as const).map((f) => <button key={f} className={freq === f ? 'on' : ''} onClick={() => setFreq(f)}>{FREQ_DEBT_LABEL[f]}</button>)}
             </div>
-            <Field label="Primera cuota"><input type="date" value={start} onChange={(e) => setStart(e.target.value)} aria-label="Primera cuota" /></Field>
-            <button className="btn primary block" disabled={!parseAmount(planAmount)} onClick={savePlan}>Guardar plan</button>
-            {debt.plan && <button className="btn ghost block mt small" onClick={() => { patch((d) => ({ ...d, plan: undefined })); setPlanOpen(false); }}>Quitar el plan</button>}
+            <Field label={_t("Primera cuota")}><input type="date" value={start} onChange={(e) => setStart(e.target.value)} aria-label={_t("Primera cuota")} /></Field>
+            <button className="btn primary block" disabled={!parseAmount(planAmount)} onClick={savePlan}>{_t("Guardar plan")}</button>
+            {debt.plan && <button className="btn ghost block mt small" onClick={() => { patch((d) => ({ ...d, plan: undefined })); setPlanOpen(false); }}>{_t("Quitar el plan")}</button>}
           </>
         )}
         {sched.length > 0 && (
@@ -286,13 +287,13 @@ function DebtDetail({ debt, onEdit, onClose }: { debt: Debt; onEdit: () => void;
             {(allSched ? sched : sched.slice(0, 6)).map((i) => (
               <li key={i.n} style={{ minHeight: 40, opacity: i.paid ? 0.55 : 1 }}>
                 <span className={`tick ${i.paid ? 'on' : ''}`}>{i.paid && <Icon name="check" size={13} stroke={2.6} />}</span>
-                <span className="grow small">Cuota {i.n} · {dateFmt(i.date)}{!i.paid && i.date < today() && <b className="neg"> · atrasada</b>}</span>
+                <span className="grow small">{_t("Cuota")} {i.n} · {dateFmt(i.date)}{!i.paid && i.date < today() && <b className="neg"> {_t("· atrasada")}</b>}</span>
                 <b className="num small">{formatMoney(i.amount, cur)}</b>
               </li>
             ))}
           </ul>
         )}
-        {sched.length > 6 && <button className="btn ghost block small" onClick={() => setAllSched(!allSched)}>{allSched ? 'Ver menos' : `Ver las ${sched.length} cuotas`}</button>}
+        {sched.length > 6 && <button className="btn ghost block small" onClick={() => setAllSched(!allSched)}>{allSched ? _t("Ver menos") : `Ver las ${sched.length} cuotas`}</button>}
       </div>
 
       {debt.payments.length > 0 && (
@@ -300,9 +301,9 @@ function DebtDetail({ debt, onEdit, onClose }: { debt: Debt; onEdit: () => void;
           <ul className="list">
             {[...debt.payments].sort((a, b) => b.date.localeCompare(a.date)).map((p) => (
               <li key={p.id}>
-                <div className="grow"><div className="small">{dateFmt(p.date)}{p.txId ? ' · en cuenta' : ''}</div>{p.note && <div className="tiny muted">{p.note}</div>}</div>
+                <div className="grow"><div className="small">{dateFmt(p.date)}{p.txId ? _t(" · en cuenta") : ''}</div>{p.note && <div className="tiny muted">{p.note}</div>}</div>
                 <b className="num">{formatMoney(p.amount, cur)}</b>
-                <button className="icon-btn" style={{ width: 30, height: 30 }} onClick={() => removePayment(p.id)} aria-label="Quitar pago"><Icon name="trash" size={14} /></button>
+                <button className="icon-btn" style={{ width: 30, height: 30 }} onClick={() => removePayment(p.id)} aria-label={_t("Quitar pago")}><Icon name="trash" size={14} /></button>
               </li>
             ))}
           </ul>
@@ -310,12 +311,12 @@ function DebtDetail({ debt, onEdit, onClose }: { debt: Debt; onEdit: () => void;
       )}
 
       <div className="grid2">
-        <button className="btn tinted" onClick={onEdit}>Editar</button>
+        <button className="btn tinted" onClick={onEdit}>{_t("Editar")}</button>
         <button className="btn danger" onClick={() => {
           if (!confirm(`¿Eliminar la deuda con ${debt.person}? Los movimientos que anotaste en cuentas se conservan.`)) return;
           update((cur) => ({ ...cur, debts: cur.debts.filter((x) => x.id !== debt.id) }));
           onClose();
-        }}><Icon name="trash" size={16} /> Eliminar</button>
+        }}><Icon name="trash" size={16} /> {_t("Eliminar")}</button>
       </div>
     </>
   );

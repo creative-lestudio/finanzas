@@ -8,6 +8,7 @@ import { netWorth } from '../lib/health';
 import { formatMoney, today } from '../lib/money';
 import type { Account, AccountKind } from '../lib/types';
 import { useStore } from '../store';
+import { t as _t } from '../lib/i18n';
 
 /** Visión global del patrimonio: todo lo que tienes y lo que debes, en tu moneda principal. */
 export function Wealth() {
@@ -21,16 +22,16 @@ export function Wealth() {
   return (
     <>
       <div className="hero glass">
-        <div className="small secondary">Patrimonio neto · {base}</div>
+        <div className="small secondary">{_t("Patrimonio neto ·")} {base}</div>
         <div className="big" style={{ fontSize: 40 }}>{formatMoney(nw.net, base)}</div>
         <div className="row small secondary wrap" style={{ gap: 14 }}>
-          <span>Activos <Money cents={nw.assets} /></span>
-          <span>Deudas <Money cents={-nw.liabilities} /></span>
-          <span>Liquidez <Money cents={nw.liquid} /></span>
+          <span>{_t("Activos")} <Money cents={nw.assets} /></span>
+          <span>{_t("Deudas")} <Money cents={-nw.liabilities} /></span>
+          <span>{_t("Liquidez")} <Money cents={nw.liquid} /></span>
         </div>
       </div>
       <div className="card glass">
-        <h2>Composición de tus activos</h2>
+        <h2>{_t("Composición de tus activos")}</h2>
         <Bars rows={kinds.filter((k) => nw.byKind[k] > 0).map((k) => ({ label: KIND_LABEL[k], value: nw.byKind[k] }))} />
       </div>
       {kinds.map((k) => {
@@ -47,7 +48,7 @@ export function Wealth() {
                     <div className="grow">
                       <div className="ellipsis">{a.name}</div>
                       <div className="small muted">
-                        {a.source === 'manual' ? 'Manual' : a.source === 'import' ? 'Importada' : `Sincronizada${a.lastSync ? ` · ${a.lastSync}` : ''}`}
+                        {a.source === 'manual' ? _t("Manual") : a.source === 'import' ? _t("Importada") : `Sincronizada${a.lastSync ? ` · ${a.lastSync}` : ''}`}
                       </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
@@ -61,10 +62,10 @@ export function Wealth() {
           </div>
         );
       })}
-      <button className="btn block glass mt" onClick={() => setEdit({ kind: 'checking', currency: base, source: 'manual' })}><Icon name="plus" size={18} /> Añadir cuenta, inversión o deuda</button>
+      <button className="btn block glass mt" onClick={() => setEdit({ kind: 'checking', currency: base, source: 'manual' })}><Icon name="plus" size={18} /> {_t("Añadir cuenta, inversión o deuda")}</button>
 
       {edit && (
-        <Sheet title={edit.id ? 'Editar cuenta' : 'Nueva cuenta'} onClose={() => setEdit(null)}>
+        <Sheet title={edit.id ? _t("Editar cuenta") : _t("Nueva cuenta")} onClose={() => setEdit(null)}>
           <AccountForm
             value={edit}
             onSave={(a) => {

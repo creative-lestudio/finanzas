@@ -12,6 +12,7 @@ import { formatMoney, parseAmount, today, uid } from '../lib/money';
 import { applyGoalMovement, safeToSave } from '../lib/savings';
 import type { Budget, Goal, GoalKind } from '../lib/types';
 import { useStore } from '../store';
+import { t as _t } from '../lib/i18n';
 
 export function Plan() {
   const { data, update } = useStore();
@@ -42,47 +43,47 @@ export function Plan() {
         <>
           {statuses.length > 0 && (
             <div className="hero glass">
-              <div className="small secondary">Gastado este mes en categorías con tope</div>
-              <div className="big">{formatMoney(totalSpent)} <span className="small muted">de {formatMoney(totalBudget)}</span></div>
-              <div className="mt"><Meter ratio={totalBudget ? totalSpent / totalBudget : 0} state={totalSpent > totalBudget ? 'over' : totalSpent > totalBudget * 0.8 ? 'warning' : 'ok'} label="Presupuesto total" /></div>
+              <div className="small secondary">{_t("Gastado este mes en categorías con tope")}</div>
+              <div className="big">{formatMoney(totalSpent)} <span className="small muted">{_t("de")} {formatMoney(totalBudget)}</span></div>
+              <div className="mt"><Meter ratio={totalBudget ? totalSpent / totalBudget : 0} state={totalSpent > totalBudget ? 'over' : totalSpent > totalBudget * 0.8 ? 'warning' : 'ok'} label={_t("Presupuesto total")} /></div>
             </div>
           )}
-          {statuses.length === 0 && <Empty>Sin presupuestos todavía. Crea uno, acepta una sugerencia o pídeselos al asesor.</Empty>}
+          {statuses.length === 0 && <Empty>{_t("Sin presupuestos todavía. Crea uno, acepta una sugerencia o pídeselos al asesor.")}</Empty>}
           {statuses.map((s) => (
             <div className="card glass" key={s.budget.id} onClick={() => setEditBudget(s.budget)} style={{ cursor: 'pointer' }}>
               <div className="row between mb">
-                <b className="row"><CatBadge id={s.budget.categoryId} emoji={cat(s.budget.categoryId)?.icon} />{cat(s.budget.categoryId)?.name}</b>
+                <b className="row"><CatBadge id={s.budget.categoryId} emoji={cat(s.budget.categoryId)?.icon} />{_t(cat(s.budget.categoryId)?.name ?? '')}</b>
                 <StateBadge state={s.state} />
               </div>
               <Meter ratio={s.ratio} state={s.state} label={`Gastado ${Math.round(s.ratio * 100)} %`} />
               <div className="row between small" style={{ marginTop: 8 }}>
-                <span><Money cents={s.spent} /> <span className="muted">de</span> <Money cents={s.limit} /></span>
-                <span className="muted">{s.remaining >= 0 ? `${formatMoney(s.dailyAllowance)}/día` : `${formatMoney(-s.remaining)} de más`}</span>
+                <span><Money cents={s.spent} /> <span className="muted">{_t("de")}</span> <Money cents={s.limit} /></span>
+                <span className="muted">{s.remaining >= 0 ? _t('{amount}/día', { amount: formatMoney(s.dailyAllowance) }) : _t('{amount} de más', { amount: formatMoney(-s.remaining) })}</span>
               </div>
-              {s.projected > s.limit && s.state !== 'over' && <div className="small" style={{ marginTop: 8, color: 'var(--warn)' }}>Al ritmo actual acabarás el mes en {formatMoney(s.projected)}.</div>}
+              {s.projected > s.limit && s.state !== 'over' && <div className="small" style={{ marginTop: 8, color: 'var(--warn)' }}>{_t("Al ritmo actual acabarás el mes en")} {formatMoney(s.projected)}.</div>}
             </div>
           ))}
           {suggestions.length > 0 && (
             <div className="card glass">
-              <h2>Sugerencias según tu gasto medio</h2>
+              <h2>{_t("Sugerencias según tu gasto medio")}</h2>
               <ul className="list">
                 {suggestions.slice(0, 5).map((s) => (
                   <li key={s.categoryId}>
-                    <CatBadge id={s.categoryId} emoji={cat(s.categoryId)?.icon} /><span className="grow">{cat(s.categoryId)?.name}</span>
+                    <CatBadge id={s.categoryId} emoji={cat(s.categoryId)?.icon} /><span className="grow">{_t(cat(s.categoryId)?.name ?? '')}</span>
                     <Money cents={s.limit} />
-                    <button className="btn sm tinted" onClick={() => (askBudget ? setEditBudget({ categoryId: s.categoryId, limit: s.limit, warnAt: 0.8, rollover: false }) : update((d) => ({ ...d, budgets: [...d.budgets, { id: uid(), categoryId: s.categoryId, limit: s.limit, warnAt: 0.8, rollover: false }] })))}>Añadir</button>
+                    <button className="btn sm tinted" onClick={() => (askBudget ? setEditBudget({ categoryId: s.categoryId, limit: s.limit, warnAt: 0.8, rollover: false }) : update((d) => ({ ...d, budgets: [...d.budgets, { id: uid(), categoryId: s.categoryId, limit: s.limit, warnAt: 0.8, rollover: false }] })))}>{_t("Añadir")}</button>
                   </li>
                 ))}
               </ul>
             </div>
           )}
-          <button className="btn block glass" onClick={() => setEditBudget({ warnAt: 0.8, rollover: false })}><Icon name="plus" size={18} /> Nuevo presupuesto</button>
+          <button className="btn block glass" onClick={() => setEditBudget({ warnAt: 0.8, rollover: false })}><Icon name="plus" size={18} /> {_t("Nuevo presupuesto")}</button>
         </>
       )}
 
       {tab === 'goals' && (
         <>
-          {data.goals.length === 0 && <Empty>Crea metas medibles: una cifra, una fecha y un plan mensual. Ahorro, inversión, compras o pagar deudas.</Empty>}
+          {data.goals.length === 0 && <Empty>{_t("Crea metas medibles: una cifra, una fecha y un plan mensual. Ahorro, inversión, compras o pagar deudas.")}</Empty>}
           {[...data.goals].sort((a, b) => a.priority - b.priority).map((g) => {
             const p = goalProgress(data, g, now);
             return (
@@ -91,52 +92,52 @@ export function Plan() {
                   <span className="icon"><GoalIcon icon={g.icon} /></span>
                   <div className="grow">
                     <div style={{ fontWeight: 600, fontSize: 17, letterSpacing: '-0.02em' }} className="ellipsis">{g.name}</div>
-                    <div className="tiny muted">{GOAL_KIND_LABEL[g.kind ?? 'savings']}{g.accountIds?.length ? ' · medida con tus cuentas' : ''}</div>
+                    <div className="tiny muted">{GOAL_KIND_LABEL[g.kind ?? 'savings']}{g.accountIds?.length ? _t(" · medida con tus cuentas") : ''}</div>
                   </div>
                   <span className={`badge ${p.status}`}>{GOAL_STATUS_LABEL[p.status]}</span>
                 </div>
                 <div className="row between mt" style={{ alignItems: 'baseline' }}>
                   <span className="mid">{formatMoney(p.current, p.currency)}</span>
-                  <span className="small muted">de {formatMoney(g.target, p.currency)} · {Math.round(p.ratio * 100)} %</span>
+                  <span className="small muted">{_t("de")} {formatMoney(g.target, p.currency)} · {Math.round(p.ratio * 100)} %</span>
                 </div>
                 <div className="mt"><Meter ratio={p.ratio} state="goal" mark={p.expectedRatio} label={`${g.name}: ${Math.round(p.ratio * 100)} %`} /></div>
                 <div className="kv small mt">
-                  {g.deadline && <><span className="muted">Fecha límite</span><span>{g.deadline} · {p.monthsLeft} meses</span></>}
-                  {p.requiredMonthly !== null && p.requiredMonthly > 0 && <><span className="muted">Necesitas al mes</span><b>{formatMoney(p.requiredMonthly, p.currency)}</b></>}
-                  {g.monthlyPlan ? <><span className="muted">Plan mensual</span><span>{formatMoney(g.monthlyPlan, p.currency)}</span></> : null}
-                  <span className="muted">Aportas de media</span><span>{formatMoney(p.actualMonthly, p.currency)}/mes</span>
-                  {p.projectedDate && p.status !== 'done' && <><span className="muted">Al ritmo actual</span><span>la logras en {p.projectedDate.slice(0, 7)}</span></>}
-                  {g.kind === 'investment' && p.projectedAtDeadline !== null && <><span className="muted">Proyección a la fecha ({g.expectedReturn ?? 0} %/año)</span><span>{formatMoney(p.projectedAtDeadline, p.currency)}</span></>}
+                  {g.deadline && <><span className="muted">{_t("Fecha límite")}</span><span>{g.deadline} · {p.monthsLeft} {_t("meses")}</span></>}
+                  {p.requiredMonthly !== null && p.requiredMonthly > 0 && <><span className="muted">{_t("Necesitas al mes")}</span><b>{formatMoney(p.requiredMonthly, p.currency)}</b></>}
+                  {g.monthlyPlan ? <><span className="muted">{_t("Plan mensual")}</span><span>{formatMoney(g.monthlyPlan, p.currency)}</span></> : null}
+                  <span className="muted">{_t("Aportas de media")}</span><span>{formatMoney(p.actualMonthly, p.currency)}{_t("/mes")}</span>
+                  {p.projectedDate && p.status !== 'done' && <><span className="muted">{_t("Al ritmo actual")}</span><span>{_t("la logras en")} {p.projectedDate.slice(0, 7)}</span></>}
+                  {g.kind === 'investment' && p.projectedAtDeadline !== null && <><span className="muted">{_t("Proyección a la fecha (")}{g.expectedReturn ?? 0} {_t("%/año)")}</span><span>{formatMoney(p.projectedAtDeadline, p.currency)}</span></>}
                 </div>
                 {!g.accountIds?.length && (
-                  <button className="btn tinted block mt" onClick={() => setMoveGoal(g)}>Aportar / retirar</button>
+                  <button className="btn tinted block mt" onClick={() => setMoveGoal(g)}>{_t("Aportar / retirar")}</button>
                 )}
               </div>
             );
           })}
-          <button className="btn block glass" onClick={() => setEditGoal({ icon: 'piggy', kind: 'savings', priority: data.goals.length + 1 })}><Icon name="plus" size={18} /> Nueva meta</button>
+          <button className="btn block glass" onClick={() => setEditGoal({ icon: 'piggy', kind: 'savings', priority: data.goals.length + 1 })}><Icon name="plus" size={18} /> {_t("Nueva meta")}</button>
         </>
       )}
 
       {tab === 'auto' && (
         <div className="card glass">
-          <h2>Ahorro automático</h2>
-          <p className="small muted" style={{ marginTop: 0 }}>Cada mes la app calcula cuánto puedes apartar y lo reparte entre tus huchas por prioridad. Tú lo confirmas desde Inicio.</p>
-          <Switch checked={r.enabled} onChange={(v) => update((d) => ({ ...d, savingsRules: { ...r, enabled: v } }))}>Activar ahorro automático</Switch>
-          <Switch checked={r.roundUp} disabled={!r.enabled} onChange={(v) => update((d) => ({ ...d, savingsRules: { ...r, roundUp: v } }))}>Redondear compras al euro</Switch>
-          <Switch checked={r.smartSave} disabled={!r.enabled} onChange={(v) => update((d) => ({ ...d, savingsRules: { ...r, smartSave: v } }))}>Ahorro inteligente según mis hábitos</Switch>
+          <h2>{_t("Ahorro automático")}</h2>
+          <p className="small muted" style={{ marginTop: 0 }}>{_t("Cada mes la app calcula cuánto puedes apartar y lo reparte entre tus huchas por prioridad. Tú lo confirmas desde Inicio.")}</p>
+          <Switch checked={r.enabled} onChange={(v) => update((d) => ({ ...d, savingsRules: { ...r, enabled: v } }))}>{_t("Activar ahorro automático")}</Switch>
+          <Switch checked={r.roundUp} disabled={!r.enabled} onChange={(v) => update((d) => ({ ...d, savingsRules: { ...r, roundUp: v } }))}>{_t("Redondear compras al euro")}</Switch>
+          <Switch checked={r.smartSave} disabled={!r.enabled} onChange={(v) => update((d) => ({ ...d, savingsRules: { ...r, smartSave: v } }))}>{_t("Ahorro inteligente según mis hábitos")}</Switch>
           <Field label={`Porcentaje de cada ingreso: ${r.percentOfIncome} %`}>
             <input type="range" min={0} max={30} value={r.percentOfIncome} disabled={!r.enabled} onChange={(e) => update((d) => ({ ...d, savingsRules: { ...r, percentOfIncome: Number(e.target.value) } }))} />
           </Field>
           <div className="alert good small">
             <Icon name="info" size={18} />
-            <div>Según tus últimos 3 meses, puedes apartar con seguridad unos <b>{formatMoney(safeToSave(data, month))}</b> este mes, dejando un colchón del 10 % de tus ingresos.</div>
+            <div>{_t("Según tus últimos 3 meses, puedes apartar con seguridad unos")} <b>{formatMoney(safeToSave(data, month))}</b> {_t("este mes, dejando un colchón del 10 % de tus ingresos.")}</div>
           </div>
         </div>
       )}
 
       {editBudget && (
-        <Sheet title={editBudget.id ? 'Editar presupuesto' : 'Nuevo presupuesto'} onClose={() => setEditBudget(null)}>
+        <Sheet title={editBudget.id ? _t("Editar presupuesto") : _t("Nuevo presupuesto")} onClose={() => setEditBudget(null)}>
           <BudgetForm
             value={editBudget}
             onSave={(b) => {
@@ -147,7 +148,7 @@ export function Plan() {
                 if (isNew && askBudget) next = patchGuide(next, { budget: true, testBudgets: budgetTest ? [...(guide?.testBudgets ?? []), newId] : guide?.testBudgets ?? [] });
                 return next;
               });
-              if (isNew && askBudget) toast(budgetTest ? 'Presupuesto de prueba creado: lo eliminaré al terminar la guía.' : 'Presupuesto creado.');
+              if (isNew && askBudget) toast(budgetTest ? _t("Presupuesto de prueba creado: lo eliminaré al terminar la guía.") : _t("Presupuesto creado."));
               setEditBudget(null);
             }}
             guideChoice={askBudget && !editBudget.id ? { test: budgetTest, set: setBudgetTest } : undefined}
@@ -156,7 +157,7 @@ export function Plan() {
         </Sheet>
       )}
       {editGoal && (
-        <Sheet title={editGoal.id ? 'Editar meta' : 'Nueva meta'} onClose={() => setEditGoal(null)}>
+        <Sheet title={editGoal.id ? _t("Editar meta") : _t("Nueva meta")} onClose={() => setEditGoal(null)}>
           <GoalForm
             value={editGoal}
             onSave={(g) => {
@@ -185,22 +186,22 @@ function BudgetForm({ value, onSave, onDelete, guideChoice }: { value: Partial<B
   const cents = parseAmount(limit);
   return (
     <>
-      <Field label="Categoría">
+      <Field label={_t("Categoría")}>
         <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
           {data.categories.filter((c) => c.kind === 'expense').map((c) => ({ c, label: categoryLabel(data.categories, c.id) })).sort((a, b) => a.label.localeCompare(b.label, 'es')).map(({ c, label }) => <option key={c.id} value={c.id}>{label}</option>)}
         </select>
       </Field>
       <Field label={`Tope mensual (${data.settings.currency})`}><input inputMode="decimal" value={limit} onChange={(e) => setLimit(e.target.value)} /></Field>
       <Field label={`Avisarme al llegar al ${warnAt} %`}><input type="range" min={50} max={100} step={5} value={warnAt} onChange={(e) => setWarnAt(Number(e.target.value))} /></Field>
-      <Switch checked={rollover} onChange={setRollover}>Lo que sobre pasa al mes siguiente</Switch>
+      <Switch checked={rollover} onChange={setRollover}>{_t("Lo que sobre pasa al mes siguiente")}</Switch>
       {guideChoice && (
-        <div className="seg mt" role="group" aria-label="Tipo de presupuesto">
-          <button className={guideChoice.test ? 'on' : ''} onClick={() => guideChoice.set(true)}>Presupuesto de prueba</button>
-          <button className={!guideChoice.test ? 'on' : ''} onClick={() => guideChoice.set(false)}>Presupuesto real</button>
+        <div className="seg mt" role="group" aria-label={_t("Tipo de presupuesto")}>
+          <button className={guideChoice.test ? 'on' : ''} onClick={() => guideChoice.set(true)}>{_t("Presupuesto de prueba")}</button>
+          <button className={!guideChoice.test ? 'on' : ''} onClick={() => guideChoice.set(false)}>{_t("Presupuesto real")}</button>
         </div>
       )}
-      <button className="btn primary block mt" disabled={!cents || cents <= 0} onClick={() => onSave({ id: value.id ?? '', categoryId, limit: Math.abs(cents!), warnAt: warnAt / 100, rollover })}>Guardar</button>
-      {onDelete && <button className="btn danger block mt" onClick={onDelete}>Eliminar</button>}
+      <button className="btn primary block mt" disabled={!cents || cents <= 0} onClick={() => onSave({ id: value.id ?? '', categoryId, limit: Math.abs(cents!), warnAt: warnAt / 100, rollover })}>{_t("Guardar")}</button>
+      {onDelete && <button className="btn danger block mt" onClick={onDelete}>{_t("Eliminar")}</button>}
     </>
   );
 }
@@ -235,18 +236,18 @@ function GoalForm({ value, onSave, onDelete }: { value: Partial<Goal>; onSave: (
         ))}
       </div>
       <div className="chips mb">{ICONS.map((i) => <button key={i} aria-label={i} className={`chip ${icon === i ? 'on' : ''}`} onClick={() => setIcon(i)} style={{ padding: 10 }}><GoalIcon icon={i} size={18} /></button>)}</div>
-      <Field label="Nombre"><input value={name} placeholder={kind === 'investment' ? 'Cartera indexada 20.000 €' : kind === 'debt' ? 'Liquidar tarjeta' : 'Fondo de emergencia 6 meses'} onChange={(e) => setName(e.target.value)} /></Field>
+      <Field label={_t("Nombre")}><input value={name} placeholder={kind === 'investment' ? _t("Cartera indexada 20.000 €") : kind === 'debt' ? _t("Liquidar tarjeta") : _t("Fondo de emergencia 6 meses")} onChange={(e) => setName(e.target.value)} /></Field>
       <div className="grid2">
-        <Field label="Objetivo"><input inputMode="decimal" value={target} onChange={(e) => setTarget(e.target.value)} /></Field>
-        <Field label="Moneda"><select value={currency} onChange={(e) => setCurrency(e.target.value)}>{CURRENCIES.map((c) => <option key={c.code}>{c.code}</option>)}</select></Field>
+        <Field label={_t("Objetivo")}><input inputMode="decimal" value={target} onChange={(e) => setTarget(e.target.value)} /></Field>
+        <Field label={_t("Moneda")}><select value={currency} onChange={(e) => setCurrency(e.target.value)}>{CURRENCIES.map((c) => <option key={c.code}>{c.code}</option>)}</select></Field>
       </div>
       <div className="grid2">
-        <Field label="Fecha límite"><input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} /></Field>
-        <Field label="Aportación mensual"><input inputMode="decimal" value={monthly} onChange={(e) => setMonthly(e.target.value)} /></Field>
+        <Field label={_t("Fecha límite")}><input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} /></Field>
+        <Field label={_t("Aportación mensual")}><input inputMode="decimal" value={monthly} onChange={(e) => setMonthly(e.target.value)} /></Field>
       </div>
       {kind === 'investment' && <Field label={`Rentabilidad anual esperada: ${ret} %`}><input type="range" min={0} max={15} step={0.5} value={ret} onChange={(e) => setRet(e.target.value)} /></Field>}
       {linkable.length > 0 && (
-        <Field label={kind === 'debt' ? 'Deuda que quieres liquidar' : 'Medir con el saldo de estas cuentas (opcional)'}>
+        <Field label={kind === 'debt' ? _t("Deuda que quieres liquidar") : _t("Medir con el saldo de estas cuentas (opcional)")}>
           <div className="chips">
             {linkable.map((a) => (
               <button key={a.id} className={`chip ${accountIds.includes(a.id) ? 'on' : ''}`} onClick={() => setAccountIds(accountIds.includes(a.id) ? accountIds.filter((x) => x !== a.id) : [...accountIds, a.id])}>{a.name}</button>
@@ -254,10 +255,10 @@ function GoalForm({ value, onSave, onDelete }: { value: Partial<Goal>; onSave: (
           </div>
         </Field>
       )}
-      <Field label="Prioridad para el ahorro automático"><input type="number" min={1} value={priority} onChange={(e) => setPriority(Number(e.target.value) || 1)} /></Field>
+      <Field label={_t("Prioridad para el ahorro automático")}><input type="number" min={1} value={priority} onChange={(e) => setPriority(Number(e.target.value) || 1)} /></Field>
       {projection !== null && cents && (
         <div className={`alert ${projection >= cents ? 'good' : 'warning'} small`}>
-          Con {formatMoney(Math.abs(monthlyC), currency)}/mes llegarás a <b>{formatMoney(projection, currency)}</b> en {months} meses: {projection >= cents ? '¡meta cumplida!' : `te faltarían ${formatMoney(cents - projection, currency)}.`}
+          {_t("Con")} {formatMoney(Math.abs(monthlyC), currency)}{_t("/mes llegarás a")} <b>{formatMoney(projection, currency)}</b> {_t("en")} {months} {_t("meses:")} {projection >= cents ? _t("¡meta cumplida!") : `te faltarían ${formatMoney(cents - projection, currency)}.`}
         </div>
       )}
       <button
@@ -283,9 +284,9 @@ function GoalForm({ value, onSave, onDelete }: { value: Partial<Goal>; onSave: (
           });
         }}
       >
-        Guardar meta
+        {_t("Guardar meta")}
       </button>
-      {onDelete && <button className="btn danger block mt" onClick={onDelete}>Eliminar meta</button>}
+      {onDelete && <button className="btn danger block mt" onClick={onDelete}>{_t("Eliminar meta")}</button>}
     </>
   );
 }
@@ -296,12 +297,12 @@ function GoalMove({ currency, onDone }: { currency: string; onDone: (amount: num
   return (
     <>
       <div className="amount-wrap">
-        <input className="amount-input" inputMode="decimal" autoFocus placeholder="0" value={amount} onChange={(e) => setAmount(e.target.value)} aria-label="Importe" style={{ width: `${Math.max(2, amount.length + 1)}ch` }} />
+        <input className="amount-input" inputMode="decimal" autoFocus placeholder="0" value={amount} onChange={(e) => setAmount(e.target.value)} aria-label={_t("Importe")} style={{ width: `${Math.max(2, amount.length + 1)}ch` }} />
         <span className="cur">{currency}</span>
       </div>
       <div className="grid2">
-        <button className="btn" disabled={!cents} onClick={() => onDone(-Math.abs(cents!))}>Retirar</button>
-        <button className="btn primary" disabled={!cents} onClick={() => onDone(Math.abs(cents!))}>Aportar</button>
+        <button className="btn" disabled={!cents} onClick={() => onDone(-Math.abs(cents!))}>{_t("Retirar")}</button>
+        <button className="btn primary" disabled={!cents} onClick={() => onDone(Math.abs(cents!))}>{_t("Aportar")}</button>
       </div>
     </>
   );

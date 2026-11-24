@@ -1,6 +1,7 @@
 import { toBase, txBase, txCurrency } from './fx';
 import { daysBetween, merchantKey, monthKey, normalize } from './money';
 import type { AppData, Transaction } from './types';
+import { t as tr } from './i18n';
 
 export type Frequency = 'weekly' | 'monthly' | 'quarterly' | 'yearly';
 
@@ -151,13 +152,13 @@ export function detectFees(data: AppData): FeeAlert[] {
 }
 
 export const FEE_TIPS: Record<FeeAlert['kind'], string> = {
-  maintenance: 'Muchos bancos online (y los tradicionales si domicilias la nómina) no cobran mantenimiento. Pide la exención o cambia de cuenta.',
-  card: 'Hay tarjetas de débito y crédito sin cuota anual. Reclama la bonificación o pide una tarjeta gratuita.',
-  overdraft: 'Los descubiertos tienen intereses muy altos. Configura un aviso de saldo bajo o un colchón en la hucha de emergencia.',
-  atm: 'Usa cajeros de tu red o una cuenta que no cobre retiradas. Retirar menos veces y más cantidad también ayuda.',
-  transfer: 'Las transferencias SEPA y las inmediatas suelen ser gratuitas en banca online. Revisa tu tarifa.',
-  fx: 'Para pagos en otra divisa, una tarjeta sin comisión de cambio puede ahorrarte un 2-3 % de cada compra.',
-  other: 'Revisa este cargo con tu banco: muchas comisiones se pueden negociar o evitar.',
+  maintenance: tr('Muchos bancos online (y los tradicionales si domicilias la nómina) no cobran mantenimiento. Pide la exención o cambia de cuenta.'),
+  card: tr('Hay tarjetas de débito y crédito sin cuota anual. Reclama la bonificación o pide una tarjeta gratuita.'),
+  overdraft: tr('Los descubiertos tienen intereses muy altos. Configura un aviso de saldo bajo o un colchón en la hucha de emergencia.'),
+  atm: tr('Usa cajeros de tu red o una cuenta que no cobre retiradas. Retirar menos veces y más cantidad también ayuda.'),
+  transfer: tr('Las transferencias SEPA y las inmediatas suelen ser gratuitas en banca online. Revisa tu tarifa.'),
+  fx: tr('Para pagos en otra divisa, una tarjeta sin comisión de cambio puede ahorrarte un 2-3 % de cada compra.'),
+  other: tr('Revisa este cargo con tu banco: muchas comisiones se pueden negociar o evitar.'),
 };
 
 export interface AntExpenses {

@@ -1,4 +1,5 @@
 import type { Category } from './types';
+import { t } from './i18n';
 
 // Jerarquía de categorías: una categoría puede tener una madre (un solo nivel de subcategorías).
 // Los movimientos se guardan con la categoría más específica; los informes y presupuestos pueden
@@ -54,5 +55,5 @@ export function categoryLabel(list: Category[], id: string): string {
   const c = list.find((x) => x.id === id);
   if (!c) return id;
   const p = c.parentId ? list.find((x) => x.id === c.parentId) : undefined;
-  return p ? `${p.name} › ${c.name}` : c.name;
+  return p ? `${t(p.name)} › ${t(c.name)}` : t(c.name);
 }

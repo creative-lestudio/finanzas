@@ -1,13 +1,14 @@
 import { formatMoney } from '../lib/money';
 import type { MonthTotals } from '../lib/reports';
+import { t as _t, LOCALE } from '../lib/i18n';
 
-const MONTH_SHORT = new Intl.DateTimeFormat('es-ES', { month: 'short' });
+const MONTH_SHORT = new Intl.DateTimeFormat(LOCALE, { month: 'short' });
 const monthLabel = (m: string) => MONTH_SHORT.format(new Date(`${m}-15`)).replace('.', '');
 
 /** Barras de ingresos (verde) y gastos (rojo) por mes, con ejes y etiquetas legibles. */
 export function MonthBars({ rows, base }: { rows: MonthTotals[]; base: string }) {
   const max = Math.max(1, ...rows.flatMap((r) => [r.income, r.expenses]));
-  const compact = (c: number) => new Intl.NumberFormat('es-ES', { notation: 'compact', maximumFractionDigits: 1 }).format(c / 100);
+  const compact = (c: number) => new Intl.NumberFormat(LOCALE, { notation: 'compact', maximumFractionDigits: 1 }).format(c / 100);
   const H = 150, L = 38, T = 8;
   const step = 64;
   const W = Math.max(L + rows.length * step + 8, 340);
@@ -15,7 +16,7 @@ export function MonthBars({ rows, base }: { rows: MonthTotals[]; base: string })
   const x0 = L + (W - L - rows.length * step) / 2;
   return (
     <div className="chart-wrap">
-      <svg viewBox={`0 0 ${W} ${H + T + 24}`} width="100%" style={{ display: 'block', maxHeight: 230 }} role="img" aria-label="Ingresos y gastos por mes" preserveAspectRatio="xMidYMid meet">
+      <svg viewBox={`0 0 ${W} ${H + T + 24}`} width="100%" style={{ display: 'block', maxHeight: 230 }} role="img" aria-label={_t("Ingresos y gastos por mes")} preserveAspectRatio="xMidYMid meet">
         {[0, 0.5, 1].map((g) => {
           const y = T + H - g * H;
           return (
@@ -50,7 +51,7 @@ export function Donut({ parts, size = 148, center }: { parts: { id: string; valu
   const C = 2 * Math.PI * r;
   let acc = 0;
   return (
-    <svg viewBox="0 0 140 140" width={size} height={size} role="img" aria-label="Reparto por categoría">
+    <svg viewBox="0 0 140 140" width={size} height={size} role="img" aria-label={_t("Reparto por categoría")}>
       <circle cx="70" cy="70" r={r} fill="none" stroke="var(--fill-2)" strokeWidth="18" />
       {total > 0 && parts.map((p) => {
         const len = (p.value / total) * C;

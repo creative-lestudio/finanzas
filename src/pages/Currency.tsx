@@ -23,6 +23,7 @@ import { addMonths, formatMoney, formatRate, parseAmount, today } from '../lib/m
 import { applyLiveRates, fetchLiveRates } from '../lib/liverates';
 import type { AppData } from '../lib/types';
 import { useStore } from '../store';
+import { t as _t } from '../lib/i18n';
 
 type Tab = 'summary' | 'rates' | 'calc';
 
@@ -73,16 +74,16 @@ function Summary({ onAdd }: { onAdd: () => void }) {
   return (
     <>
       <div className="hero">
-        <div className="eyebrow">{fx.total <= 0 ? 'Pérdida por tipo de cambio' : 'Ganancia por tipo de cambio'}</div>
+        <div className="eyebrow">{fx.total <= 0 ? _t("Pérdida por tipo de cambio") : _t("Ganancia por tipo de cambio")}</div>
         <div className={`big ${fx.total < 0 ? 'negc' : 'pos'}`}>{formatMoney(Math.abs(fx.total))}</div>
         <div className="hero-sub">
-          <span>Comisiones <b>{formatMoney(fx.fees)}</b></span>
-          <span><b>{fx.exchanges.length}</b> cambios</span>
-          <span><b>{fx.incomes.length}</b> cobros en otra moneda</span>
+          <span>{_t("Comisiones")} <b>{formatMoney(fx.fees)}</b></span>
+          <span><b>{fx.exchanges.length}</b> {_t("cambios")}</span>
+          <span><b>{fx.incomes.length}</b> {_t("cobros en otra moneda")}</span>
         </div>
         <div className="chips mt">
           {(['3', '12', 'all'] as const).map((r) => (
-            <button key={r} className={`chip ${range === r ? 'on' : ''}`} onClick={() => setRange(r)}>{r === 'all' ? 'Todo' : `${r} meses`}</button>
+            <button key={r} className={`chip ${range === r ? 'on' : ''}`} onClick={() => setRange(r)}>{r === 'all' ? _t("Todo") : `${r} meses`}</button>
           ))}
         </div>
       </div>
@@ -90,32 +91,32 @@ function Summary({ onAdd }: { onAdd: () => void }) {
       {bcv && par && (
         <div className="grid2 mb">
           <div className="card glass">
-            <div className="eyebrow">BCV · Paralelo</div>
+            <div className="eyebrow">{_t("BCV · Paralelo")}</div>
             <div className="mid" style={{ fontSize: 19 }}>{formatRate(bcv)} · {formatRate(par)}</div>
-            <div className="tiny muted">Bs por dólar, últimas guardadas</div>
+            <div className="tiny muted">{_t("Bs por dólar, últimas guardadas")}</div>
           </div>
           <div className="card glass">
-            <div className="eyebrow">Brecha cambiaria</div>
+            <div className="eyebrow">{_t("Brecha cambiaria")}</div>
             <div className="mid" style={{ fontSize: 19 }}>{(((par - bcv) / bcv) * 100).toFixed(1)} %</div>
-            <div className="tiny muted">Lo que pierdes si te pagan a BCV</div>
+            <div className="tiny muted">{_t("Lo que pierdes si te pagan a BCV")}</div>
           </div>
         </div>
       )}
 
-      <button className="btn primary block mb" onClick={onAdd}><Icon name="swap" size={18} /> Registrar un cambio</button>
+      <button className="btn primary block mb" onClick={onAdd}><Icon name="swap" size={18} /> {_t("Registrar un cambio")}</button>
 
       {fx.incomes.length > 0 && (
         <>
-          <div className="section-title">Cobros a tasa oficial</div>
+          <div className="section-title">{_t("Cobros a tasa oficial")}</div>
           <div className="card glass flush">
             <ul className="list">
               {fx.incomes.map((i) => (
                 <li key={i.transaction.id}>
                   <span className="icon"><Icon name="arrowDown" size={18} /></span>
                   <div className="grow">
-                    <div className="ellipsis">{formatMoney(i.nominal, i.nominalCurrency)} cobrados en {i.receivedCurrency}</div>
+                    <div className="ellipsis">{formatMoney(i.nominal, i.nominalCurrency)} {_t("cobrados en")} {i.receivedCurrency}</div>
                     <div className="small muted ellipsis">
-                      {i.transaction.date} · a {formatRate(i.paidRate)} ({i.transaction.fx?.source ?? '—'}){i.marketRate ? ` · mercado ${formatRate(i.marketRate)}` : ' · falta tasa de mercado'}
+                      {i.transaction.date} {_t("· a")} {formatRate(i.paidRate)} ({i.transaction.fx?.source ?? '—'}){i.marketRate ? ` · mercado ${formatRate(i.marketRate)}` : _t(" · falta tasa de mercado")}
                     </div>
                   </div>
                   {i.diff !== null && (
@@ -133,10 +134,10 @@ function Summary({ onAdd }: { onAdd: () => void }) {
 
       {fx.byPlatform.length > 0 && (
         <>
-          <div className="section-title">Plataformas, de mejor a peor</div>
+          <div className="section-title">{_t("Plataformas, de mejor a peor")}</div>
           <div className="card glass">
             <table className="simple">
-              <thead><tr><th>Plataforma</th><th className="r">Cambios</th><th className="r">Media</th><th className="r">Total</th></tr></thead>
+              <thead><tr><th>{_t("Plataforma")}</th><th className="r">{_t("Cambios")}</th><th className="r">{_t("Media")}</th><th className="r">{_t("Total")}</th></tr></thead>
               <tbody>
                 {[...fx.byPlatform].reverse().map((p) => (
                   <tr key={p.platform}>
@@ -152,9 +153,9 @@ function Summary({ onAdd }: { onAdd: () => void }) {
         </>
       )}
 
-      <div className="section-title">Cambios registrados</div>
+      <div className="section-title">{_t("Cambios registrados")}</div>
       <div className="card glass flush">
-        {fx.exchanges.length === 0 && <Empty>Aún no has registrado cambios de divisa.</Empty>}
+        {fx.exchanges.length === 0 && <Empty>{_t("Aún no has registrado cambios de divisa.")}</Empty>}
         <ul className="list">
           {fx.exchanges.map((a) => {
             const [s, w] = displayPair(a.from, a.to);
@@ -163,8 +164,8 @@ function Summary({ onAdd }: { onAdd: () => void }) {
               <li key={a.exchange.id}>
                 <span className="icon"><Icon name="swap" size={18} /></span>
                 <div className="grow">
-                  <div className="ellipsis">{formatMoney(a.exchange.fromAmount, a.from)} a {formatMoney(a.exchange.toAmount, a.to)}</div>
-                  <div className="small muted ellipsis">{a.exchange.date} · {a.exchange.platform} · {acc(a.exchange.fromAccountId)} a {acc(a.exchange.toAccountId)}</div>
+                  <div className="ellipsis">{formatMoney(a.exchange.fromAmount, a.from)} {_t("a")} {formatMoney(a.exchange.toAmount, a.to)}</div>
+                  <div className="small muted ellipsis">{a.exchange.date} · {a.exchange.platform} · {acc(a.exchange.fromAccountId)} {_t("a")} {acc(a.exchange.toAccountId)}</div>
                   <div className="tiny muted">
                     1 {s} = {formatRate(shown(a.effectiveRate))} {w}
                     {a.referenceRate ? ` · ${a.exchange.referenceSource ?? 'ref.'} ${formatRate(shown(a.referenceRate))}` : ''}
@@ -174,7 +175,7 @@ function Summary({ onAdd }: { onAdd: () => void }) {
                 <div style={{ textAlign: 'right' }}>
                   {a.diff !== null && <div className={`num ${a.diff < 0 ? 'negc' : 'pos'}`}>{formatMoney(a.diff, a.to)}</div>}
                   {a.diffPct !== null && <div className="tiny muted">{(a.diffPct * 100).toFixed(2)} %</div>}
-                  <button className="btn ghost sm" aria-label="Eliminar cambio" onClick={() => update((d) => deleteExchange(d, a.exchange.id))}>
+                  <button className="btn ghost sm" aria-label={_t("Eliminar cambio")} onClick={() => update((d) => deleteExchange(d, a.exchange.id))}>
                     <Icon name="trash" size={16} />
                   </button>
                 </div>
@@ -244,13 +245,13 @@ function ExchangeForm({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <Sheet title="Registrar cambio" onClose={onClose}>
-      <Field label="Plataforma">
+    <Sheet title={_t("Registrar cambio")} onClose={onClose}>
+      <Field label={_t("Plataforma")}>
         <div className="chips">{PLATFORMS.map((p) => <button type="button" key={p} className={`chip ${platform === p ? 'on' : ''}`} onClick={() => setPlatform(p)}>{p}</button>)}</div>
       </Field>
       <div className="grid2">
-        <Field label="Desde"><select value={fromId} onChange={(e) => setFromId(e.target.value)}>{accounts.map((a) => <option key={a.id} value={a.id}>{a.name} · {a.currency}</option>)}</select></Field>
-        <Field label="Hacia"><select value={toId} onChange={(e) => setToId(e.target.value)}>{accounts.map((a) => <option key={a.id} value={a.id}>{a.name} · {a.currency}</option>)}</select></Field>
+        <Field label={_t("Desde")}><select value={fromId} onChange={(e) => setFromId(e.target.value)}>{accounts.map((a) => <option key={a.id} value={a.id}>{a.name} · {a.currency}</option>)}</select></Field>
+        <Field label={_t("Hacia")}><select value={toId} onChange={(e) => setToId(e.target.value)}>{accounts.map((a) => <option key={a.id} value={a.id}>{a.name} · {a.currency}</option>)}</select></Field>
       </div>
       <div className="grid2">
         <Field label={`Envías (${from})`}><input inputMode="decimal" value={sent} onChange={(e) => setSent(e.target.value)} placeholder="0,00" /></Field>
@@ -258,50 +259,50 @@ function ExchangeForm({ onClose }: { onClose: () => void }) {
       </div>
       <div className="card glass" style={{ padding: '6px 16px', marginBottom: 0 }}>
         <div className="rate-input">
-          <span className="small">Tasa del cambio</span>
-          <input inputMode="decimal" value={rate} onChange={(e) => setRate(e.target.value)} placeholder="0,00" aria-label="Tasa del cambio" />
-          <span className="unit">{weak} por {strong}</span>
+          <span className="small">{_t("Tasa del cambio")}</span>
+          <input inputMode="decimal" value={rate} onChange={(e) => setRate(e.target.value)} placeholder="0,00" aria-label={_t("Tasa del cambio")} />
+          <span className="unit">{weak} {_t("por")} {strong}</span>
         </div>
         <div className="rate-input">
-          <span className="small">Recibes</span>
+          <span className="small">{_t("Recibes")}</span>
           <input
             inputMode="decimal"
             value={receivedTouched ? received : autoReceived ? (autoReceived / 100).toFixed(2).replace('.', ',') : ''}
             onChange={(e) => { setReceivedTouched(true); setReceived(e.target.value); }}
             placeholder="0,00"
-            aria-label="Importe recibido"
+            aria-label={_t("Importe recibido")}
           />
           <span className="unit">{to}</span>
         </div>
       </div>
-      <p className="tiny muted" style={{ margin: '8px 4px 16px' }}>Escribe la tasa y calculamos lo que recibes, o escribe lo que te llegó si no sabes la tasa.</p>
+      <p className="tiny muted" style={{ margin: '8px 4px 16px' }}>{_t("Escribe la tasa y calculamos lo que recibes, o escribe lo que te llegó si no sabes la tasa.")}</p>
 
-      <Field label="Comparar con">
+      <Field label={_t("Comparar con")}>
         <div className="chips">{refTypes.map((t) => <button type="button" key={t} className={`chip ${activeRef === t ? 'on' : ''}`} onClick={() => { setRefType(t); setRefValue(''); }}>{t}</button>)}</div>
       </Field>
       <div className="card glass" style={{ padding: '6px 16px', marginBottom: 0 }}>
         <div className="rate-input">
           <span className="small">{activeRef}</span>
           <input inputMode="decimal" value={refValue} onChange={(e) => setRefValue(e.target.value)} placeholder={stored ? formatRate(stored) : '0,00'} aria-label={`Tasa ${activeRef}`} />
-          <span className="unit">{weak} por {strong}</span>
+          <span className="unit">{weak} {_t("por")} {strong}</span>
         </div>
       </div>
-      <p className="tiny muted" style={{ margin: '8px 4px 16px' }}>{stored ? `Última guardada: ${formatRate(stored)}. Escribe la de hoy si cambió.` : 'Escribe la tasa de hoy: se guardará para los próximos cálculos.'}</p>
-      <Field label="Fecha"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></Field>
+      <p className="tiny muted" style={{ margin: '8px 4px 16px' }}>{stored ? `Última guardada: ${formatRate(stored)}. Escribe la de hoy si cambió.` : _t("Escribe la tasa de hoy: se guardará para los próximos cálculos.")}</p>
+      <Field label={_t("Fecha")}><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></Field>
 
       {preview && (
         <div className={`alert ${preview.diff !== null && preview.diff < 0 ? 'warning' : 'good'}`}>
           <Icon name={preview.diff !== null && preview.diff < 0 ? 'alert' : 'check'} size={18} />
           <div className="small">
             {preview.expected !== null ? (
-              <>A tasa {activeRef} habrías recibido <b>{formatMoney(preview.expected, to)}</b>. {preview.diff! < 0 ? 'Pierdes' : 'Ganas'} <b>{formatMoney(Math.abs(preview.diff!), to)}</b> ({((preview.diffPct ?? 0) * 100).toFixed(2)} %).</>
+              <>{_t("A tasa")} {activeRef} {_t("habrías recibido")} <b>{formatMoney(preview.expected, to)}</b>. {preview.diff! < 0 ? _t("Pierdes") : _t("Ganas")} <b>{formatMoney(Math.abs(preview.diff!), to)}</b> ({((preview.diffPct ?? 0) * 100).toFixed(2)} %).</>
             ) : (
-              <>Añade la tasa {activeRef} para saber cuánto pierdes.</>
+              <>{_t("Añade la tasa")} {activeRef} {_t("para saber cuánto pierdes.")}</>
             )}
           </div>
         </div>
       )}
-      <button className="btn primary block mt" disabled={!preview || fromId === toId} onClick={save}>Guardar cambio</button>
+      <button className="btn primary block mt" disabled={!preview || fromId === toId} onClick={save}>{_t("Guardar cambio")}</button>
     </Sheet>
   );
 }
@@ -337,7 +338,7 @@ function Rates() {
     setBusy(true);
     const live = await fetchLiveRates(today());
     setBusy(false);
-    if (!live) return toast('No se pudieron descargar las tasas. Revisa tu conexión.');
+    if (!live) return toast(_t("No se pudieron descargar las tasas. Revisa tu conexión."));
     update((d) => applyLiveRates(d, live, true) ?? d);
     toast(`Tasas de hoy: BCV ${live.BCV ? formatRate(live.BCV) : '—'} · Euro ${live.Euro ? formatRate(live.Euro) : '—'}`);
   };
@@ -359,8 +360,8 @@ function Rates() {
     <>
       <div className="card glass">
         <div className="card-head">
-          <h2>Tasas de hoy</h2>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} style={{ width: 'auto', padding: '7px 10px', fontSize: 14 }} aria-label="Fecha" />
+          <h2>{_t("Tasas de hoy")}</h2>
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} style={{ width: 'auto', padding: '7px 10px', fontSize: 14 }} aria-label={_t("Fecha")} />
         </div>
         {(['BCV', 'Euro', 'Paralelo'] as RateType[]).map((t) => (
           <div className="rate-input" key={t}>
@@ -369,45 +370,45 @@ function Rates() {
               <div className="tiny muted">{RATE_TYPES[t].hint}</div>
             </div>
             <input inputMode="decimal" value={vals[t]} onChange={(e) => set(t, e.target.value)} placeholder={prev(t) ? formatRate(prev(t)!) : '0,00'} aria-label={`Tasa ${t}`} />
-            <span className="unit">Bs</span>
+            <span className="unit">{_t("Bs")}</span>
           </div>
         ))}
         <div className="rate-input">
           <div>
-            <div style={{ fontWeight: 600 }}>Personalizada</div>
+            <div style={{ fontWeight: 600 }}>{_t("Personalizada")}</div>
             <div className="row tiny muted" style={{ gap: 4, marginTop: 4 }}>
               1
-              <select value={cBase} onChange={(e) => setCBase(e.target.value)} style={mini} aria-label="Moneda base">{CURRENCIES.map((c) => <option key={c.code}>{c.code}</option>)}</select>
+              <select value={cBase} onChange={(e) => setCBase(e.target.value)} style={mini} aria-label={_t("Moneda base")}>{CURRENCIES.map((c) => <option key={c.code}>{c.code}</option>)}</select>
               =
-              <select value={cQuote} onChange={(e) => setCQuote(e.target.value)} style={mini} aria-label="Moneda cotizada">{CURRENCIES.map((c) => <option key={c.code}>{c.code}</option>)}</select>
+              <select value={cQuote} onChange={(e) => setCQuote(e.target.value)} style={mini} aria-label={_t("Moneda cotizada")}>{CURRENCIES.map((c) => <option key={c.code}>{c.code}</option>)}</select>
             </div>
           </div>
-          <input inputMode="decimal" value={vals.Personalizada} onChange={(e) => set('Personalizada', e.target.value)} placeholder={prev('Personalizada') ? formatRate(prev('Personalizada')!) : '0,00'} aria-label="Tasa personalizada" />
+          <input inputMode="decimal" value={vals.Personalizada} onChange={(e) => set('Personalizada', e.target.value)} placeholder={prev('Personalizada') ? formatRate(prev('Personalizada')!) : '0,00'} aria-label={_t("Tasa personalizada")} />
           <span className="unit">{cQuote}</span>
         </div>
         {bcv > 0 && par > 0 && (
-          <p className="small secondary" style={{ margin: '10px 0 14px' }}>Brecha BCV–paralelo: <b>{(((par - bcv) / bcv) * 100).toFixed(1)} %</b></p>
+          <p className="small secondary" style={{ margin: '10px 0 14px' }}>{_t("Brecha BCV–paralelo:")} <b>{(((par - bcv) / bcv) * 100).toFixed(1)} %</b></p>
         )}
-        <button className="btn ghost block" style={{ marginBottom: 8 }} disabled={busy || data.settings.offlineOnly} title={data.settings.offlineOnly ? 'Desactiva el modo sin terceros para descargar tasas' : undefined} onClick={() => void refresh()}>{busy ? 'Descargando…' : 'Traer tasas oficiales de hoy (BCV)'}</button>
-        <button className="btn primary block" disabled={!filled.length || (num(vals.Personalizada, isBs('Personalizada')) > 0 && cBase === cQuote)} onClick={save}>Guardar tasas</button>
-        <p className="tiny muted" style={{ marginBottom: 0 }}>Las tasas oficiales se descargan solas al abrir la app; puedes sobrescribirlas o escribir las tuyas (acuerdos, Binance, casa de cambio). Los campos vacíos mantienen la última guardada.</p>
+        <button className="btn ghost block" style={{ marginBottom: 8 }} disabled={busy || data.settings.offlineOnly} title={data.settings.offlineOnly ? _t("Desactiva el modo sin terceros para descargar tasas") : undefined} onClick={() => void refresh()}>{busy ? _t("Descargando…") : _t("Traer tasas oficiales de hoy (BCV)")}</button>
+        <button className="btn primary block" disabled={!filled.length || (num(vals.Personalizada, isBs('Personalizada')) > 0 && cBase === cQuote)} onClick={save}>{_t("Guardar tasas")}</button>
+        <p className="tiny muted" style={{ marginBottom: 0 }}>{_t("Las tasas oficiales se descargan solas al abrir la app; puedes sobrescribirlas o escribir las tuyas (acuerdos, Binance, casa de cambio). Los campos vacíos mantienen la última guardada.")}</p>
       </div>
 
       {data.accounts.some((a) => a.currency === 'VES') && (
         <div className="card glass">
-          <h2>Para valorar tus bolívares usa</h2>
-          <p className="small muted" style={{ marginTop: 0 }}>Convierte saldos y movimientos en Bs a {data.settings.currency} y mide lo que pierdes al cobrar a tasa oficial.</p>
+          <h2>{_t("Para valorar tus bolívares usa")}</h2>
+          <p className="small muted" style={{ marginTop: 0 }}>{_t("Convierte saldos y movimientos en Bs a")} {data.settings.currency} {_t("y mide lo que pierdes al cobrar a tasa oficial.")}</p>
           <div className="seg" style={{ marginBottom: 0 }}>
             {(['BCV', 'Paralelo'] as RateType[]).map((t) => (
-              <button key={t} className={(data.settings.rateSource?.VES ?? 'BCV') === t ? 'on' : ''} onClick={() => update((d) => ({ ...d, settings: { ...d.settings, rateSource: { ...d.settings.rateSource, VES: t } } }))}>{t === 'BCV' ? 'Oficial (BCV)' : 'Paralelo'}</button>
+              <button key={t} className={(data.settings.rateSource?.VES ?? 'BCV') === t ? 'on' : ''} onClick={() => update((d) => ({ ...d, settings: { ...d.settings, rateSource: { ...d.settings.rateSource, VES: t } } }))}>{t === 'BCV' ? _t("Oficial (BCV)") : _t("Paralelo")}</button>
             ))}
           </div>
         </div>
       )}
 
-      <div className="section-title">Historial</div>
+      <div className="section-title">{_t("Historial")}</div>
       <div className="card glass flush">
-        {history.length === 0 && <Empty>Sin tasas guardadas todavía.</Empty>}
+        {history.length === 0 && <Empty>{_t("Sin tasas guardadas todavía.")}</Empty>}
         <ul className="list plain">
           {history.map(([d, rs]) => (
             <li key={d} style={{ alignItems: 'flex-start' }}>
@@ -446,45 +447,45 @@ function Calculator() {
   const n = Math.round(num(nominal) * 100);
   const valid = n > 0 && num(bcv, true) > 0 && num(par, true) > 0;
   const steps: ChainStep[] = [
-    { label: 'Te pagan en Bs a tasa BCV', to: 'VES', rate: num(bcv, true) },
-    { label: 'Compras dólares en el paralelo', to: 'USD', rate: 1 / num(par, true), feePct: (num(p2pFee) || 0) / 100 },
+    { label: _t("Te pagan en Bs a tasa BCV"), to: 'VES', rate: num(bcv, true) },
+    { label: _t("Compras dólares en el paralelo"), to: 'USD', rate: 1 / num(par, true), feePct: (num(p2pFee) || 0) / 100 },
   ];
   const wr = num(wiseRate) || num(mid);
-  if (wise && wr > 0) steps.push({ label: 'Pasas a euros con Wise', to: 'EUR', rate: 1 / wr, feeFixed: Math.round((num(wiseFee) || 0) * 100) });
+  if (wise && wr > 0) steps.push({ label: _t("Pasas a euros con Wise"), to: 'EUR', rate: 1 / wr, feeFixed: Math.round((num(wiseFee) || 0) * 100) });
   const result = valid ? simulateChain({ amount: n, currency: 'USD' }, steps, { VES: num(par, true), EUR: 1 / (num(mid) || wr || 1) }) : [];
   const last = result[result.length - 1];
 
   return (
     <>
       <div className="card glass">
-        <h2>Tu caso</h2>
-        <div className="rate-input"><span className="small">Te deben</span><input inputMode="decimal" value={nominal} onChange={(e) => setNominal(e.target.value)} aria-label="Importe que te deben" /><span className="unit">USD</span></div>
-        <div className="rate-input"><span className="small">Tasa BCV</span><input inputMode="decimal" value={bcv} onChange={(e) => setBcv(e.target.value)} placeholder="0,00" aria-label="Tasa BCV" /><span className="unit">Bs por $</span></div>
-        <div className="rate-input"><span className="small">Tasa paralelo</span><input inputMode="decimal" value={par} onChange={(e) => setPar(e.target.value)} placeholder="0,00" aria-label="Tasa paralelo" /><span className="unit">Bs por $</span></div>
-        <div className="rate-input"><span className="small">Comisión P2P</span><input inputMode="decimal" value={p2pFee} onChange={(e) => setP2pFee(e.target.value)} aria-label="Comisión P2P" /><span className="unit">%</span></div>
+        <h2>{_t("Tu caso")}</h2>
+        <div className="rate-input"><span className="small">{_t("Te deben")}</span><input inputMode="decimal" value={nominal} onChange={(e) => setNominal(e.target.value)} aria-label={_t("Importe que te deben")} /><span className="unit">{_t("USD")}</span></div>
+        <div className="rate-input"><span className="small">{_t("Tasa BCV")}</span><input inputMode="decimal" value={bcv} onChange={(e) => setBcv(e.target.value)} placeholder="0,00" aria-label={_t("Tasa BCV")} /><span className="unit">{_t("Bs por $")}</span></div>
+        <div className="rate-input"><span className="small">{_t("Tasa paralelo")}</span><input inputMode="decimal" value={par} onChange={(e) => setPar(e.target.value)} placeholder="0,00" aria-label={_t("Tasa paralelo")} /><span className="unit">{_t("Bs por $")}</span></div>
+        <div className="rate-input"><span className="small">{_t("Comisión P2P")}</span><input inputMode="decimal" value={p2pFee} onChange={(e) => setP2pFee(e.target.value)} aria-label={_t("Comisión P2P")} /><span className="unit">%</span></div>
         <label className="switch-row" style={{ color: 'var(--text)', fontSize: 15, margin: '6px 0 0' }}>
-          <span className="grow">Pasar a euros con Wise</span>
+          <span className="grow">{_t("Pasar a euros con Wise")}</span>
           <input type="checkbox" className="switch" checked={wise} onChange={(e) => setWise(e.target.checked)} />
         </label>
         {wise && (
           <>
-            <div className="rate-input"><span className="small">Tasa Wise</span><input inputMode="decimal" value={wiseRate} onChange={(e) => setWiseRate(e.target.value)} placeholder={mid || '0,00'} aria-label="Tasa Wise" /><span className="unit">$ por €</span></div>
-            <div className="rate-input"><span className="small">Comisión Wise</span><input inputMode="decimal" value={wiseFee} onChange={(e) => setWiseFee(e.target.value)} placeholder="0,00" aria-label="Comisión Wise" /><span className="unit">$</span></div>
-            <div className="rate-input"><span className="small">Tipo real</span><input inputMode="decimal" value={mid} onChange={(e) => setMid(e.target.value)} placeholder="0,00" aria-label="Tipo de cambio real" /><span className="unit">$ por €</span></div>
+            <div className="rate-input"><span className="small">{_t("Tasa Wise")}</span><input inputMode="decimal" value={wiseRate} onChange={(e) => setWiseRate(e.target.value)} placeholder={mid || '0,00'} aria-label={_t("Tasa Wise")} /><span className="unit">{_t("$ por €")}</span></div>
+            <div className="rate-input"><span className="small">{_t("Comisión Wise")}</span><input inputMode="decimal" value={wiseFee} onChange={(e) => setWiseFee(e.target.value)} placeholder="0,00" aria-label={_t("Comisión Wise")} /><span className="unit">$</span></div>
+            <div className="rate-input"><span className="small">{_t("Tipo real")}</span><input inputMode="decimal" value={mid} onChange={(e) => setMid(e.target.value)} placeholder="0,00" aria-label={_t("Tipo de cambio real")} /><span className="unit">{_t("$ por €")}</span></div>
           </>
         )}
       </div>
 
       {valid && last && (
         <div className="card glass">
-          <h2>La ruta de tu dinero</h2>
+          <h2>{_t("La ruta de tu dinero")}</h2>
           {result.map((r, i) => (
             <div className="step" key={i}>
               <span className="n">{i}</span>
               <div>
                 <div className="small secondary">{r.label}</div>
                 <div className="mid" style={{ fontSize: 19 }}>{formatMoney(r.amount, r.currency)}</div>
-                {r.currency !== 'USD' && Number.isFinite(r.value) && <div className="tiny muted">equivale a {formatMoney(r.value, 'USD')}</div>}
+                {r.currency !== 'USD' && Number.isFinite(r.value) && <div className="tiny muted">{_t("equivale a")} {formatMoney(r.value, 'USD')}</div>}
               </div>
               {i > 0 && Number.isFinite(r.stepDiff) && <span className={`num small ${r.stepDiff < 0 ? 'negc' : 'muted'}`}>{r.stepDiff < 0 ? '−' : ''}{formatMoney(Math.abs(r.stepDiff), 'USD')}</span>}
             </div>
@@ -493,15 +494,15 @@ function Calculator() {
             <div className={`alert ${last.totalDiff < 0 ? 'over' : 'good'} mt`}>
               <Icon name={last.totalDiff < 0 ? 'arrowDown' : 'check'} size={18} />
               <div>
-                <div className="small">De {formatMoney(n, 'USD')} te llegan en valor real</div>
+                <div className="small">{_t("De")} {formatMoney(n, 'USD')} {_t("te llegan en valor real")}</div>
                 <div className="mid">{formatMoney(last.value, 'USD')}</div>
                 <div className="small">
-                  Pierdes <b>{formatMoney(-last.totalDiff, 'USD')}</b> ({((-last.totalDiff / n) * 100).toFixed(1)} %). Solo por cobrar a BCV: <b>{formatMoney(-result[1].stepDiff, 'USD')}</b>.
+                  {_t("Pierdes")} <b>{formatMoney(-last.totalDiff, 'USD')}</b> ({((-last.totalDiff / n) * 100).toFixed(1)} {_t("%). Solo por cobrar a BCV:")} <b>{formatMoney(-result[1].stepDiff, 'USD')}</b>.
                 </div>
               </div>
             </div>
           )}
-          <p className="tiny muted" style={{ marginBottom: 0 }}>Para cobrar {formatMoney(n, 'USD')} reales en bolívares necesitarías {formatMoney(Math.round(n * num(par, true)), 'VES')}.</p>
+          <p className="tiny muted" style={{ marginBottom: 0 }}>{_t("Para cobrar")} {formatMoney(n, 'USD')} {_t("reales en bolívares necesitarías")} {formatMoney(Math.round(n * num(par, true)), 'VES')}.</p>
         </div>
       )}
     </>

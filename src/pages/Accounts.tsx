@@ -9,23 +9,24 @@ import { netWorth } from '../lib/health';
 import { daysBetween, formatMoney, today } from '../lib/money';
 import type { Account, AccountKind } from '../lib/types';
 import { useStore } from '../store';
+import { t as _t, LOCALE } from '../lib/i18n';
 
 const GROUPS: { title: string; kinds: AccountKind[] }[] = [
-  { title: 'Dinero disponible', kinds: ['checking', 'savings', 'cash'] },
-  { title: 'Inversiones', kinds: ['investment', 'crypto'] },
-  { title: 'Deudas', kinds: ['card', 'loan'] },
+  { title: _t("Dinero disponible"), kinds: ['checking', 'savings', 'cash'] },
+  { title: _t("Inversiones"), kinds: ['investment', 'crypto'] },
+  { title: _t("Deudas"), kinds: ['card', 'loan'] },
 ];
 
-const DATE_FMT = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' });
+const DATE_FMT = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'short' });
 
 /** «Hoy», «ayer», «hace 5 días» o la fecha, con un tono según lo reciente que sea. */
 function freshness(date?: string): { text: string; tone: 'good' | 'warn' | 'muted' } {
-  if (!date) return { text: 'Sin movimientos', tone: 'muted' };
+  if (!date) return { text: _t('Sin movimientos'), tone: 'muted' };
   const days = daysBetween(date, today());
-  if (days <= 0) return { text: 'Actualizada hoy', tone: 'good' };
-  if (days === 1) return { text: 'Actualizada ayer', tone: 'good' };
+  if (days <= 0) return { text: _t("Actualizada hoy"), tone: 'good' };
+  if (days === 1) return { text: _t("Actualizada ayer"), tone: 'good' };
   if (days <= 7) return { text: `Actualizada hace ${days} días`, tone: 'good' };
-  if (days <= 30) return { text: `Actualizada el ${DATE_FMT.format(new Date(`${date}T12:00:00`))}`, tone: 'warn' };
+  if (days <= 30) return { text: _t('Actualizada el {date}', { date: DATE_FMT.format(new Date(`${date}T12:00:00`)) }), tone: 'warn' };
   return { text: `Sin actividad desde el ${DATE_FMT.format(new Date(`${date}T12:00:00`))}`, tone: 'muted' };
 }
 
@@ -57,12 +58,12 @@ export function Accounts({ onView, onAdd }: { onView: (accountId: string) => voi
         <div className="row small" style={{ marginTop: 10, gap: 8 }}>
           <span className={`acc-dot ${fr.tone}`} />
           <span className={fr.tone === 'good' ? '' : 'muted'}>{fr.text}</span>
-          <span className="muted">· {st.movements} mov.</span>
-          {a.balance < 0 && a.kind !== 'card' && a.kind !== 'loan' && <span className="pill" style={{ marginLeft: 'auto', color: 'var(--bad)' }}>En descubierto</span>}
+          <span className="muted">· {st.movements} {_t("mov.")}</span>
+          {a.balance < 0 && a.kind !== 'card' && a.kind !== 'loan' && <span className="pill" style={{ marginLeft: 'auto', color: 'var(--bad)' }}>{_t("En descubierto")}</span>}
         </div>
         <div className="grid2 mt" style={{ gap: 8 }}>
-          <button className="btn sm" onClick={() => onView(a.id)}>Ver movimientos</button>
-          <button className="btn sm tinted" onClick={() => setEdit(a)}>Editar</button>
+          <button className="btn sm" onClick={() => onView(a.id)}>{_t("Ver movimientos")}</button>
+          <button className="btn sm tinted" onClick={() => setEdit(a)}>{_t("Editar")}</button>
         </div>
       </div>
     );
@@ -72,9 +73,9 @@ export function Accounts({ onView, onAdd }: { onView: (accountId: string) => voi
     <>
       <GuideTip task="accounts" />
       <div className="hero glass">
-        <div className="small secondary">Total en cuentas · {base}</div>
+        <div className="small secondary">{_t("Total en cuentas ·")} {base}</div>
         <div className="big" style={{ fontSize: 38 }}>{formatMoney(nw.liquid, base)}</div>
-        <div className="small secondary">Patrimonio neto {formatMoney(nw.net, base)} · {data.accounts.length} cuentas</div>
+        <div className="small secondary">{_t("Patrimonio neto")} {formatMoney(nw.net, base)} · {data.accounts.length} {_t("cuentas")}</div>
       </div>
 
       {GROUPS.map((g) => {
@@ -90,13 +91,13 @@ export function Accounts({ onView, onAdd }: { onView: (accountId: string) => voi
       })}
 
       <div className="grid2">
-        <button className="btn glass block" onClick={() => setEdit({ kind: 'checking', currency: base, source: 'manual' })}><Icon name="plus" size={18} /> Nueva cuenta</button>
-        <button className="btn glass block" onClick={onAdd}><Icon name="plus" size={18} /> Movimiento</button>
+        <button className="btn glass block" onClick={() => setEdit({ kind: 'checking', currency: base, source: 'manual' })}><Icon name="plus" size={18} /> {_t("Nueva cuenta")}</button>
+        <button className="btn glass block" onClick={onAdd}><Icon name="plus" size={18} /> {_t("Movimiento")}</button>
       </div>
-      <p className="tiny muted center">Toca «Editar» para actualizar el saldo, cambiar el nombre o ponerle el logo de tu banco.</p>
+      <p className="tiny muted center">{_t("Toca «Editar» para actualizar el saldo, cambiar el nombre o ponerle el logo de tu banco.")}</p>
 
       {edit && (
-        <Sheet title={edit.id ? 'Editar cuenta' : 'Nueva cuenta'} onClose={() => setEdit(null)}>
+        <Sheet title={edit.id ? _t("Editar cuenta") : _t("Nueva cuenta")} onClose={() => setEdit(null)}>
           <AccountForm
             value={edit}
             onSave={(a) => {

@@ -8,6 +8,7 @@ import { CategoryPicker } from './CategoryPicker';
 import { Equivalent, type EquivResult } from './Equivalent';
 import { Icon } from './icons';
 import { toast } from './ui';
+import { t as _t } from '../lib/i18n';
 
 /** Editor completo de un movimiento: tipo, importe, concepto, fecha, cuenta, categoría, nota y equivalente. */
 export function TransactionEditor({ tx, onDone, onRemove }: { tx: Transaction; onDone: () => void; onRemove: () => void }) {
@@ -38,7 +39,7 @@ export function TransactionEditor({ tx, onDone, onRemove }: { tx: Transaction; o
         ? { description: description.trim(), note: note.trim() || undefined }
         : { amount: signed, description: description.trim(), date, accountId, categoryId, note: note.trim() || undefined, ...(equivTouched ? { fx: equiv?.fx } : {}) });
     });
-    toast('Movimiento actualizado');
+    toast(_t("Movimiento actualizado"));
     onDone();
   };
 
@@ -46,48 +47,48 @@ export function TransactionEditor({ tx, onDone, onRemove }: { tx: Transaction; o
     <>
       <div className="small muted center" style={{ marginBottom: 8 }}>
         {prettyDescription(tx.description)} · {tx.date}
-        {tx.recurringId && <> · <span title="Creado por una regla recurrente"><Icon name="repeat" size={12} /> recurrente</span></>}
+        {tx.recurringId && <> · <span title={_t("Creado por una regla recurrente")}><Icon name="repeat" size={12} /> {_t("recurrente")}</span></>}
       </div>
-      {locked && <p className="small muted center" style={{ marginTop: 0 }}>Forma parte de un cambio de divisa: solo puedes cambiar el concepto y la nota. Al borrarlo se elimina la operación completa.</p>}
+      {locked && <p className="small muted center" style={{ marginTop: 0 }}>{_t("Forma parte de un cambio de divisa: solo puedes cambiar el concepto y la nota. Al borrarlo se elimina la operación completa.")}</p>}
       {!locked && (
         <div className="seg">
-          <button className={kind === 'expense' ? 'on' : ''} onClick={() => { setKind('expense'); if (tx.amount > 0) setCategoryId(''); }}>Gasto</button>
-          <button className={kind === 'income' ? 'on' : ''} onClick={() => { setKind('income'); if (tx.amount < 0) setCategoryId(''); }}>Ingreso</button>
+          <button className={kind === 'expense' ? 'on' : ''} onClick={() => { setKind('expense'); if (tx.amount > 0) setCategoryId(''); }}>{_t("Gasto")}</button>
+          <button className={kind === 'income' ? 'on' : ''} onClick={() => { setKind('income'); if (tx.amount < 0) setCategoryId(''); }}>{_t("Ingreso")}</button>
         </div>
       )}
       {!locked && (
         <div className="amount-wrap">
-          <input className="amount-input" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} aria-label="Importe" style={{ width: `${Math.max(2, amount.length + 1)}ch`, maxWidth: '80%' }} />
+          <input className="amount-input" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} aria-label={_t("Importe")} style={{ width: `${Math.max(2, amount.length + 1)}ch`, maxWidth: '80%' }} />
           <span className="cur">{currency}</span>
         </div>
       )}
-      <div className="field"><label>Concepto<input value={description} onChange={(e) => setDescription(e.target.value)} aria-label="Concepto" /></label></div>
+      <div className="field"><label>{_t("Concepto")}<input value={description} onChange={(e) => setDescription(e.target.value)} aria-label={_t("Concepto")} /></label></div>
       {!locked && (
         <>
           <CategoryPicker kind={kind} value={categoryId || null} onChange={setCategoryId} />
           <div className="grid2">
             <div className="field">
-              <label>Cuenta
-                <select value={accountId} onChange={(e) => setAccountId(e.target.value)} aria-label="Cuenta">
+              <label>{_t("Cuenta")}
+                <select value={accountId} onChange={(e) => setAccountId(e.target.value)} aria-label={_t("Cuenta")}>
                   {usable.map((a) => <option key={a.id} value={a.id}>{a.name} · {a.currency}</option>)}
                 </select>
               </label>
             </div>
-            <div className="field"><label>Fecha<input type="date" value={date} onChange={(e) => setDate(e.target.value)} aria-label="Fecha" /></label></div>
+            <div className="field"><label>{_t("Fecha")}<input type="date" value={date} onChange={(e) => setDate(e.target.value)} aria-label={_t("Fecha")} /></label></div>
           </div>
           {accountId !== tx.accountId && (
-            <p className="tiny muted" style={{ marginTop: 0 }}>El dinero se devuelve a «{data.accounts.find((a) => a.id === tx.accountId)?.name}» y se anota en «{data.accounts.find((a) => a.id === accountId)?.name}».</p>
+            <p className="tiny muted" style={{ marginTop: 0 }}>{_t("El dinero se devuelve a «")}{data.accounts.find((a) => a.id === tx.accountId)?.name}{_t("» y se anota en «")}{data.accounts.find((a) => a.id === accountId)?.name}».</p>
           )}
         </>
       )}
-      <div className="field"><label>Nota (opcional)<input value={note} onChange={(e) => setNote(e.target.value)} aria-label="Nota" /></label></div>
+      <div className="field"><label>{_t("Nota (opcional)")}<input value={note} onChange={(e) => setNote(e.target.value)} aria-label={_t("Nota")} /></label></div>
       {!locked && currency !== 'USD' && (
         <div className="mb">
           <Equivalent key={`${tx.id}-${currency}`} currency={currency} date={date} cents={cents || null} initial={accountId === tx.accountId ? tx.fx : undefined} defaultOpen={Boolean(tx.fx) || currency === 'VES'} onChange={(r) => { setEquiv(r); setEquivTouched(true); }} />
         </div>
       )}
-      <button className="btn primary block" disabled={!valid || !changed} onClick={save}>Guardar cambios{!locked && cents ? ` · ${formatMoney(signed, currency)}` : ''}</button>
-      <button className="btn danger block mt" onClick={onRemove}><Icon name="trash" size={18} /> Eliminar</button>
+      <button className="btn primary block" disabled={!valid || !changed} onClick={save}>{_t("Guardar cambios")}{!locked && cents ? ` · ${formatMoney(signed, currency)}` : ''}</button>
+      <button className="btn danger block mt" onClick={onRemove}><Icon name="trash" size={18} /> {_t("Eliminar")}</button>
     </>
   );
 }

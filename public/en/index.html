@@ -1,0 +1,896 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Finanzas — tu dinero, con claridad</title>
+    <meta name="description" content="Private, encrypted personal finance: expenses, budgets and goals in bolivars, dollars and euros, with the exact equivalent of every payment. Install it on Android, iPhone or your computer." />
+    <meta name="theme-color" content="#04132e" />
+    <meta property="og:title" content="Finanzas — your money, clearly" />
+    <meta property="og:description" content="Expenses, budgets and goals in several currencies, with every payment in its equivalent. Private and encrypted." />
+    <link rel="canonical" href="https://creative-lestudio.github.io/finanzas/en/" />
+    <link rel="alternate" hreflang="es" href="https://creative-lestudio.github.io/finanzas/" />
+    <link rel="alternate" hreflang="en" href="https://creative-lestudio.github.io/finanzas/en/" />
+    <link rel="alternate" hreflang="x-default" href="https://creative-lestudio.github.io/finanzas/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://creative-lestudio.github.io/finanzas/en/" />
+    <meta property="og:site_name" content="Finanzas" />
+    <meta property="og:image" content="https://creative-lestudio.github.io/finanzas/site/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Finanzas — your money, clearly" />
+    <meta name="twitter:image" content="https://creative-lestudio.github.io/finanzas/site/og.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Finanzas","applicationCategory":"FinanceApplication","operatingSystem":"Android, iOS, Web","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"inLanguage":"en","description":"Private, encrypted personal finance in bolivars, dollars and euros."}</script>
+    <link rel="icon" href="../app/icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="../app/icons/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500..800&family=Inter:opsz,wght@14..32,400..650&display=swap" />
+    <script>try{var t=localStorage.getItem('finanzas.site-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+    <style>
+      :root {
+        --brand: #032a67; --navy: #04132e; --blue: #3d7bff; --glow: #5b9bff;
+        --bg: #f6f8fc; --surface: #ffffff; --ink: #0a1324; --ink-2: rgb(10 19 36 / 0.66); --muted: rgb(10 19 36 / 0.62);
+        --line: rgb(10 25 60 / 0.09); --soft: rgb(61 123 255 / 0.08); --brand-ink: #0b3a8a;
+        --good: #12a150; --warn: #d98a00; --bad: #d93025;
+        --btn: #04132e; --btn-ink: #fff;
+        --display: 'Inter Tight', 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+        --mono: ui-monospace, 'SF Mono', SFMono-Regular, 'JetBrains Mono', Menlo, Consolas, monospace;
+        --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+        --card-shadow: 0 1px 2px rgb(10 25 60 / 0.04), 0 20px 50px -24px rgb(10 25 60 / 0.22);
+        color-scheme: light;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) {
+          --bg: #050913; --surface: #0c1322; --ink: #eef2fa; --ink-2: rgb(238 242 250 / 0.7); --muted: rgb(238 242 250 / 0.64);
+          --line: rgb(255 255 255 / 0.09); --soft: rgb(91 155 255 / 0.12); --brand-ink: #9cc0ff;
+          --good: #3ddc84; --warn: #f5b942; --bad: #ff7b73; --btn: #fff; --btn-ink: #04132e;
+          --card-shadow: 0 1px 2px rgb(0 0 0 / 0.5), 0 20px 50px -24px rgb(0 0 0 / 0.8);
+          color-scheme: dark;
+        }
+      }
+      :root[data-theme='dark'] {
+          --bg: #050913; --surface: #0c1322; --ink: #eef2fa; --ink-2: rgb(238 242 250 / 0.7); --muted: rgb(238 242 250 / 0.64);
+          --line: rgb(255 255 255 / 0.09); --soft: rgb(91 155 255 / 0.12); --brand-ink: #9cc0ff;
+          --good: #3ddc84; --warn: #f5b942; --bad: #ff7b73; --btn: #fff; --btn-ink: #04132e;
+          --card-shadow: 0 1px 2px rgb(0 0 0 / 0.5), 0 20px 50px -24px rgb(0 0 0 / 0.8);
+          color-scheme: dark;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.6 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+      a { color: inherit; }
+      :focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; border-radius: 6px; }
+      .wrap { max-width: 1160px; margin: 0 auto; padding: 0 max(20px, env(safe-area-inset-left)); }
+      h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
+
+      /* Cabecera sobre el hero oscuro */
+      header { position: fixed; inset: 0 0 auto; z-index: 30; padding: 14px 0 0; pointer-events: none; }
+      .bar { pointer-events: auto; display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 16px; color: #fff; padding: 0 8px 0 18px; border-radius: 999px; background: rgb(255 255 255 / 0.06); border: 1px solid rgb(255 255 255 / 0.14); -webkit-backdrop-filter: blur(16px) saturate(1.5); backdrop-filter: blur(16px) saturate(1.5); transition: background 0.25s, box-shadow 0.25s; }
+      header.solid .bar { background: rgb(4 19 46 / 0.84); box-shadow: 0 18px 40px -18px rgb(4 19 46 / 0.7); }
+      .bar .end { display: flex; align-items: center; gap: 8px; }
+      @media (max-width: 700px) { .btn.hide-s { display: none; } }
+      header .btn { white-space: nowrap; }
+      .lang { font: 600 13px var(--sans); padding: 8px 12px; border-radius: 999px; color: inherit; text-decoration: none; border: 1px solid var(--line); opacity: .85; }
+      .lang:hover { opacity: 1; }
+      .tgl { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; border: 0; cursor: pointer; background: rgb(255 255 255 / 0.1); color: #fff; transition: background 0.2s, transform 0.2s; }
+      .tgl:hover { background: rgb(255 255 255 / 0.18); } .tgl:active { transform: scale(0.92); } .tgl .moon { display: none; }
+      :root[data-theme='dark'] .tgl .sun { display: none; } :root[data-theme='dark'] .tgl .moon { display: block; }
+      @media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .tgl .sun { display: none; } :root:not([data-theme='light']) .tgl .moon { display: block; } }
+      .brand { display: flex; align-items: center; gap: 10px; font: 700 19px var(--display); text-decoration: none; letter-spacing: -0.02em; }
+      .brand img { width: 30px; height: 30px; border-radius: 8px; }
+      nav { display: flex; gap: 6px; font-size: 14.5px; }
+      nav a { text-decoration: none; padding: 8px 14px; border-radius: 999px; color: rgb(255 255 255 / 0.72); transition: background 0.2s, color 0.2s; }
+      nav a:hover { color: #fff; background: rgb(255 255 255 / 0.08); }
+      .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 26px; border-radius: 999px; font: 600 16px var(--sans); letter-spacing: -0.01em; text-decoration: none; border: 1px solid transparent; cursor: pointer; transition: transform 0.2s, box-shadow 0.25s, background 0.2s; }
+      .btn:active { transform: scale(0.97); }
+      .btn.white { background: #fff; color: var(--navy); }
+      .btn.white:hover { box-shadow: 0 10px 34px -8px rgb(255 255 255 / 0.5); }
+      .btn.glass { background: rgb(255 255 255 / 0.08); color: #fff; border-color: rgb(255 255 255 / 0.18); }
+      .btn.glass:hover { background: rgb(255 255 255 / 0.14); }
+      .btn.dark { background: var(--btn); color: var(--btn-ink); }
+      .btn.dark:hover { box-shadow: 0 12px 30px -10px rgb(4 19 46 / 0.55); }
+      .btn.sm { padding: 9px 18px; font-size: 14px; }
+
+      /* Hero: texto a la izquierda, móvil a la derecha */
+      .hero { position: relative; background: var(--navy); color: #fff; padding: 116px 0 72px; overflow: hidden; isolation: isolate; }
+      .hero::before { content: ''; position: absolute; inset: -20% -10% auto; height: 900px; z-index: -1;
+        background: radial-gradient(48% 55% at 72% 18%, rgb(61 123 255 / 0.55), transparent 70%), radial-gradient(35% 40% at 8% 40%, rgb(3 74 190 / 0.45), transparent 70%), radial-gradient(30% 30% at 95% 80%, rgb(91 155 255 / 0.22), transparent 70%); }
+      .hero::after { content: ''; position: absolute; inset: 0; z-index: -1; opacity: 0.35;
+        background-image: linear-gradient(rgb(255 255 255 / 0.05) 1px, transparent 1px), linear-gradient(90deg, rgb(255 255 255 / 0.05) 1px, transparent 1px); background-size: 56px 56px;
+        -webkit-mask-image: radial-gradient(70% 60% at 60% 30%, #000, transparent); mask-image: radial-gradient(70% 60% at 60% 30%, #000, transparent); }
+      .hero-grid { display: grid; grid-template-columns: 1.08fr 0.92fr; gap: 24px; align-items: center; min-height: 640px; }
+      .pill { display: inline-flex; align-items: center; gap: 10px; padding: 6px 14px 6px 6px; border-radius: 999px; background: rgb(255 255 255 / 0.08); border: 1px solid rgb(255 255 255 / 0.16); font-size: 13.5px; color: rgb(255 255 255 / 0.86); text-decoration: none; transition: background 0.2s; }
+      .pill:hover { background: rgb(255 255 255 / 0.14); }
+      .pill b { background: var(--blue); color: #fff; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; letter-spacing: 0.02em; }
+      .hero h1 { font-size: clamp(46px, 6.4vw, 88px); line-height: 1; letter-spacing: -0.04em; word-spacing: 0.06em; font-weight: 700; margin: 24px 0 22px; max-width: 12ch; }
+      .grad { background: linear-gradient(95deg, #fff 0%, #a9c9ff 45%, #5b9bff 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .hero .lead { font-size: clamp(18px, 1.9vw, 21px); color: rgb(255 255 255 / 0.72); max-width: 46ch; margin: 0 0 32px; text-wrap: pretty; }
+      .ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+      .assure { display: flex; gap: 10px 24px; flex-wrap: wrap; margin: 30px 0 0; padding: 0; list-style: none; font-size: 14px; color: rgb(255 255 255 / 0.6); }
+      .assure li { display: inline-flex; align-items: center; gap: 8px; }
+      .assure svg { color: var(--glow); width: 16px; height: 16px; }
+
+      .hero-visual { position: relative; display: grid; place-items: center; min-height: 600px; perspective: 1400px; --rx: 5deg; --ry: -14deg; }
+      .hero-visual::before { content: ''; position: absolute; width: 440px; height: 440px; border-radius: 50%; background: radial-gradient(closest-side, rgb(61 123 255 / 0.55), transparent); filter: blur(6px); z-index: 0; }
+      /* iPhone Pro en plata (titanio): marco metálico con grosor, bisel negro, isla dinámica y botones laterales */
+      .iph { --w: 292px; --r: 52px; position: relative; width: var(--w); padding: 4px; border-radius: var(--r); background: linear-gradient(145deg, #f4f5f7 0%, #c3c7cf 18%, #eef0f3 36%, #a5aab4 60%, #e4e7eb 82%, #b6bbc4 100%);
+        box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.75), inset 0 0 8px rgb(0 0 0 / 0.28), 1px 1px 0 #b2b8c1, 2px 2px 0 #a3a9b3, 3px 3px 0 #949aa5, 4px 4px 0 #868c97, 5px 5px 0 #7a808b, 6px 6px 0 #6f7580; }
+      .iph-in { position: relative; padding: 7px; border-radius: calc(var(--r) - 4px); background: #05060a; box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08), inset 0 0 14px rgb(0 0 0 / 0.9); }
+      .iph-in picture, .iph-in img { display: block; width: 100%; height: auto; aspect-ratio: 390 / 844; object-fit: cover; object-position: top; border-radius: calc(var(--r) - 11px); }
+      .iph-in .isl { position: absolute; top: 18px; left: 50%; width: 31%; height: 27px; transform: translateX(-50%); border-radius: 99px; background: #020306; z-index: 3; box-shadow: 0 0 0 1px rgb(255 255 255 / 0.04); }
+      .iph-in .isl::after { content: ''; position: absolute; right: 9px; top: 50%; width: 9px; height: 9px; margin-top: -4.5px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #25324f 0%, #0a0f1c 55%, #000 100%); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06); }
+      .iph-in .glare { position: absolute; inset: 7px; border-radius: calc(var(--r) - 11px); pointer-events: none; z-index: 2; background: linear-gradient(112deg, rgb(255 255 255 / 0.2) 0%, rgb(255 255 255 / 0.05) 24%, transparent 38%), linear-gradient(0deg, rgb(255 255 255 / 0.05), transparent 20%); }
+      .iph .b { position: absolute; width: 4px; border-radius: 2px; background: linear-gradient(90deg, #8d939e, #d9dde3 55%, #9aa0ab); box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.25); }
+      .iph .b.act { left: -4px; top: 13%; height: 4.2%; } .iph .b.vu { left: -4px; top: 20%; height: 7.4%; } .iph .b.vd { left: -4px; top: 29%; height: 7.4%; }
+      .iph .b.pw { right: -4px; top: 22%; height: 11%; background: linear-gradient(90deg, #9aa0ab, #d9dde3 45%, #8d939e); } .iph .b.cc { right: -4px; top: 60%; height: 7%; background: linear-gradient(90deg, #9aa0ab, #d9dde3 45%, #8d939e); }
+      .scene { position: relative; z-index: 2; transform-style: preserve-3d; transform: rotateY(var(--ry, -14deg)) rotateX(var(--rx, 5deg)) rotateZ(1.5deg); transition: transform 0.3s ease-out; animation: float 7s ease-in-out infinite; }
+      .scene::after { content: ''; position: absolute; left: 6%; right: -8%; bottom: -42px; height: 60px; z-index: -1; border-radius: 50%; background: radial-gradient(closest-side, rgb(0 0 0 / 0.6), transparent); filter: blur(10px); transform: translateZ(-60px); }
+      @keyframes float { 50% { margin-top: -10px; } }
+      .badge { position: absolute; z-index: 5; background: rgb(8 22 52 / 0.78); border: 1px solid rgb(255 255 255 / 0.2); -webkit-backdrop-filter: blur(18px) saturate(1.5); backdrop-filter: blur(18px) saturate(1.5); border-radius: 18px; padding: 12px 16px; text-align: left; font-size: 13px; color: rgb(255 255 255 / 0.8); box-shadow: 0 24px 50px -20px rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.25); animation: float 6s ease-in-out infinite; }
+      .badge b { display: block; font: 700 20px var(--display); color: #fff; letter-spacing: -0.03em; }
+      .badge .ok { color: #5eead4; font-weight: 600; }
+      .badge.a { left: -14%; top: 20%; animation-delay: -1.5s; } .badge.b { right: -12%; bottom: 17%; animation-delay: -3.2s; } .badge.c { display: none; left: -4%; bottom: 7%; animation-delay: -4.6s; display: flex; align-items: center; gap: 10px; padding: 10px 14px; font-weight: 600; color: #fff; }
+      .badge.c i { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: rgb(94 234 212 / 0.2); color: #5eead4; font-style: normal; }
+
+      .strip { background: var(--navy); border-top: 1px solid rgb(255 255 255 / 0.08); }
+      .strip .wrap { display: grid; grid-template-columns: repeat(4, 1fr); }
+      .stat { padding: 30px 24px; border-left: 1px solid rgb(255 255 255 / 0.08); color: rgb(255 255 255 / 0.6); font-size: 14px; }
+      .stat:first-child { border-left: 0; padding-left: 0; }
+      .stat b { display: block; font: 700 32px/1.1 var(--display); letter-spacing: -0.04em; color: #fff; }
+
+      /* Secciones */
+      section { padding: 112px 0 0; }
+      .kicker { display: inline-block; font: 500 12px/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--brand-ink); background: var(--surface); border: 1px solid var(--line); padding: 9px 14px; border-radius: 10px; }
+      h2 { font-size: clamp(34px, 5vw, 58px); line-height: 1.02; letter-spacing: -0.035em; word-spacing: 0.05em; font-weight: 700; margin: 18px 0 16px; }
+      .head { max-width: 720px; margin-bottom: 52px; }
+      .head.center { margin-left: auto; margin-right: auto; text-align: center; }
+      .head p { color: var(--ink-2); font-size: 19px; margin: 0; text-wrap: pretty; }
+
+      /* Bento */
+      .bento { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+      .card { grid-column: span 2; background: radial-gradient(70% 60% at 100% 100%, rgb(61 123 255 / 0.07), transparent 70%), var(--surface); border: 1px solid var(--line); border-radius: 28px; padding: 28px; box-shadow: var(--card-shadow); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 10px; min-height: 280px; }
+      .card.w3 { grid-column: span 3; } .card.w4 { grid-column: span 4; } .card.w6 { grid-column: span 6; }
+      .card h3 { font-size: 24px; letter-spacing: -0.035em; font-weight: 650; margin-top: 4px; }
+      .card p { margin: 0; color: var(--ink-2); font-size: 15.5px; max-width: 46ch; }
+      .card .ic { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: var(--soft); color: var(--brand-ink); }
+      .card .viz { margin-top: auto; padding-top: 14px; }
+      .more-link { display: inline-block; margin-top: 4px; color: var(--ink); font: 600 14.5px var(--sans); text-decoration: none; border-bottom: 1.5px solid currentColor; padding-bottom: 1px; width: fit-content; transition: color 0.2s, gap 0.2s; } .more-link:hover { color: var(--blue); }
+
+      .eq { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font: 650 30px/1 var(--display); letter-spacing: -0.04em; }
+      .eq small { font: 500 14px var(--sans); color: var(--muted); letter-spacing: 0; display: block; margin-top: 6px; }
+      .eq .arrow { color: var(--blue); }
+      .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+      .chip { padding: 7px 14px; border-radius: 999px; font-size: 13.5px; font-weight: 550; background: var(--bg); border: 1px solid var(--line); color: var(--ink-2); }
+      .chip.on { background: var(--btn); color: var(--btn-ink); border-color: transparent; }
+
+      .bars { display: grid; gap: 14px; }
+      .bar-row { display: grid; gap: 6px; font-size: 13.5px; color: var(--ink-2); }
+      .bar-row div:first-child { display: flex; justify-content: space-between; }
+      .track { height: 8px; border-radius: 99px; background: var(--bg); overflow: hidden; }
+      .track i { display: block; height: 100%; border-radius: inherit; background: var(--blue); }
+      .track i.w { background: var(--warn); } .track i.g { background: var(--good); }
+
+      .ring { --p: 62; width: 120px; aspect-ratio: 1; border-radius: 50%; background: conic-gradient(var(--blue) calc(var(--p) * 1%), var(--bg) 0); display: grid; place-items: center; position: relative; }
+      .ring::before { content: ''; position: absolute; inset: 12px; border-radius: 50%; background: var(--surface); }
+      .ring b { position: relative; font: 700 26px var(--display); letter-spacing: -0.04em; }
+      .goal { display: flex; align-items: center; gap: 20px; }
+      .goal div small { display: block; color: var(--muted); font-size: 13.5px; }
+      .goal div strong { font: 650 20px var(--display); letter-spacing: -0.03em; }
+
+      .wave { display: flex; align-items: center; gap: 4px; height: 44px; }
+      .wave i { width: 4px; border-radius: 4px; background: var(--blue); animation: wv 1.3s ease-in-out infinite; }
+      .wave i:nth-child(odd) { animation-delay: -0.4s; } .wave i:nth-child(3n) { animation-delay: -0.8s; }
+      @keyframes wv { 0%, 100% { height: 14%; } 50% { height: 100%; } }
+      .say { margin-top: 12px; font: 500 17px/1.35 var(--display); letter-spacing: -0.02em; padding: 12px 16px; border-radius: 16px; background: var(--bg); }
+      .say small { display: block; font: 500 13px var(--sans); color: var(--muted); margin-top: 2px; }
+
+      .coachc { flex-direction: row; align-items: center; gap: 30px; }
+      .coachc img { width: 150px; height: 150px; border-radius: 50%; flex: none; box-shadow: 0 0 0 8px var(--soft), 0 20px 40px -16px rgb(4 19 46 / 0.5); }
+      .chat { display: grid; gap: 8px; margin-top: 12px; }
+      .chat .b { justify-self: start; padding: 10px 14px; border-radius: 16px 16px 16px 4px; font-size: 14.5px; background: var(--bg); border: 1px solid var(--line); }
+      .chat .u { justify-self: end; padding: 9px 14px; border-radius: 16px 16px 4px 16px; font-size: 14.5px; background: var(--btn); color: var(--btn-ink); font-weight: 500; }
+
+      .calc .in { display: grid; gap: 12px; }
+      .calc label { display: grid; gap: 4px; font-size: 12.5px; color: var(--muted); font-weight: 500; }
+      .calc input { font: 650 20px/1.2 var(--display); letter-spacing: -0.03em; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); width: 100%; font-variant-numeric: tabular-nums; }
+      .calc input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 4px var(--soft); }
+      .calc .out { border-radius: 18px; padding: 18px 20px; background: linear-gradient(150deg, #0b3f8f, #04132e); color: #fff; margin-top: 4px; }
+      .calc .out .k { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; font-weight: 600; }
+      .calc .out .v { display: block; font: 700 40px/1.05 var(--display); letter-spacing: -0.05em; font-variant-numeric: tabular-nums; }
+      .calc .out .s { display: block; font-size: 13.5px; opacity: 0.8; margin-top: 4px; }
+
+      /* Cómo funciona */
+      .how { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: n; }
+      .step { counter-increment: n; padding: 28px; border-radius: 24px; background: var(--surface); border: 1px solid var(--line); }
+      .step::before { content: counter(n); display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--btn); color: var(--btn-ink); font: 700 15px var(--display); margin-bottom: 18px; }
+      .step h3 { font-size: 21px; letter-spacing: -0.03em; font-weight: 650; margin-bottom: 6px; }
+      .step p { margin: 0; color: var(--ink-2); font-size: 15.5px; }
+
+      /* Seguridad */
+      .secure { margin-top: 112px; background: var(--navy); color: #fff; padding: 104px 0; position: relative; overflow: hidden; isolation: isolate; }
+      .secure::before { content: ''; position: absolute; inset: auto -10% -40% auto; width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(closest-side, rgb(61 123 255 / 0.35), transparent); z-index: -1; }
+      .secure .kicker, .sc-stage .kicker { background: rgb(255 255 255 / 0.08); border-color: rgb(255 255 255 / 0.16); color: #cfe0ff; }
+      .secure h2 { color: #fff; } .secure .head p { color: rgb(255 255 255 / 0.7); }
+      .cols3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      .col { padding: 28px; border-radius: 24px; background: rgb(255 255 255 / 0.05); border: 1px solid rgb(255 255 255 / 0.1); }
+      .col .ic { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: rgb(91 155 255 / 0.16); color: #a9c9ff; margin-bottom: 16px; }
+      .col h3 { font-size: 21px; letter-spacing: -0.03em; font-weight: 650; margin-bottom: 8px; color: #fff; }
+      .col p { margin: 0; color: rgb(255 255 255 / 0.68); font-size: 15.5px; }
+      .secure .more { margin-top: 36px; }
+
+      /* Instalar */
+      .install { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+      .os { border-radius: 22px; padding: 24px; background: var(--surface); border: 1px solid var(--line); }
+      .os.me { border-color: var(--blue); box-shadow: 0 0 0 4px var(--soft); }
+      .os .tag { display: none; font: 600 12px var(--sans); color: var(--blue); margin-bottom: 8px; }
+      .os.me .tag { display: block; }
+      .os h3 { font-size: 19px; letter-spacing: -0.03em; font-weight: 650; margin: 0 0 10px; }
+      .os ol { margin: 0; padding-left: 18px; color: var(--ink-2); font-size: 15px; }
+      .os li { margin-bottom: 6px; } .os b { color: var(--ink); font-weight: 600; }
+
+      .final { margin: 112px auto 0; }
+      .cta { border-radius: 36px; padding: 80px 24px; text-align: center; color: #fff; position: relative; overflow: hidden; isolation: isolate; background: linear-gradient(150deg, #0b3f8f, #04132e 70%); }
+      .cta::before { content: ''; position: absolute; inset: -40% 20% auto; height: 420px; z-index: -1; background: radial-gradient(closest-side, rgb(91 155 255 / 0.5), transparent); }
+      .cta h2 { color: #fff; max-width: 16ch; margin: 0 auto 26px; }
+      footer { padding: 64px 0 48px; font-size: 14px; color: var(--muted); border-top: 1px solid var(--line); margin-top: 24px; }
+      .foot { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 32px; }
+      .foot h4 { margin: 0 0 14px; font: 650 13px var(--sans); color: var(--ink); letter-spacing: 0.02em; }
+      .foot a { display: block; text-decoration: none; color: var(--ink-2); padding: 4px 0; transition: color 0.2s; } .foot a:hover { color: var(--blue); }
+      .foot .fb a.brand { display: flex; padding: 0; } .foot .fb p { margin: 14px 0 0; max-width: 36ch; line-height: 1.55; }
+      .talk { margin-top: 44px; padding-top: 28px; border-top: 1px dashed var(--line); display: grid; gap: 6px; }
+      .talk span { font-size: 13px; } .talk a { display: inline-flex; align-items: center; gap: 12px; width: fit-content; text-decoration: none; color: var(--ink); font: 600 clamp(24px, 4vw, 44px) var(--display); letter-spacing: -0.03em; word-break: break-all; transition: color 0.2s; }
+      .talk a:hover { color: var(--blue); } .talk a i { display: grid; place-items: center; transition: transform 0.3s; } .talk a:hover i { transform: translate(3px, -3px); }
+      .fine { margin-top: 36px; padding-top: 22px; border-top: 1px dashed var(--line); font-size: 13px; display: flex; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; } .fine .trust { color: var(--ink-2); }
+
+
+      /* Pantalla viva: barra de estado, indicador de inicio y carrusel */
+      .iph-in .sb { position: absolute; top: 15px; left: 30px; right: 28px; z-index: 3; display: flex; justify-content: space-between; align-items: center; font: 600 13px/1 var(--sans); letter-spacing: -0.01em; color: #0b1324; transition: color 0.5s; }
+      .iph-in .sbi { display: inline-flex; gap: 5px; align-items: center; } .iph-in[data-dark='1'] .sb { color: #fff; }
+      .iph-in .hbar { position: absolute; bottom: 14px; left: 50%; width: 34%; height: 5px; margin-left: -17%; border-radius: 99px; background: #0b1324; opacity: 0.85; z-index: 3; transition: background 0.5s; } .iph-in[data-dark='1'] .hbar { background: #fff; }
+      .slides { position: relative; aspect-ratio: 390 / 844; border-radius: calc(var(--r) - 11px); overflow: hidden; background: #05060a; }
+      .iph-in .slides .sl { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; opacity: 0; transition: opacity 0.9s ease; } .iph-in .slides .sl.on { opacity: 1; }
+      .dots { position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); z-index: 6; display: flex; gap: 8px; }
+      .dots button { width: 8px; height: 8px; padding: 0; border: 0; border-radius: 99px; background: rgb(255 255 255 / 0.3); cursor: pointer; transition: width 0.35s, background 0.35s; } .dots button.on { width: 26px; background: #fff; }
+      .sc-phone .iph-in img { aspect-ratio: 390 / 844; }
+
+      /* Grano sutil sobre las bandas oscuras (acabado de impresión) */
+      .hero, .sc-stage, .secure, .cta { --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+      .secure::after, .cta::after, .sc-stage .grain { content: ''; position: absolute; inset: 0; background-image: var(--grain); opacity: 0.045; pointer-events: none; mix-blend-mode: overlay; z-index: 0; }
+      .sc-stage .grain { z-index: 0; }
+
+      /* El cambio: antes / con Finanzas */
+      .shift { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+      .shift .col2 { border-radius: 30px; padding: 34px; border: 1px solid var(--line); background: var(--surface); position: relative; overflow: hidden; min-height: 360px; display: flex; flex-direction: column; gap: 14px; }
+      .shift .before { background: repeating-linear-gradient(0deg, transparent 0 31px, rgb(10 25 60 / 0.045) 31px 32px), var(--surface); }
+      .shift h3 { font: 650 14px var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin: 0; } .shift .after h3 { color: var(--blue); }
+      .shift .col2 > p { margin: 0; color: var(--ink-2); font-size: 15.5px; max-width: 40ch; }
+      .mess { display: grid; gap: 8px; margin-top: auto; font: 500 13.5px var(--mono); color: var(--ink-2); }
+      .mess span { padding: 8px 12px; border-radius: 8px; background: rgb(10 25 60 / 0.05); width: fit-content; } .mess s { color: var(--bad); } .mess em { font-style: normal; color: var(--warn); }
+      .clean { margin-top: auto; border-radius: 20px; padding: 18px; background: linear-gradient(150deg, #0b3f8f, #04132e); color: #fff; display: grid; gap: 12px; box-shadow: 0 30px 50px -30px rgb(4 19 46 / 0.7); }
+      .clean .r { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; } .clean small { opacity: 0.7; font-size: 12.5px; } .clean b { font: 700 24px var(--display); letter-spacing: -0.035em; }
+      .clean .ok { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; color: #5eead4; font-weight: 600; }
+
+      /* Dispositivos */
+      .devices { position: relative; margin: 8px auto 0; height: 660px; display: grid; place-items: center; perspective: 1600px; }
+      .devices::before { content: ''; position: absolute; inset: 6% 8%; border-radius: 48px; background: radial-gradient(60% 70% at 50% 40%, rgb(61 123 255 / 0.16), transparent 70%), var(--surface); border: 1px solid var(--line); }
+      .iph.pad { --w: 392px; --r: 36px; z-index: 1; transform: rotateY(10deg) rotateZ(-1deg) translateX(-90px); } .iph.pad .iph-in { padding: 13px; border-radius: 32px; } .iph.pad .iph-in img { border-radius: 24px; aspect-ratio: 744 / 1133; }
+      .iph.pad .cam { position: absolute; top: 5px; left: 50%; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: #10131c; z-index: 3; }
+      .iph.sm { --w: 232px; --r: 44px; position: absolute; right: 18%; bottom: 36px; z-index: 3; transform: rotateY(-10deg) rotateZ(2deg); }
+      .iph.sm .iph-in .isl { height: 22px; top: 15px; }
+      .chip-sync { position: absolute; z-index: 5; left: 12%; bottom: 22%; display: inline-flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--card-shadow); font-size: 13.5px; color: var(--ink-2); } .chip-sync b { display: block; color: var(--ink); font: 650 15px var(--display); } .chip-sync i { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: rgb(18 161 80 / 0.14); color: var(--good); }
+      .dev-points { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 28px; } .dev-points div { padding: 22px; border-radius: 22px; background: var(--surface); border: 1px solid var(--line); } .dev-points b { display: block; font: 650 17px var(--display); letter-spacing: -0.02em; margin-bottom: 4px; } .dev-points span { color: var(--ink-2); font-size: 14.5px; }
+
+      /* Hoja de ruta */
+      .road { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      .rcol { border-radius: 28px; padding: 28px; background: var(--surface); border: 1px solid var(--line); position: relative; }
+      .rcol h3 { display: flex; align-items: center; gap: 10px; font: 650 20px var(--display); letter-spacing: -0.025em; margin-bottom: 16px; }
+      .rcol h3 em { font: 600 11px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; font-style: normal; padding: 5px 9px; border-radius: 7px; background: var(--soft); color: var(--brand-ink); }
+      .rcol.now h3 em { background: rgb(18 161 80 / 0.13); color: var(--good); }
+      .rcol ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; } .rcol li { display: flex; gap: 12px; align-items: flex-start; color: var(--ink-2); font-size: 15.5px; line-height: 1.4; }
+      .rcol li i { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; margin-top: 1px; background: var(--soft); color: var(--brand-ink); font-style: normal; font-size: 11px; } .rcol.now li i { background: rgb(18 161 80 / 0.14); color: var(--good); }
+      .fine .by { color: var(--ink-2); }
+
+      /* Detalles: foco de luz que sigue al cursor en las tarjetas y brillo en el botón principal */
+      .card::after, .step::after, .col::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity 0.3s; background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 50%), rgb(61 123 255 / 0.13), transparent 60%); }
+      .card:hover::after, .step:hover::after, .col:hover::after { opacity: 1; }
+      .step, .col { position: relative; overflow: hidden; }
+      .store { position: relative; overflow: hidden; }
+      .store.white::after { content: ''; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgb(61 123 255 / 0.14) 50%, transparent 70%); transform: translateX(-100%); transition: transform 0.7s; }
+      .store.white:hover::after { transform: translateX(100%); }
+      .gallery figure .mock { transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); } .gallery figure:hover .mock { transform: translateY(-8px); }
+
+      .rv { opacity: 0; transform: translateY(18px); transition: opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); }
+      .rv.in { opacity: 1; transform: none; }
+
+
+      /* Botones de descarga */
+      .store { display: inline-flex; align-items: center; gap: 12px; padding: 12px 24px 12px 18px; border-radius: 16px; text-decoration: none; text-align: left; transition: transform 0.2s, box-shadow 0.25s, background 0.2s; border: 1px solid transparent; }
+      .store span { display: grid; line-height: 1.15; } .store small { font-size: 11.5px; opacity: 0.7; font-weight: 500; } .store b { font: 650 18px var(--display); letter-spacing: -0.02em; }
+      .store.white { background: #fff; color: var(--navy); } .store.white:hover { box-shadow: 0 14px 40px -10px rgb(255 255 255 / 0.45); transform: translateY(-1px); }
+      .store.glass { background: rgb(255 255 255 / 0.08); color: #fff; border-color: rgb(255 255 255 / 0.2); } .store.glass:hover { background: rgb(255 255 255 / 0.14); transform: translateY(-1px); }
+      .alt { margin: 16px 0 0; font-size: 14px; } .alt a { color: rgb(255 255 255 / 0.65); text-decoration: none; border-bottom: 1px solid rgb(255 255 255 / 0.25); } .alt a:hover { color: #fff; }
+
+
+
+      /* Guías verticales discontinuas de fondo (detalle editorial) */
+      .guides { position: fixed; inset: 0; z-index: 0; pointer-events: none; display: flex; justify-content: center; }
+      .guides div { width: min(1120px, calc(100% - 40px)); display: grid; grid-template-columns: repeat(4, 1fr); border-left: 1px dashed var(--line); border-right: 1px dashed var(--line); }
+      .guides i { border-right: 1px dashed var(--line); } .guides i:last-child { border-right: 0; }
+      main { position: relative; z-index: 1; }
+
+      /* Escaparate de funciones: móvil central, palabra gigante de fondo y tarjetas alrededor */
+      .showcase { padding-top: 0; } .showcase .sc-stage { border-top: 1px solid rgb(255 255 255 / 0.08); }
+      .sc-stage { position: relative; margin-top: 0; background: var(--navy); overflow: hidden; isolation: isolate; padding: 96px 0 0; }
+      .sc-stage::before { content: ''; position: absolute; inset: 0; z-index: -1; background: radial-gradient(50% 60% at 50% 30%, rgb(61 123 255 / 0.32), transparent 70%); }
+      .sc-word { position: absolute; left: 0; right: 0; top: 250px; text-align: center; z-index: -1; font: 800 clamp(96px, 17vw, 250px)/1 var(--display); letter-spacing: -0.05em; color: rgb(255 255 255 / 0.055); user-select: none; white-space: nowrap; }
+      .sc-cols { display: grid; grid-template-columns: 1fr 330px 1fr; gap: 28px; align-items: start; height: 620px; overflow: hidden; }
+      .sc-side { display: grid; gap: 16px; padding-top: 24px; align-content: start; }
+      .sc-card { display: flex; gap: 16px; align-items: flex-start; padding: 22px; border-radius: 28px; background: rgb(255 255 255 / 0.05); border: 1px solid rgb(255 255 255 / 0.1); color: #fff; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); transition: background 0.3s, transform 0.3s; }
+      .sc-card:hover { background: rgb(255 255 255 / 0.09); transform: translateY(-3px); }
+      .sc-ic { flex: none; width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; background: rgb(91 155 255 / 0.18); color: #a9c9ff; }
+      .sc-card b { display: block; font: 650 18px var(--display); letter-spacing: -0.02em; margin-bottom: 4px; } .sc-card p { margin: 0; color: rgb(255 255 255 / 0.66); font-size: 14.5px; line-height: 1.45; }
+      .sc-phone { align-self: end; padding-top: 24px; }
+      .sc-phone { filter: drop-shadow(0 -30px 60px rgb(61 123 255 / 0.4)); } .sc-phone .iph { margin: 0 auto; }
+      .sc-stage::after { content: ''; position: absolute; inset: auto 0 0; height: 90px; z-index: 2; background: linear-gradient(transparent, var(--bg)); pointer-events: none; }
+
+      /* Crucetas y píldoras decorativas */
+      .cross { position: absolute; width: 54px; height: 54px; color: rgb(156 192 255 / 0.55); z-index: 0; } .cross::before, .cross::after { content: ''; position: absolute; background: currentColor; } .cross::before { left: 50%; top: 0; bottom: 0; width: 1px; } .cross::after { top: 50%; left: 0; right: 0; height: 1px; }
+      .pills i { position: absolute; display: grid; place-items: center; width: 78px; height: 56px; border-radius: 99px; background: rgb(255 255 255 / 0.1); border: 1px solid rgb(255 255 255 / 0.2); color: #cfe0ff; font-style: normal; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); animation: float 7s ease-in-out infinite; }
+      .pills i:nth-child(1) { left: 6%; top: 18%; transform: rotate(-8deg); } .pills i:nth-child(2) { right: 8%; top: 14%; transform: rotate(7deg); animation-delay: -2s; } .pills i:nth-child(3) { left: 12%; bottom: 14%; transform: rotate(6deg); animation-delay: -4s; } .pills i:nth-child(4) { right: 12%; bottom: 18%; transform: rotate(-6deg); animation-delay: -1s; }
+      .btn.arrow { padding: 8px 8px 8px 26px; gap: 14px; } .btn.arrow .circ { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--blue); color: #fff; transition: transform 0.3s; } .btn.arrow:hover .circ { transform: rotate(45deg); }
+
+
+      /* Galería (sin uso) */
+      .gallery { display: flex; gap: 28px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 12px max(20px, calc((100vw - 1160px) / 2 + 20px)) 36px; scrollbar-width: none; }
+      .gallery::-webkit-scrollbar { display: none; }
+      .gallery figure { flex: 0 0 auto; margin: 0; width: 260px; scroll-snap-align: center; }
+      .mock { border-radius: 40px; padding: 8px; background: linear-gradient(160deg, #26334d, #0a1020); box-shadow: 0 40px 70px -34px rgb(4 19 46 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.1) inset; }
+      .mock img, .mock picture { display: block; width: 100%; aspect-ratio: 390 / 844; object-fit: cover; object-position: top; border-radius: 33px; }
+      .gallery figcaption { padding: 18px 8px 0; color: var(--ink-2); font-size: 14.5px; } .gallery figcaption b { display: block; font: 650 18px var(--display); letter-spacing: -0.02em; color: var(--ink); margin-bottom: 2px; }
+
+      /* Descarga */
+      .dl { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+      .os { border-radius: 24px; padding: 26px; background: var(--surface); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+      .os.me { border-color: var(--blue); box-shadow: 0 0 0 4px var(--soft); }
+      .os .tag { display: none; font: 600 12px var(--sans); color: var(--blue); }
+      .os.me .tag { display: block; }
+      .os .oh { display: flex; align-items: center; gap: 10px; color: var(--ink); } .os h3 { font-size: 22px; letter-spacing: -0.03em; font-weight: 650; margin: 0; }
+      .os .od { margin: 0; color: var(--ink-2); font-size: 15px; }
+      .os .btn { margin: 6px 0 4px; width: 100%; }
+      .os ol { margin: 0; padding-left: 18px; color: var(--ink-2); font-size: 14.5px; } .os li { margin-bottom: 6px; } .os b { color: var(--ink); font-weight: 600; }
+      .os.qr { align-items: center; text-align: center; justify-content: center; }
+      .os.qr img { width: 168px; height: 168px; border-radius: 16px; border: 1px solid var(--line); background: #fff; padding: 4px; }
+
+
+      /* Guía iPhone */
+      .ios-guide { margin-top: 40px; border-radius: 32px; padding: 44px 32px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--card-shadow); }
+      .ig-head { max-width: 620px; margin: 0 auto 32px; text-align: center; } .ig-head h3 { font-size: clamp(26px, 3.4vw, 38px); letter-spacing: -0.035em; font-weight: 700; margin: 14px 0 8px; }
+      .ig-head p { margin: 0; color: var(--ink-2); }
+      .ig-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+      .ig-steps figure { margin: 0; text-align: center; } .ig-steps img { width: 100%; max-width: 280px; height: auto; border-radius: 26px; box-shadow: 0 30px 60px -34px rgb(4 19 46 / 0.55), 0 0 0 1px var(--line); }
+      .ig-steps figcaption { padding-top: 16px; color: var(--ink-2); font-size: 15px; } .ig-steps figcaption b { display: block; color: var(--ink); font: 650 18px var(--display); letter-spacing: -0.02em; margin-bottom: 2px; }
+      .ig-note { margin: 28px 0 0; text-align: center; font-size: 13.5px; color: var(--muted); }
+
+      /* Preguntas */
+      .faq { max-width: 760px; margin: 0 auto; display: grid; gap: 10px; }
+      .faq details { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 0 22px; }
+      .faq summary { cursor: pointer; list-style: none; padding: 20px 0; font: 600 17px var(--display); letter-spacing: -0.02em; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+      .faq summary::-webkit-details-marker { display: none; }
+      .faq summary::after { content: '+'; font: 400 24px/1 var(--sans); color: var(--blue); transition: transform 0.25s; }
+      .faq details[open] summary::after { transform: rotate(45deg); }
+      .faq details p { margin: 0 0 20px; color: var(--ink-2); font-size: 16px; }
+
+      /* Barra de descarga en móvil */
+      .sticky-dl { position: fixed; left: 12px; right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); z-index: 40; display: none; align-items: center; gap: 12px; padding: 10px 10px 10px 12px; border-radius: 20px; background: color-mix(in srgb, var(--surface) 88%, transparent); -webkit-backdrop-filter: blur(18px) saturate(1.5); backdrop-filter: blur(18px) saturate(1.5); border: 1px solid var(--line); box-shadow: 0 20px 50px -16px rgb(4 19 46 / 0.45); transform: translateY(140%); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+      .sticky-dl.show { transform: none; }
+      .sticky-dl img { width: 40px; height: 40px; border-radius: 10px; }
+      .sticky-dl span { flex: 1; display: grid; line-height: 1.2; } .sticky-dl b { font: 650 15px var(--display); } .sticky-dl small { color: var(--muted); font-size: 12px; }
+
+      @media (max-width: 1240px) { .badge.a { left: -2%; } .badge.b { right: -2%; }  }
+      @media (max-width: 860px) {
+        nav { display: none; }
+        .hero { padding: 112px 0 40px; } .hero-grid { grid-template-columns: 1fr; min-height: 0; gap: 8px; } .hero-copy { text-align: center; } .hero h1 { margin-left: auto; margin-right: auto; } .hero .lead { margin-left: auto; margin-right: auto; } .ctas, .assure { justify-content: center; }
+        .hero-visual { min-height: 520px; } .iph { --w: 250px; --r: 46px; } .badge.a { left: 0; top: 8%; } .badge.b { right: 0; bottom: 12%; } .badge.c { display: none; }
+        .strip .wrap { grid-template-columns: 1fr 1fr; } .stat:nth-child(3) { border-left: 0; padding-left: 0; }
+        .bento { grid-template-columns: 1fr 1fr; } .card, .card.w3, .card.w4 { grid-column: span 2; } .card.w6 { grid-column: span 2; }
+        .shift, .road, .dev-points { grid-template-columns: 1fr; } .devices { height: 460px; } .iph.pad { --w: 320px; transform: rotateY(8deg) translateX(-60px); } .iph.sm { --w: 190px; right: 6%; bottom: 16px; } .chip-sync { display: none; }
+        .sc-cols { grid-template-columns: 1fr 1fr; height: auto; overflow: visible; } .sc-phone { grid-column: 1 / -1; order: -1; max-width: 300px; margin: 0 auto; } .sc-side { padding-top: 0; } .sc-stage { padding-bottom: 40px; } .sc-stage::after { display: none; } .sc-word { top: 10px; }
+        .ig-steps { grid-template-columns: 1fr; } .ios-guide { padding: 32px 20px; }
+        .how, .cols3 { grid-template-columns: 1fr; } .dl { grid-template-columns: 1fr 1fr; } .sticky-dl { display: flex; } .foot { grid-template-columns: 1fr 1fr; } .foot .fb { grid-column: 1 / -1; }
+        .coachc { flex-direction: column; align-items: flex-start; }
+      }
+      @media (max-width: 560px) {
+        header .btn.white.sm { display: none; } header .btn.op-app { background: var(--btn); color: var(--btn-ink); border-color: transparent; }
+        .sc-cols { grid-template-columns: 1fr; } .pills i { display: none; } .devices { height: 380px; } .iph.pad { --w: 250px; --r: 30px; transform: translateX(-40px); } .iph.sm { --w: 150px; --r: 32px; }
+        .shift .col2 { padding: 26px; }
+        section { padding-top: 76px; } .secure { margin-top: 76px; padding: 76px 0; } .final { margin-top: 76px; }
+        .bento { grid-template-columns: 1fr; } .card, .card.w3, .card.w4, .card.w6 { grid-column: auto; }
+        .dl { grid-template-columns: 1fr; } .foot { grid-template-columns: 1fr 1fr; } .gallery figure { width: 230px; } footer { padding-bottom: 110px; }
+        .stat b { font-size: 26px; } .stat { padding: 22px 12px; }
+        .eq { font-size: 24px; } .cta { padding: 56px 20px; border-radius: 28px; }
+      }
+      @media (prefers-reduced-motion: reduce) { .scene, .badge { animation: none; } html { scroll-behavior: auto; } .rv { opacity: 1; transform: none; transition: none; } .wave i { animation: none; height: 60%; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="wrap"><div class="bar">
+        <a class="brand" href="./"><img src="../app/icons/icon-192.png" alt="" />Finanzas</a>
+        <nav aria-label="Sections"><a href="#funciones">Features</a><a href="#divisas">Currencies</a><a href="#como">How it works</a><a href="#seguridad">Security</a><a href="#faq">FAQ</a></nav>
+        <div class="end">
+          <a class="lang" href="../" hreflang="es" lang="es" aria-label="Español">ES</a>
+          <button class="tgl" id="theme" type="button" aria-label="Switch between light and dark theme"><span class="sun"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4V2M12 22v-2M4.9 4.9 3.5 3.5M20.5 20.5l-1.4-1.4M4 12H2M22 12h-2M4.9 19.1l-1.4 1.4M20.5 3.5l-1.4 1.4M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z" /></svg></span><span class="moon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" /></svg></span></button>
+          <a class="btn glass sm op-app" href="../app/?lang=en">Open app</a>
+          <a class="btn white sm" href="#descargar">Download</a>
+        </div>
+      </div></div>
+    </header>
+
+    <div class="guides" aria-hidden="true"><div><i></i><i></i><i></i><i></i></div></div>
+
+    <main>
+      <div class="hero">
+        <div class="wrap hero-grid">
+          <div class="hero-copy">
+            <a class="pill" href="#divisas"><b>New</b>Every payment in Bs, with its equivalent →</a>
+            <h1>Your money, <span class="grad">clearly.</span></h1>
+            <p class="lead">Log an expense in three seconds, in bolivars, dollars or euros. Every payment with its exact equivalent, without linking your bank and with your data encrypted on your device.</p>
+            <div class="ctas">
+              <a class="store white" id="dl-android" href="../app/?lang=en" data-state="web"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 8.6l1.4-2.4a.3.3 0 0 0-.5-.3l-1.4 2.5a8.2 8.2 0 0 0-6.6 0L8.9 5.9a.3.3 0 0 0-.5.3l1.4 2.4A7 7 0 0 0 5 14.5h14a7 7 0 0 0-4.8-5.9zM9.5 12.2a.8.8 0 1 1 0-1.6.8.8 0 0 1 0 1.6zm5 0a.8.8 0 1 1 0-1.6.8.8 0 0 1 0 1.6zM5 15.6V19a1 1 0 0 0 1 1h1v2.2a1.1 1.1 0 0 0 2.2 0V20h5.6v2.2a1.1 1.1 0 0 0 2.2 0V20h1a1 1 0 0 0 1-1v-3.4z"/></svg><span><small id="dl-android-sub">Open the app on your phone</small><b id="dl-android-main">Android</b></span></a>
+              <a class="store glass" href="../app/?lang=en"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.7c0-2.4 2-3.5 2-3.6a4.3 4.3 0 0 0-3.4-1.8c-1.4-.2-2.8.8-3.5.8s-1.8-.8-3-.8a4.4 4.4 0 0 0-3.7 2.3c-1.6 2.8-.4 6.900 1.100 9.100.8 1.100 1.700 2.300 2.900 2.300 1.100 0 1.600-.7 3-.7s1.800.7 3 .7 2-1.100 2.800-2.200a9.800 9.800 0 0 0 1.200-2.600 3.900 3.900 0 0 1-2.400-3.500zM14.200 6a3.900 3.900 0 0 0 .9-2.800 3.900 3.900 0 0 0-2.600 1.300A3.700 3.700 0 0 0 11.600 6a3.200 3.200 0 0 0 2.600 0z"/></svg><span><small>Open it in Safari</small><b>iPhone and iPad</b></span></a>
+            </div>
+            <p class="alt"><a href="../app/?lang=en">or open it now in the browser →</a></p>
+            <ul class="assure">
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10h12v11H6zM8.5 10V7a3.5 3.5 0 0 1 7 0v3" /></svg>End-to-end encrypted</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0M12 19.5h.01" /></svg>Without linking your bank</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6zM12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" /></svg>No ads or data selling</li>
+            </ul>
+          </div>
+          <div class="hero-visual" id="hv" aria-hidden="true" inert>
+            <span class="cross" style="right: 2%; top: 4%"></span><span class="cross" style="left: 8%; bottom: 2%; opacity: .6"></span>
+            <div class="scene"><div class="iph"><span class="b act"></span><span class="b vu"></span><span class="b vd"></span><span class="b pw"></span><span class="b cc"></span>
+              <div class="iph-in" id="hero-screen"><i class="isl"></i><div class="sb" aria-hidden="true"><span>9:41</span><span class="sbi"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.7" y="5" width="3" height="6" rx="1"/><rect x="9.4" y="2.5" width="3" height="8.5" rx="1"/><rect x="14" y="0" width="3" height="11" rx="1"/></svg><svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M1 4a10 10 0 0 1 14 0M3.5 6.6a6.4 6.4 0 0 1 9 0M6 9.2a2.8 2.8 0 0 1 4 0"/></svg><svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x="0.5" y="0.5" width="22" height="11" rx="3.5" stroke="currentColor" opacity="0.4"/><rect x="2" y="2" width="19" height="8" rx="2.2" fill="currentColor"/><path d="M24 4v4c.8-.3 1.5-1.1 1.5-2S24.800 4.300 24 4z" fill="currentColor" opacity="0.45"/></svg></span></div><div class="slides"><img class="sl on" data-dark="0" src="../site/s-home.webp" alt="Home with net worth and monthly summary" width="390" height="844" /><img class="sl" data-dark="0" src="../site/s-equiv.webp" alt="Logging a payment in bolivars with its equivalent in dollars" width="390" height="844" loading="lazy" /><img class="sl" data-dark="1" src="../site/s-plan-dark.webp" alt="Budgets by category in dark mode" width="390" height="844" loading="lazy" /><img class="sl" data-dark="0" src="../site/s-tx.webp" alt="Transactions of the month" width="390" height="844" loading="lazy" /></div><i class="hbar"></i><i class="glare"></i></div></div></div>
+            <div class="dots" id="hero-dots" role="tablist" aria-label="App screens"><button type="button" class="on" aria-label="Home"></button><button type="button" aria-label="Equivalent in bolivars"></button><button type="button" aria-label="Budgets"></button><button type="button" aria-label="Transactions"></button></div>
+            <div class="badge a"><span>Payment logged</span><b>1,100,000 Bs ≈ $1,250</b><span class="ok">Agreed rate · 880</span></div>
+            <div class="badge b"><span>Budget</span><b>Groceries 78%</b><span>We alert you at 80%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="strip">
+        <div class="wrap">
+          <div class="stat"><b>AES-256</b>Encrypted with your password</div>
+          <div class="stat"><b>600.000</b>Iterations for your key</div>
+          <div class="stat"><b>0</b>Ads and data sold</div>
+          <div class="stat"><b>4 rates</b>BCV, Euro, Parallel and your own</div>
+        </div>
+      </div>
+
+      <section id="funciones" class="showcase">
+        <div class="sc-stage">
+          <i class="grain" aria-hidden="true"></i>
+          <div class="wrap"><div class="head center rv" style="margin-bottom: 36px"><span class="kicker">Features</span><h2 style="color:#fff">Everything you need to make your money go further.</h2></div></div>
+          <div class="sc-word" aria-hidden="true">FEATURES</div>
+          <div class="wrap sc-cols">
+            <div class="sc-side">
+              <div class="sc-card rv"><span class="sc-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></svg></span><div><b>Budgets</b><p>Set limits by category and get alerts in time.</p></div></div>
+              <div class="sc-card rv"><span class="sc-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7" /></svg></span><div><b>Multi-currency</b><p>Bolivars, dollars, euros and USDT in a single balance.</p></div></div>
+              <div class="sc-card rv"><span class="sc-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-4a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0-4a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" /></svg></span><div><b>Savings goals</b><p>Amount, date and monthly contribution; track your progress.</p></div></div>
+            </div>
+            <div class="sc-phone rv"><div class="iph" style="--w: 330px; --r: 56px"><span class="b act"></span><span class="b vu"></span><span class="b vd"></span><span class="b pw"></span><div class="iph-in"><i class="isl"></i><div class="sb" aria-hidden="true"><span>9:41</span><span class="sbi"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.7" y="5" width="3" height="6" rx="1"/><rect x="9.4" y="2.5" width="3" height="8.5" rx="1"/><rect x="14" y="0" width="3" height="11" rx="1"/></svg><svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M1 4a10 10 0 0 1 14 0M3.5 6.6a6.4 6.4 0 0 1 9 0M6 9.2a2.8 2.8 0 0 1 4 0"/></svg><svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x="0.5" y="0.5" width="22" height="11" rx="3.5" stroke="currentColor" opacity="0.4"/><rect x="2" y="2" width="19" height="8" rx="2.2" fill="currentColor"/><path d="M24 4v4c.8-.3 1.5-1.1 1.5-2S24.800 4.300 24 4z" fill="currentColor" opacity="0.45"/></svg></span></div><img src="../site/s-plan.webp" alt="Budgets with progress bars by category" loading="lazy" width="390" height="844" /><i class="hbar"></i><i class="glare"></i></div></div></div>
+            <div class="sc-side">
+              <div class="sc-card rv"><span class="sc-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3ZM5 11a7 7 0 0 0 14 0M12 18v3" /></svg></span><div><b>Voice logging</b><p>Log an expense by speaking, no typing.</p></div></div>
+              <div class="sc-card rv"><span class="sc-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18H6zM9 7h6M9 11h.01M12 11h.01M15 11h.01M9 15h.01M12 15h.01M15 15h.01" /></svg></span><div><b>Rate calculator</b><p>Convert between currencies with the rate you choose.</p></div></div>
+              <div class="sc-card rv"><span class="sc-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8zM19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z" /></svg></span><div><b>AI advisor</b><p>Analyzes your numbers and suggests what to do.</p></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="cambio">
+        <div class="wrap">
+          <div class="head center rv">
+            <span class="kicker">The change</span>
+            <h2>From spreadsheet to real control.</h2>
+            <p>What used to be rates, formulas and doubts is now just a log entry.</p>
+          </div>
+          <div class="shift">
+            <div class="col2 before rv">
+              <h3>Before</h3>
+              <p>Look up the day's rate, copy it into a cell, recalculate by hand and pray it adds up.</p>
+              <div class="mess"><span>=B4*C4 <em>// which rate was it?</em></span><span>rate today: <s>880</s> 905 ??</span><span>month total: #REF!</span></div>
+            </div>
+            <div class="col2 after rv">
+              <h3>With Finanzas</h3>
+              <p>You log the payment, choose the rate or the agreed amount and the app counts it in your main currency.</p>
+              <div class="clean"><div class="r"><small>Payment received</small><b>1,100,000 Bs</b></div><div class="r"><small>Equivalent · agreed rate 880</small><b>1.250 $</b></div><span class="ok"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7" /></svg> Counted in your main currency</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="detalles">
+        <div class="wrap">
+          <div class="head center rv">
+            <span class="kicker">In detail</span>
+            <h2>Made for your day to day.</h2>
+            <p>Log in seconds and understand your numbers at a glance.</p>
+          </div>
+          <div class="bento">
+            <div class="card w4 rv" id="divisas">
+              <span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7" /></svg></span>
+              <h3>Every payment, with its equivalent</h3>
+              <p>If you're paid in bolivars at an agreed rate, your income is what you agreed, not what the day's rate says. Finanzas counts it that way in your main currency.</p>
+              <a class="more-link" href="#como">See how it works →</a>
+              <div class="viz">
+                <div class="eq"><div>1,100,000 Bs<small>Payment received</small></div><span class="arrow">→</span><div>1.250 $<small>Agreed equivalent</small></div></div>
+                <div class="chips"><span class="chip">BCV</span><span class="chip">Parallel</span><span class="chip">Euro</span><span class="chip on">Agreed</span></div>
+              </div>
+            </div>
+            <div class="card rv">
+              <span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3ZM5 11a7 7 0 0 0 14 0M12 18v3" /></svg></span>
+              <h3>Voice logging</h3>
+              <p>Dictate as you speak.</p>
+              <div class="viz"><div class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="say">“I spent 50 euros at Mercadona”<small>Groceries · −€50.00</small></div></div>
+            </div>
+            <div class="card rv">
+              <span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></svg></span>
+              <h3>Budgets that warn you</h3>
+              <p>Caps by category and timely alerts.</p>
+              <div class="viz bars">
+                <div class="bar-row"><div><span>Groceries</span><span>248 / 320 €</span></div><div class="track"><i class="w" style="width:78%"></i></div></div>
+                <div class="bar-row"><div><span>Transport</span><span>41 / 120 €</span></div><div class="track"><i class="g" style="width:34%"></i></div></div>
+                <div class="bar-row"><div><span>Leisure</span><span>66 / 90 €</span></div><div class="track"><i style="width:73%"></i></div></div>
+              </div>
+            </div>
+            <div class="card rv">
+              <span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-4a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0-4a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" /></svg></span>
+              <h3>Measurable goals</h3>
+              <p>Amount, date and monthly contribution.</p>
+              <div class="viz goal"><div class="ring" style="--p:62"><b>62%</b></div><div><small>Trip to Lisbon</small><strong>1.860 / 3.000 €</strong><small>On the way · 6 months</small></div></div>
+            </div>
+            <div class="card calc rv">
+              <h3>How much do you lose at the BCV rate?</h3>
+              <form class="in" id="calc" autocomplete="off">
+                <label for="amt">You're owed (USD)<input id="amt" inputmode="decimal" value="800" /></label>
+                <label for="bcv">BCV rate (Bs per $)<input id="bcv" inputmode="decimal" value="880" /></label>
+                <label for="par">Parallel rate (Bs per $)<input id="par" inputmode="decimal" value="1.100" /></label>
+              </form>
+              <div class="out" aria-live="polite"><span class="k">You lose</span><span class="v" id="loss">—</span><span class="s" id="detail"></span></div>
+            </div>
+            <div class="card w4 coachc rv" id="asistente">
+              <img src="../site/coach-avatar.webp" alt="The Finanzas assistant: a white robot with a blue visor waving" loading="lazy" />
+              <div>
+                <h3>An assistant that knows your numbers</h3>
+                <p>Friendly, clear and jargon-free. It analyzes your spending and suggests what to do.</p>
+                <a class="more-link" href="#seguridad">How we protect your data →</a>
+                <div class="chat" aria-hidden="true"><div class="u">Where is my money going?</div><div class="b">You're 20% over on food. Shall I suggest a cap of €320?</div></div>
+              </div>
+            </div>
+            <div class="card rv">
+              <span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h10l4 4v14H5zM14 3v5h5M8 13h8M8 17h8" /></svg></span>
+              <h3>Excel and automatic backups</h3>
+              <p>Import and export in Excel or CSV. Local encrypted backups so nothing gets lost.</p>
+            </div>
+            <div class="card w6 rv">
+              <span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a5 5 0 1 1 .9-9.9A6 6 0 0 1 19 10a4 4 0 0 1-1 8z" /></svg></span>
+              <h3>On all your devices</h3>
+              <p>Sign in with Google or email and your data follows you, end-to-end encrypted.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="dispositivos">
+        <div class="wrap">
+          <div class="head center rv">
+            <span class="kicker">On all your devices</span>
+            <h2>One account. Your data, wherever you need it.</h2>
+            <p>Start on your phone, continue on your tablet or computer. With encrypted sync, everything is up to date.</p>
+          </div>
+          <div class="devices rv">
+            <div class="iph pad"><div class="iph-in"><i class="cam"></i><img src="../site/s-tab-home.webp" alt="Finanzas on a tablet" loading="lazy" width="744" height="1133" /><i class="glare"></i></div></div>
+            <div class="iph sm"><span class="b act"></span><span class="b vu"></span><span class="b vd"></span><span class="b pw"></span><div class="iph-in"><i class="isl"></i><img src="../site/s-equiv.webp" alt="Logging a payment with its equivalent" loading="lazy" width="390" height="844" /><i class="glare"></i></div></div>
+            <div class="chip-sync"><i><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7" /></svg></i><span><b>Synced</b>End-to-end encrypted</span></div>
+          </div>
+          <div class="dev-points rv">
+            <div><b>Android</b><span>Direct installer (APK), with its icon and offline.</span></div>
+            <div><b>iPhone and iPad</b><span>Installs from Safari and opens full screen.</span></div>
+            <div><b>Computer</b><span>Works in Chrome, Edge and Safari, and can be installed.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="como">
+        <div class="wrap">
+          <div class="head center rv">
+            <span class="kicker">How it works</span>
+            <h2>From payment to real value, in three steps.</h2>
+          </div>
+          <div class="how">
+            <div class="step rv"><h3>Log the payment</h3><p>In bolivars, from your phone, by voice or by hand. In seconds.</p></div>
+            <div class="step rv"><h3>Set the rate or agreed amount</h3><p>BCV, Euro, Parallel or your own. Or just type “$1,250”.</p></div>
+            <div class="step rv"><h3>See the real value</h3><p>Income, expenses and budgets are calculated with that equivalent.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="secure" id="seguridad">
+        <div class="wrap">
+          <div class="head rv">
+            <span class="kicker">Security and privacy</span>
+            <h2>Your data, under your key.</h2>
+            <p>Your financial information is only yours. It's designed so that not even we can read it.</p>
+          </div>
+          <div class="cols3">
+            <div class="col rv"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10h12v11H6zM8.5 10V7a3.5 3.5 0 0 1 7 0v3" /></svg></span><h3>Encrypted on your device</h3><p>AES-256 with a key derived from your password, which never leaves your device.</p></div>
+            <div class="col rv"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a5 5 0 1 1 .9-9.9A6 6 0 0 1 19 10a4 4 0 0 1-1 8z" /></svg></span><h3>Blind sync</h3><p>Only already-encrypted data reaches the server, and each account only accesses its own.</p></div>
+            <div class="col rv"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 10a4 4 0 1 0-3.5 4L21 14v-3h-3v-2h-3" /></svg></span><h3>You decide</h3><p>Works offline and without linking any bank. Export or delete your account whenever you want.</p></div>
+          </div>
+          <div class="more"><a class="btn glass" href="../privacidad.html">Read the privacy policy</a></div>
+        </div>
+      </div>
+
+      <section id="hoja-de-ruta">
+        <div class="wrap">
+          <div class="head center rv">
+            <span class="kicker">Roadmap</span>
+            <h2>What already works and what's coming.</h2>
+            <p>Transparency about the product: no empty promises.</p>
+          </div>
+          <div class="road">
+            <div class="rcol now rv"><h3>Available <em>Today</em></h3><ul>
+              <li><i><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7" /></svg></i>Installable web app and Android app (APK)</li>
+              <li><i><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7" /></svg></i>Equivalent in main currency for every payment</li>
+              <li><i><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7" /></svg></i>Encrypted sync between devices</li>
+              <li><i><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7" /></svg></i>Budgets, goals, Excel and automatic backups</li>
+              <li><i><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7" /></svg></i>AI assistant and voice logging</li>
+            </ul></div>
+            <div class="rcol rv"><h3>In development <em>Soon</em></h3><ul>
+              <li><i>→</i>Recovery key for your data</li>
+              <li><i>→</i>Budget alerts on your phone</li>
+              <li><i>→</i>Optional bank connection (Open Banking)</li>
+              <li><i>→</i>More assistant screens and charts</li>
+            </ul></div>
+            <div class="rcol rv"><h3>Later <em>Next</em></h3><ul>
+              <li><i>→</i>Release on Google Play and the App Store</li>
+              <li><i>→</i>More complete shared expenses</li>
+              <li><i>→</i>Annual reports for your tax return</li>
+              <li><i>→</i>Payment plan with advanced features</li>
+            </ul></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="descargar">
+        <div class="wrap">
+          <div class="head center rv">
+            <span class="kicker">Download</span>
+            <h2>Carry it in your pocket.</h2>
+            <p>Install it like any other app: an icon on your screen, works offline and opens instantly.</p>
+          </div>
+          <div class="dl">
+            <div class="os rv" data-os="android">
+              <span class="tag">Your device</span>
+              <div class="oh"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 8.6l1.4-2.4a.3.3 0 0 0-.5-.3l-1.4 2.5a8.2 8.2 0 0 0-6.6 0L8.9 5.9a.3.3 0 0 0-.5.3l1.4 2.4A7 7 0 0 0 5 14.5h14a7 7 0 0 0-4.8-5.9zM9.5 12.2a.8.8 0 1 1 0-1.6.8.8 0 0 1 0 1.6zm5 0a.8.8 0 1 1 0-1.6.8.8 0 0 1 0 1.6zM5 15.6V19a1 1 0 0 0 1 1h1v2.2a1.1 1.1 0 0 0 2.2 0V20h5.6v2.2a1.1 1.1 0 0 0 2.2 0V20h1a1 1 0 0 0 1-1v-3.4z"/></svg><h3>Android</h3></div>
+              <p class="od">Download the installer (APK) and open it.</p>
+              <a class="btn dark" id="dl-android-2" href="../app/?lang=en">Download for Android</a>
+              <ol><li>Tap the button and open the downloaded file.</li><li>If Android asks, allow <b>installing from this source</b>.</li><li>Open <b>Finanzas</b> from your home screen.</li></ol>
+            </div>
+            <div class="os rv" data-os="ios">
+              <span class="tag">Your device</span>
+              <div class="oh"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.7c0-2.4 2-3.5 2-3.6a4.3 4.3 0 0 0-3.4-1.8c-1.4-.2-2.8.8-3.5.8s-1.8-.8-3-.8a4.4 4.4 0 0 0-3.7 2.3c-1.6 2.8-.4 6.900 1.100 9.100.8 1.100 1.700 2.300 2.900 2.300 1.100 0 1.600-.7 3-.7s1.800.7 3 .7 2-1.100 2.800-2.200a9.800 9.800 0 0 0 1.200-2.600 3.900 3.900 0 0 1-2.400-3.500zM14.200 6a3.900 3.900 0 0 0 .9-2.800 3.900 3.900 0 0 0-2.600 1.300A3.700 3.700 0 0 0 11.600 6a3.200 3.200 0 0 0 2.600 0z"/></svg><h3>iPhone and iPad</h3></div>
+              <p class="od">Installs from Safari, no App Store.</p>
+              <a class="btn dark" href="../app/?lang=en">Open the app in Safari</a>
+              <p class="od" style="margin-top:8px"><a href="#iphone">See how to add it to your home screen →</a></p>
+              <ol><li>Open the app in <b>Safari</b>.</li><li>Tap <b>Share</b>.</li><li>Choose <b>Add to Home Screen</b>.</li></ol>
+            </div>
+            <div class="os rv" data-os="desktop">
+              <span class="tag">Your device</span>
+              <div class="oh"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18v11H3zM8 20h8M12 16v4"/></svg><h3>Computer</h3></div>
+              <p class="od">Windows, Linux and Mac.</p>
+              <a class="btn dark" href="../app/?lang=en">Open the app</a>
+              <ol><li>Open it in <b>Chrome</b> or <b>Edge</b>.</li><li>Click the <b>install</b> icon in the address bar.</li><li>On Mac with Safari: <b>File → Add to Dock</b>.</li></ol>
+            </div>
+            <div class="os qr rv">
+              <img src="../site/qr.svg" alt="QR code to open Finanzas on your phone" width="168" height="168" />
+              <h3>Scan it with your phone</h3>
+              <p class="od">Point the camera and take the app to your phone.</p>
+            </div>
+          </div>
+          <div class="ios-guide rv" id="iphone">
+            <div class="ig-head"><span class="kicker">iPhone and iPad</span><h3>Install it on your iPhone in 3 steps</h3><p>From Safari, no App Store. It gets its icon, runs full screen and works offline.</p><p style="margin-top:14px"><a class="btn dark" href="../app/?lang=en">1 · Open the app in Safari</a></p><p class="ig-note" style="margin-top:10px">You sign in with your email or Google, same as on Android. Then follow the steps below.</p></div>
+            <div class="ig-steps">
+              <figure><img src="../site/ios-1.svg" alt="Step 1: open the website in Safari and tap the Share button" loading="lazy" /><figcaption><b>1. Tap “Share”</b>In Safari, the square with the arrow pointing up.</figcaption></figure>
+              <figure><img src="../site/ios-2.svg" alt="Step 2: choose Add to Home Screen" loading="lazy" /><figcaption><b>2. “Add to Home Screen”</b>If you don't see it, scroll the list up and confirm.</figcaption></figure>
+              <figure><img src="../site/ios-3.svg" alt="Step 3: open Finanzas from your home screen" loading="lazy" /><figcaption><b>3. Open it from your home screen</b>The Finanzas icon appears, like any app.</figcaption></figure>
+            </div>
+            <p class="ig-note">It has to be in <b>Safari</b>: in Chrome or other iPhone browsers the option doesn't appear. The images are illustrative diagrams.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="faq">
+        <div class="wrap">
+          <div class="head center rv"><span class="kicker">Frequently asked questions</span><h2>Before you install it.</h2></div>
+          <div class="faq rv">
+            <details><summary>Does it connect to my bank?</summary><p>No, and that's on purpose. We never ask for your bank username or password and we can't see your accounts. You log what you spend, or a shortcut logs it for you, and it stays encrypted.</p></details>
+            <details><summary>Can I log an expense without opening the app?</summary><p>Yes. On iPhone, with the Shortcuts app you can open “New transaction” pre-filled when you pay with Apple Pay, or with two taps on the back of the phone. The instructions are in Settings. You can also dictate it by voice.</p></details>
+            <details><summary>Can I scan a receipt?</summary><p>Yes. You take a photo and the AI fills in the amount, merchant, date and category. The photo is only used to read it: it isn't saved on your device or on our servers.</p></details>
+            <details><summary>Does it work if I don't live in Venezuela?</summary><p>Yes. You choose your main currency (euro, dollar, peso…) and each account can have its own. If you're paid or pay in another currency, the app stores that payment's exact equivalent.</p></details>
+            <details><summary>Is it free?</summary><p>Yes, for now it's free and ad-free. If we add a paid plan in the future, what you already use will remain yours and you'll be able to export it.</p></details>
+            <details><summary>Is my data safe?</summary><p>It's encrypted on your device with AES-256 and a key derived from your password. If you sync, only already-encrypted data reaches the server and each account only accesses its own.</p></details>
+            <details><summary>Do I need to create an account?</summary><p>No. You can use it only on your device, offline. If you want your data on several devices, sign in with Google or your email.</p></details>
+            <details><summary>How do the bolivar rates work?</summary><p>The app downloads the official rates (BCV dollar and euro) and the parallel one every day; you can also enter your own. When logging a payment you choose the rate or the agreed amount, and the app counts it in your main currency.</p></details>
+            <details><summary>Why does the APK ask for permission to install?</summary><p>Because you download it from this website and not from Google Play. Android always asks in that case; you can remove the permission after installing.</p></details>
+            <details><summary>Can I sign in with Face ID or fingerprint?</summary><p>Yes. The first time you type your encryption key; then the app offers to turn on Face ID, Touch ID, fingerprint or Windows Hello, and you sign in without typing it. The key is stored only on your device.</p></details>
+            <details><summary>What about iPhone?</summary><p>On iPhone it's installed from Safari with “Add to Home Screen”: it gets its icon and opens full screen, like an app.</p></details>
+          </div>
+        </div>
+      </section>
+
+      <div class="wrap final">
+        <div class="cta rv">
+          <div class="pills" aria-hidden="true"><i><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></svg></i><i><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 7v5l3 2" /></svg></i><i><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-4a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0-4a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" /></svg></i><i><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3ZM5 11a7 7 0 0 0 14 0M12 18v3" /></svg></i></div>
+          <h2>Start today, with your own numbers.</h2>
+          <a class="btn white arrow" href="#descargar">Download Finanzas <span class="circ"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9" /></svg></span></a>
+        </div>
+      </div>
+    </main>
+
+
+    <div class="sticky-dl" id="sticky">
+      <img src="../app/icons/icon-192.png" alt="" /><span><b>Finanzas</b><small>Free · offline</small></span>
+      <a class="btn dark sm" href="../app/?lang=en">Open app</a>
+    </div>
+
+    <footer>
+      <div class="wrap foot">
+        <div class="fb">
+          <a class="brand" href="./" style="color: var(--ink)"><img src="../app/icons/icon-192.png" alt="" />Finanzas</a>
+          <p>Your money, clearly. Expenses, budgets and goals in bolivars, dollars and euros, with your data encrypted on your device.</p>
+        </div>
+        <div><h4>Product</h4><a href="#funciones">Features</a><a href="#divisas">Currencies</a><a href="#seguridad">Security</a><a href="#faq">FAQ</a></div>
+        <div><h4>Download</h4><a href="#descargar">Android</a><a href="#iphone">iPhone and iPad</a><a href="../app/?lang=en">In the browser</a></div>
+        <div><h4>Legal</h4><a href="../privacidad.html">Privacy</a><a href="../condiciones.html">Terms</a></div>
+      </div>
+      <div class="wrap talk">
+        <span>Let's talk</span>
+        <a href="mailto:creative.lestudio@gmail.com">creative.lestudio@gmail.com <i><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9" /></svg></i></a>
+      </div>
+      <div class="wrap fine"><span>General guidance, not regulated financial advice. You enter the exchange rates yourself.</span><span class="by">A product by <b>Le Studio</b> · <span id="ver">Web version</span></span><span class="trust">AES-256 · No ads · No data selling</span></div>
+    </footer>
+
+    <script>
+      // Resalta las instrucciones del sistema del visitante.
+      (function () {
+        var ua = navigator.userAgent;
+        var os = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ? 'ios' : /android/i.test(ua) ? 'android' : 'desktop';
+        var el = document.querySelector('[data-os="' + os + '"]');
+        if (el) el.classList.add('me');
+      })();
+
+      // Calculadora: lo que vale de verdad un cobro en Bs a tasa BCV, comprando dólares en el paralelo.
+      (function () {
+        var f = document.getElementById('calc');
+        var num = function (s) {
+          s = String(s).replace(/\s/g, '');
+          if (s.indexOf(',') >= 0 || /^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '').replace(',', '.');
+          return Number(s);
+        };
+        var usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', currencyDisplay: 'narrowSymbol' });
+        var bs = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+        function run() {
+          var a = num(f.amt.value), b = num(f.bcv.value), p = num(f.par.value);
+          var loss = document.getElementById('loss'), det = document.getElementById('detail');
+          if (!(a > 0 && b > 0 && p > 0)) { loss.textContent = '—'; det.textContent = 'Enter an amount and rates.'; return; }
+          var real = (a * b) / p;
+          loss.textContent = usd.format(Math.max(0, a - real));
+          det.textContent = 'You receive ' + bs.format(a * b) + ' Bs, which on the parallel market is ' + usd.format(real) + ' (' + (((a - real) / a) * 100).toFixed(1) + '% less).';
+        }
+        f.addEventListener('input', run);
+        f.addEventListener('submit', function (e) { e.preventDefault(); });
+        run();
+      })();
+
+      // Aparición suave al hacer scroll y cabecera con fondo al desplazarse.
+      (function () {
+        var els = document.querySelectorAll('.rv');
+        if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) { els.forEach(function (e) { e.classList.add('in'); }); }
+        else {
+          var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: 0.12 });
+          els.forEach(function (e) { io.observe(e); });
+        }
+        var h = document.querySelector('header');
+        var on = function () { h.classList.toggle('solid', scrollY > 8); };
+        addEventListener('scroll', on, { passive: true }); on();
+      })();
+
+      // Descarga: si ya hay un APK publicado se ofrece directamente; si no, se abre la app web.
+      (function () {
+        var REPO = 'creative-lestudio/finanzas';
+        var main = document.getElementById('dl-android-main'), sub = document.getElementById('dl-android-sub');
+        var a1 = document.getElementById('dl-android'), a2 = document.getElementById('dl-android-2');
+        var isAndroid = /android/i.test(navigator.userAgent);
+        main.textContent = isAndroid ? 'Download for Android' : 'Android';
+        if (!window.fetch) return;
+        fetch('https://api.github.com/repos/' + REPO + '/releases/latest', { headers: { Accept: 'application/vnd.github+json' } })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (rel) {
+            var asset = rel && (rel.assets || []).filter(function (x) { return /\.apk$/i.test(x.name); })[0];
+            if (!asset) return;
+            [a1, a2].forEach(function (a) { if (a) { a.href = asset.browser_download_url; a.setAttribute('download', 'finanzas.apk'); } });
+            main.textContent = 'Download for Android';
+            var ver = document.getElementById('ver'); if (ver) ver.textContent = 'Android v' + (rel.tag_name || '').replace(/^\D+/, '');
+            sub.textContent = 'APK · ' + (asset.size / 1048576).toFixed(0) + ' MB · v' + (rel.tag_name || '').replace(/^\D+/, '');
+          })
+          .catch(function () {});
+      })();
+
+      // Barra inferior de descarga en el móvil: aparece al pasar la portada y se oculta en la sección de descarga.
+      (function () {
+        var bar = document.getElementById('sticky'), hero = document.querySelector('.hero'), dl = document.getElementById('descargar');
+        if (!bar || !('IntersectionObserver' in window)) return;
+        var heroOut = false, dlIn = false;
+        var upd = function () { bar.classList.toggle('show', heroOut && !dlIn); };
+        new IntersectionObserver(function (e) { heroOut = !e[0].isIntersecting; upd(); }).observe(hero);
+        new IntersectionObserver(function (e) { dlIn = e[0].isIntersecting; upd(); }, { threshold: 0.2 }).observe(dl);
+      })();
+
+      // Detalles: inclinación suave del móvil con el cursor y foco de luz en las tarjetas.
+      (function () {
+        var fine = matchMedia('(hover: hover)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!fine) return;
+        var hv = document.getElementById('hv');
+        if (hv) {
+          hv.parentElement.addEventListener('pointermove', function (e) {
+            var r = hv.getBoundingClientRect();
+            var x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+            hv.style.setProperty('--ry', (-14 + x * 12).toFixed(2) + 'deg');
+            hv.style.setProperty('--rx', (5 - y * 9).toFixed(2) + 'deg');
+          });
+          hv.parentElement.addEventListener('pointerleave', function () { hv.style.setProperty('--ry', '-14deg'); hv.style.setProperty('--rx', '5deg'); });
+        }
+        document.querySelectorAll('.card, .step, .col').forEach(function (el) {
+          el.addEventListener('pointermove', function (e) {
+            var r = el.getBoundingClientRect();
+            el.style.setProperty('--mx', e.clientX - r.left + 'px');
+            el.style.setProperty('--my', e.clientY - r.top + 'px');
+          });
+        });
+      })();
+
+      // Tema manual claro/oscuro.
+      (function () {
+        var root = document.documentElement, btn = document.getElementById('theme');
+        if (btn) btn.addEventListener('click', function () {
+          var cur = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          var next = cur === 'dark' ? 'light' : 'dark';
+          root.setAttribute('data-theme', next);
+          try { localStorage.setItem('finanzas.site-theme', next); } catch (e) {}
+        });
+      })();
+
+      // Carrusel de pantallas en el iPhone de la portada.
+      (function () {
+        var screen = document.getElementById('hero-screen'); if (!screen) return;
+        var slides = screen.querySelectorAll('.sl'), dots = document.querySelectorAll('#hero-dots button'), i = 0, timer;
+        function show(n) {
+          i = (n + slides.length) % slides.length;
+          slides.forEach(function (s, k) { s.classList.toggle('on', k === i); });
+          dots.forEach(function (d, k) { d.classList.toggle('on', k === i); });
+          screen.setAttribute('data-dark', slides[i].getAttribute('data-dark'));
+        }
+        function play() { stop(); if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; timer = setInterval(function () { show(i + 1); }, 4200); }
+        function stop() { clearInterval(timer); }
+        dots.forEach(function (d, k) { d.addEventListener('click', function () { show(k); play(); }); });
+        var v = document.getElementById('hv'); if (v) { v.parentElement.addEventListener('pointerenter', stop); v.parentElement.addEventListener('pointerleave', play); }
+        document.addEventListener('visibilitychange', function () { document.hidden ? stop() : play(); });
+        show(0); play();
+      })();
+    </script>
+  </body>
+</html>

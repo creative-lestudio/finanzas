@@ -11,9 +11,10 @@ import { monthSummary } from '../lib/insights';
 import { addMonths, capitalize, formatMoney, formatRate, prettyDescription, today } from '../lib/money';
 import type { Transaction } from '../lib/types';
 import { useStore } from '../store';
+import { t as _t, LOCALE } from '../lib/i18n';
 
-const DAY_FMT = new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
-const MONTH_FMT = new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' });
+const DAY_FMT = new Intl.DateTimeFormat(LOCALE, { weekday: 'long', day: 'numeric', month: 'long' });
+const MONTH_FMT = new Intl.DateTimeFormat(LOCALE, { month: 'long', year: 'numeric' });
 
 export function Transactions({ account }: { account?: string }) {
   const { data, update } = useStore();
@@ -76,41 +77,41 @@ export function Transactions({ account }: { account?: string }) {
       <Segmented value={view} onChange={(v) => setView(v as typeof view)} options={[['list', 'Lista'], ['cats', 'Categorías'], ['summary', 'Resumen']]} />
       {view === 'summary' && <Reports />}
       {view !== 'summary' && <div className="row between mb">
-        <button className="icon-btn lg" onClick={() => setMonth(addMonths(month, -1))} aria-label="Mes anterior"><Icon name="back" size={18} stroke={2.4} /></button>
+        <button className="icon-btn lg" onClick={() => setMonth(addMonths(month, -1))} aria-label={_t("Mes anterior")}><Icon name="back" size={18} stroke={2.4} /></button>
         <b style={{ fontSize: 18, letterSpacing: '-0.02em' }}>{capitalize(MONTH_FMT.format(new Date(`${month}-15`)))}</b>
-        <button className="icon-btn lg" onClick={() => setMonth(addMonths(month, 1))} aria-label="Mes siguiente"><Icon name="chevron" size={18} stroke={2.4} /></button>
+        <button className="icon-btn lg" onClick={() => setMonth(addMonths(month, 1))} aria-label={_t("Mes siguiente")}><Icon name="chevron" size={18} stroke={2.4} /></button>
       </div>}
       {view === 'cats' && (
         <>
-          <div className="seg mb"><button className={catKind === 'expense' ? 'on' : ''} onClick={() => setCatKind('expense')}>Gastos</button><button className={catKind === 'income' ? 'on' : ''} onClick={() => setCatKind('income')}>Ingresos</button></div>
+          <div className="seg mb"><button className={catKind === 'expense' ? 'on' : ''} onClick={() => setCatKind('expense')}>{_t("Gastos")}</button><button className={catKind === 'income' ? 'on' : ''} onClick={() => setCatKind('income')}>{_t("Ingresos")}</button></div>
           <ByCategory month={month} kind={catKind} />
         </>
       )}
       {view === 'list' && <>
       <div className="grid2 mb">
-        <div className="card glass"><h2>Ingresos</h2><div className="mid pos">{formatMoney(sum.income)}</div></div>
-        <div className="card glass"><h2>Gastos</h2><div className="mid neg">{formatMoney(sum.expenses)}</div></div>
+        <div className="card glass"><h2>{_t("Ingresos")}</h2><div className="mid pos">{formatMoney(sum.income)}</div></div>
+        <div className="card glass"><h2>{_t("Gastos")}</h2><div className="mid neg">{formatMoney(sum.expenses)}</div></div>
       </div>
       <div className="field">
-        <input type="search" placeholder="Buscar" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Buscar movimientos" />
+        <input type="search" placeholder={_t("Buscar")} value={q} onChange={(e) => setQ(e.target.value)} aria-label={_t("Buscar movimientos")} />
       </div>
       {data.accounts.length > 1 && (
         <div className="chips">
-          <button className={`chip ${acc ? '' : 'on'}`} onClick={() => setAcc('')}>Todas las cuentas</button>
+          <button className={`chip ${acc ? '' : 'on'}`} onClick={() => setAcc('')}>{_t("Todas las cuentas")}</button>
           {data.accounts.filter((a) => data.transactions.some((t) => t.accountId === a.id)).map((a) => (
             <button key={a.id} className={`chip ${acc === a.id ? 'on' : ''}`} onClick={() => setAcc(a.id)}>{a.name}</button>
           ))}
         </div>
       )}
       <div className="chips mb">
-        <button className={`chip ${cat ? '' : 'on'}`} onClick={() => setCat('')}>Todas</button>
+        <button className={`chip ${cat ? '' : 'on'}`} onClick={() => setCat('')}>{_t("Todas")}</button>
         {[...new Set(data.transactions.filter((t) => t.date.startsWith(month)).map((t) => rootOf(t.categoryId)))].map((id) => (
-          <button key={id} className={`chip ${cat && rootOf(cat) === id ? 'on' : ''}`} onClick={() => setCat(id)}>{catOf(id)?.name ?? id}</button>
+          <button key={id} className={`chip ${cat && rootOf(cat) === id ? 'on' : ''}`} onClick={() => setCat(id)}>{_t(catOf(id)?.name ?? id)}</button>
         ))}
       </div>
       {cat && childrenOf(data.categories, rootOf(cat)).length > 0 && (
         <div className="chips mb">
-          <button className={`chip ${cat === rootOf(cat) ? 'on' : ''}`} onClick={() => setCat(rootOf(cat))}>Todas</button>
+          <button className={`chip ${cat === rootOf(cat) ? 'on' : ''}`} onClick={() => setCat(rootOf(cat))}>{_t("Todas")}</button>
           {childrenOf(data.categories, rootOf(cat)).map((c) => <button key={c.id} className={`chip ${cat === c.id ? 'on' : ''}`} onClick={() => setCat(c.id)}>{c.name}</button>)}
         </div>
       )}
@@ -118,12 +119,12 @@ export function Transactions({ account }: { account?: string }) {
       {uncategorized.length > 0 && ai.ok && data.settings.aiCategorization && (
         <div className="alert">
           <Icon name="sparkles" size={18} />
-          <div className="grow small">{uncategorized.length} movimientos sin categoría clara.</div>
-          <button className="btn sm tinted" disabled={busy} onClick={runAI}>{busy ? 'Clasificando…' : 'Clasificar con IA'}</button>
+          <div className="grow small">{uncategorized.length} {_t("movimientos sin categoría clara.")}</div>
+          <button className="btn sm tinted" disabled={busy} onClick={runAI}>{busy ? _t("Clasificando…") : _t("Clasificar con IA")}</button>
         </div>
       )}
 
-      {byDay.length === 0 && <Empty>No hay movimientos este mes. Pulsa + para añadir uno.</Empty>}
+      {byDay.length === 0 && <Empty>{_t("No hay movimientos este mes. Pulsa + para añadir uno.")}</Empty>}
       {byDay.map(([date, txs]) => (
         <div key={date}>
           <div className="day">{DAY_FMT.format(new Date(`${date}T12:00:00`))}</div>
@@ -133,13 +134,13 @@ export function Transactions({ account }: { account?: string }) {
                 <li key={t.id} className="tap" onClick={() => setEditing(t)}>
                   <CatBadge id={t.categoryId} emoji={catOf(t.categoryId)?.icon} />
                   <div className="grow">
-                    <div className="ellipsis">{t.recurringId && <span style={{ marginRight: 5, opacity: 0.6, display: 'inline-flex', verticalAlign: -2 }} title="Recurrente"><Icon name="repeat" size={13} /></span>}{prettyDescription(t.description)}</div>
+                    <div className="ellipsis">{t.recurringId && <span style={{ marginRight: 5, opacity: 0.6, display: 'inline-flex', verticalAlign: -2 }} title={_t("Recurrente")}><Icon name="repeat" size={13} /></span>}{prettyDescription(t.description)}</div>
                     <div className="small muted ellipsis">
                       {categoryLabel(data.categories, t.categoryId)} · {accOf(t.accountId)?.name}
-                      {t.channel === 'bizum' && ' · Bizum'}
+                      {t.channel === 'bizum' && _t(" · Bizum")}
                       {t.fx && ` · ${formatMoney(t.amount, txCurrency(data, t))} a ${formatRate(t.fx.rate)}`}
                       {!t.fx && txCurrency(data, t) === 'VES' && (() => { const e = convert(data, Math.abs(t.amount), 'VES', 'USD', t.date); return e ? ` · ≈ ${formatMoney(e, 'USD')} (est.)` : ''; })()}
-                      {t.categorySource === 'ai' && ' · IA'}
+                      {t.categorySource === 'ai' && _t(" · IA")}
                     </div>
                   </div>
                   {t.fx && t.fx.amount > 0
@@ -155,7 +156,7 @@ export function Transactions({ account }: { account?: string }) {
       </>}
 
       {editing && (
-        <Sheet title="Editar movimiento" onClose={() => setEditing(null)}>
+        <Sheet title={_t("Editar movimiento")} onClose={() => setEditing(null)}>
           <TransactionEditor key={editing.id} tx={editing} onDone={() => setEditing(null)} onRemove={() => remove(editing)} />
         </Sheet>
       )}

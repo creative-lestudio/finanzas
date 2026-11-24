@@ -2,6 +2,7 @@ import { goalProgress } from './goals';
 import { monthSummary } from './insights';
 import { addMonths, daysInMonth, formatMoney } from './money';
 import type { AppData } from './types';
+import { t } from './i18n';
 
 // El consejo del día del asistente en Inicio. Se calcula en el dispositivo,
 // sin IA: compara el ritmo de gasto de este mes con tu media y mira tus metas.
@@ -35,9 +36,9 @@ export function coachTip(data: AppData, month: string, day: number): CoachTip {
     if (worst) {
       return {
         pose: 'insights',
-        title: 'Te tengo un dato',
-        text: `Este mes llevas un ${Math.round(worst.pct * 100)} % más en ${cat(worst.id).toLowerCase()} que de costumbre (${formatMoney(worst.extra)} de más). ¿Vemos cómo ajustarlo?`,
-        ask: `Este mes estoy gastando más en ${cat(worst.id)}. ¿Qué me recomiendas para ajustarlo?`,
+        title: t('Te tengo un dato'),
+        text: t('Este mes llevas un {pct} % más en {cat} que de costumbre ({extra} de más). ¿Vemos cómo ajustarlo?', { pct: Math.round(worst.pct * 100), cat: cat(worst.id).toLowerCase(), extra: formatMoney(worst.extra) }),
+        ask: t('Este mes estoy gastando más en {cat}. ¿Qué me recomiendas para ajustarlo?', { cat: cat(worst.id) }),
       };
     }
   }
@@ -47,9 +48,9 @@ export function coachTip(data: AppData, month: string, day: number): CoachTip {
   if (goal) {
     return {
       pose: 'motiva',
-      title: '¡Vas por buen camino!',
-      text: `Ya alcanzaste el ${Math.round(goal.ratio * 100)} % de tu meta «${goal.goal.name}».`,
-      ask: `¿Cómo puedo terminar antes mi meta «${goal.goal.name}»?`,
+      title: t('¡Vas por buen camino!'),
+      text: t('Ya alcanzaste el {pct} % de tu meta «{name}».', { pct: Math.round(goal.ratio * 100), name: goal.goal.name }),
+      ask: t('¿Cómo puedo terminar antes mi meta «{name}»?', { name: goal.goal.name }),
     };
   }
 
@@ -58,15 +59,15 @@ export function coachTip(data: AppData, month: string, day: number): CoachTip {
   if (now.income > 0 && saved > 0) {
     return {
       pose: 'feliz',
-      title: 'Buen mes',
-      text: `Llevas ${formatMoney(saved)} ahorrados este mes. ¿Los ponemos a trabajar?`,
-      ask: `Este mes me sobran ${formatMoney(saved)}. ¿Qué hago con ellos?`,
+      title: t('Buen mes'),
+      text: t('Llevas {amount} ahorrados este mes. ¿Los ponemos a trabajar?', { amount: formatMoney(saved) }),
+      ask: t('Este mes me sobran {amount}. ¿Qué hago con ellos?', { amount: formatMoney(saved) }),
     };
   }
   return {
     pose: 'hola',
-    title: '¡Hola!',
-    text: 'Registra tus gastos de hoy y te diré cómo vas. Puedes dictarlos.',
-    ask: 'Analiza mis finanzas y dime qué puedo mejorar.',
+    title: t('¡Hola!'),
+    text: t('Registra tus gastos de hoy y te diré cómo vas. Puedes dictarlos.'),
+    ask: t('Analiza mis finanzas y dime qué puedo mejorar.'),
   };
 }

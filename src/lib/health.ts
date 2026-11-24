@@ -3,6 +3,7 @@ import { addMonths, today } from './money';
 import { budgetStatus } from './budgets';
 import { detectAntExpenses, detectFees, detectSubscriptions, isActive, monthSummary } from './insights';
 import type { Account, AppData } from './types';
+import { t as tr } from './i18n';
 
 export interface NetWorth {
   assets: number;
@@ -69,15 +70,15 @@ export function healthReport(data: AppData, month: string, day: number): HealthR
   const savingsRate = income > 0 ? (income - expenses) / income : 0;
   factors.push({
     id: 'savings',
-    label: 'Tasa de ahorro',
+    label: tr('Tasa de ahorro'),
     score: clamp((savingsRate / 0.2) * 100),
     weight: 30,
-    value: income > 0 ? pct(savingsRate) : 'sin ingresos',
+    value: income > 0 ? pct(savingsRate) : tr('sin ingresos'),
     tip:
       savingsRate < 0.2
         ? savingsRate < 0
-          ? 'Gastas más de lo que ingresas. Empieza por fijar topes en tus 3 categorías con más gasto.'
-          : `Ahorras el ${pct(savingsRate)} de tus ingresos. Intenta llegar al 20 % (regla 50/30/20) activando el ahorro automático.`
+          ? tr('Gastas más de lo que ingresas. Empieza por fijar topes en tus 3 categorías con más gasto.')
+          : tr('Ahorras el {pct} de tus ingresos. Intenta llegar al 20 % (regla 50/30/20) activando el ahorro automático.', { pct: pct(savingsRate) })
         : undefined,
   });
 
@@ -87,11 +88,11 @@ export function healthReport(data: AppData, month: string, day: number): HealthR
   const months = expenses > 0 ? cushion / expenses : cushion > 0 ? 6 : 0;
   factors.push({
     id: 'emergency',
-    label: 'Fondo de emergencia',
+    label: tr('Fondo de emergencia'),
     score: clamp((months / 6) * 100),
     weight: 25,
-    value: `${months.toFixed(1)} meses`,
-    tip: months < 3 ? 'Tu colchón cubre menos de 3 meses de gastos. Crea una hucha "Fondo de emergencia" y dale prioridad 1.' : months < 6 ? 'Vas bien: completa tu fondo hasta 6 meses de gastos.' : undefined,
+    value: tr('{n} meses', { n: months.toFixed(1) }),
+    tip: months < 3 ? tr('Tu colchón cubre menos de 3 meses de gastos. Crea una hucha "Fondo de emergencia" y dale prioridad 1.') : months < 6 ? tr('Vas bien: completa tu fondo hasta 6 meses de gastos.') : undefined,
   });
 
   // 3. Endeudamiento (deuda / ingresos anuales; ideal < 35 %).
@@ -99,11 +100,11 @@ export function healthReport(data: AppData, month: string, day: number): HealthR
   const debtRatio = yearlyIncome > 0 ? nw.liabilities / yearlyIncome : nw.liabilities > 0 ? 1 : 0;
   factors.push({
     id: 'debt',
-    label: 'Endeudamiento',
+    label: tr('Endeudamiento'),
     score: clamp(100 - (debtRatio / 0.35) * 50),
     weight: 20,
-    value: pct(debtRatio) + ' de ingresos anuales',
-    tip: debtRatio > 0.35 ? 'Tu deuda es alta respecto a tus ingresos. Prioriza amortizar la de mayor interés (método avalancha).' : undefined,
+    value: tr('{pct} de ingresos anuales', { pct: pct(debtRatio) }),
+    tip: debtRatio > 0.35 ? tr('Tu deuda es alta respecto a tus ingresos. Prioriza amortizar la de mayor interés (método avalancha).') : undefined,
   });
 
   // 4. Presupuestos.
@@ -111,11 +112,11 @@ export function healthReport(data: AppData, month: string, day: number): HealthR
   const overCount = budgets.filter((b) => b.state === 'over').length;
   factors.push({
     id: 'budgets',
-    label: 'Cumplimiento de presupuestos',
+    label: tr('Cumplimiento de presupuestos'),
     score: budgets.length ? clamp(100 - (overCount / budgets.length) * 100) : 50,
     weight: 10,
-    value: budgets.length ? `${budgets.length - overCount}/${budgets.length} en orden` : 'sin presupuestos',
-    tip: !budgets.length ? 'Crea presupuestos por categoría: la app te propone topes a partir de tu gasto real.' : overCount ? `Te has pasado en ${overCount} presupuesto(s) este mes.` : undefined,
+    value: budgets.length ? tr('{ok}/{total} en orden', { ok: budgets.length - overCount, total: budgets.length }) : tr('sin presupuestos'),
+    tip: !budgets.length ? tr('Crea presupuestos por categoría: la app te propone topes a partir de tu gasto real.') : overCount ? tr('Te has pasado en {n} presupuesto(s) este mes.', { n: overCount }) : undefined,
   });
 
   // 5. Suscripciones (ideal < 5 % de ingresos).
@@ -125,11 +126,11 @@ export function healthReport(data: AppData, month: string, day: number): HealthR
   const subsRatio = income > 0 ? subsMonthly / income : 0;
   factors.push({
     id: 'subscriptions',
-    label: 'Peso de las suscripciones',
+    label: tr('Peso de las suscripciones'),
     score: clamp(100 - Math.max(0, subsRatio - 0.05) * 1000),
     weight: 8,
-    value: `${pct(subsRatio)} de ingresos`,
-    tip: subsRatio > 0.05 ? `Tus ${subs.length} suscripciones suman más del 5 % de tus ingresos. Revisa cuáles no usas.` : undefined,
+    value: tr('{pct} de ingresos', { pct: pct(subsRatio) }),
+    tip: subsRatio > 0.05 ? tr('Tus {n} suscripciones suman más del 5 % de tus ingresos. Revisa cuáles no usas.', { n: subs.length }) : undefined,
   });
 
   // 6. Fugas: gastos hormiga y comisiones.
@@ -138,11 +139,11 @@ export function healthReport(data: AppData, month: string, day: number): HealthR
   const leakRatio = income > 0 ? (ants.total + fees.reduce((s, f) => s + f.amountBase, 0) / 3) / income : 0;
   factors.push({
     id: 'leaks',
-    label: 'Fugas de dinero',
+    label: tr('Fugas de dinero'),
     score: clamp(100 - leakRatio * 1000),
     weight: 7,
-    value: `${pct(leakRatio)} de ingresos`,
-    tip: fees.length ? 'Pagas comisiones bancarias evitables. Mira la sección de comisiones.' : leakRatio > 0.05 ? 'Los gastos pequeños y repetidos se comen una parte importante de tu sueldo.' : undefined,
+    value: tr('{pct} de ingresos', { pct: pct(leakRatio) }),
+    tip: fees.length ? tr('Pagas comisiones bancarias evitables. Mira la sección de comisiones.') : leakRatio > 0.05 ? tr('Los gastos pequeños y repetidos se comen una parte importante de tu sueldo.') : undefined,
   });
 
   const totalW = factors.reduce((s, f) => s + f.weight, 0);

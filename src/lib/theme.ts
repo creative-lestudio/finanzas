@@ -1,11 +1,12 @@
 import type { Settings } from './types';
+import { t } from './i18n';
 
 export const BRAND = '#032a67';
 
 export const ACCENTS: [string, string][] = [
   ['Marino', BRAND],
   ['Azul', '#0a84ff'],
-  ['Índigo', '#5e5ce6'],
+  [t('Índigo'), '#5e5ce6'],
   ['Morado', '#bf5af2'],
   ['Rosa', '#ff375f'],
   ['Rojo', '#ff453a'],

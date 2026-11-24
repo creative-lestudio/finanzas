@@ -1,6 +1,7 @@
 import { convert } from './fx';
 import { addMonths, monthKey, today } from './money';
 import type { AppData, Goal } from './types';
+import { t } from './i18n';
 
 // Metas medibles (SMART): cada meta tiene cifra, fecha, plan mensual y una
 // forma objetiva de medir el avance (aportaciones o saldo de cuentas).
@@ -117,16 +118,16 @@ export function goalProgress(data: AppData, goal: Goal, asOf = today()): GoalPro
 }
 
 export const GOAL_STATUS_LABEL: Record<GoalStatus, string> = {
-  done: 'Conseguida',
-  ahead: 'Por delante',
-  on_track: 'En camino',
-  behind: 'Retrasada',
-  no_plan: 'Sin plan',
+  done: t('Conseguida'),
+  ahead: t('Por delante'),
+  on_track: t('En camino'),
+  behind: t('Retrasada'),
+  no_plan: t('Sin plan'),
 };
 
 export const GOAL_KIND_LABEL: Record<NonNullable<Goal['kind']>, string> = {
-  savings: 'Ahorro',
-  investment: 'Inversión',
-  debt: 'Pagar deuda',
-  purchase: 'Compra',
+  savings: t('Ahorro'),
+  investment: t('Inversión'),
+  debt: t('Pagar deuda'),
+  purchase: t('Compra'),
 };
